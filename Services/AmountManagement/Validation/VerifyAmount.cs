@@ -4,7 +4,7 @@ using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
-namespace FinBookeAPI.Services.AmountManagementService;
+namespace FinBookeAPI.Services.AmountManagement;
 
 public partial class AmountManagementService : IAmountManagementService
 {

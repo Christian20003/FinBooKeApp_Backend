@@ -1,6 +1,6 @@
 using FinBookeAPI.Collections.PaymentMethodCollection;
 using FinBookeAPI.Models.Payment;
-using FinBookeAPI.Services.PaymentMethodService;
+using FinBookeAPI.Services.Payment;
 using FinBookeAPI.Tests.Mocks.Collections;
 using FinBookeAPI.Tests.Records;
 using Moq;

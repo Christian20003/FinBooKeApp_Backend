@@ -2,6 +2,7 @@ using FinBookeAPI.DTO.Authentication.Input;
 using FinBookeAPI.DTO.Authentication.Output;
 using FinBookeAPI.DTO.Error;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Token;
 using FinBookeAPI.Services.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
@@ -142,16 +143,21 @@ public class AuthenticationController(
     /// <response code="403">If the provided refresh token is invalid or has expired.</response>
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("refreshToken")]
-    [ProducesResponseType(typeof(RefreshedTokenDTO), 200)]
+    [ProducesResponseType(typeof(SessionDTO), 200)]
     [ProducesResponseType(typeof(ErrorResponse), 400)]
     [ProducesResponseType(typeof(ErrorResponse), 403)]
     [ProducesResponseType(typeof(ErrorResponse), 406)]
     [ProducesResponseType(typeof(ErrorResponse), 500)]
-    public async Task<ActionResult<RefreshedTokenDTO>> RefreshAccessToken(
+    public async Task<ActionResult<SessionDTO>> RefreshAccessToken(
         [FromBody] RefreshAccessTokenDTO data
     )
     {
         var token = await _service.IssueJwtToken(data.RefreshToken);
-        return Ok(new RefreshedTokenDTO(token));
+        var refreshToken = new JwtToken
+        {
+            Value = data.RefreshToken,
+            Expires = data.RefreshTokenExpires,
+        };
+        return Ok(new SessionDTO(token, refreshToken));
     }
 }

@@ -3,7 +3,7 @@ using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinBookeAPI.Services.PaymentMethodService;
+namespace FinBookeAPI.Services.Payment;
 
 public interface IPaymentMethodService
 {

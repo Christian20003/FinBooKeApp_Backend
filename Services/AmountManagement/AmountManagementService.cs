@@ -1,7 +1,7 @@
 using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Services.CategoryType;
 
-namespace FinBookeAPI.Services.AmountManagementService;
+namespace FinBookeAPI.Services.AmountManagement;
 
 public partial class AmountManagementService(
     IAmountCollection collection,

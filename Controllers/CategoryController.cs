@@ -13,11 +13,11 @@ namespace FinBookeAPI.Controllers;
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public class CategoriesController(ICategoryService service, ILogger<CategoriesController> logger)
+public class CategoryController(ICategoryService service, ILogger<CategoryController> logger)
     : ControllerBase
 {
     private readonly ICategoryService _service = service;
-    private readonly ILogger<CategoriesController> _logger = logger;
+    private readonly ILogger<CategoryController> _logger = logger;
 
     private string GetPath()
     {

@@ -1,6 +1,6 @@
 using FinBookeAPI.Collections.PaymentMethodCollection;
 
-namespace FinBookeAPI.Services.PaymentMethodService;
+namespace FinBookeAPI.Services.Payment;
 
 public partial class PaymentMethodService(
     IPaymentMethodCollection collection,
