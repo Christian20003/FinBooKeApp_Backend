@@ -150,7 +150,8 @@ public partial class AmountManagementService : IAmountManagementService
     /// </exception>
     private void VerifyReceiptFile(string filename, Guid userId)
     {
-        var path = Path.Combine(FileStorage.GetReceiptPath(userId), filename);
+        // TODO
+        var path = Path.Combine("", filename);
         if (string.IsNullOrEmpty(filename))
             return;
         if (!File.Exists(path))
@@ -175,7 +176,8 @@ public partial class AmountManagementService : IAmountManagementService
     /// </exception>
     private void VerifyBankStatementFile(string filename, Guid userId)
     {
-        var path = Path.Combine(FileStorage.GetReceiptPath(userId), filename);
+        // TODO
+        var path = Path.Combine("", filename);
         if (string.IsNullOrEmpty(filename))
             return;
         if (!File.Exists(path))

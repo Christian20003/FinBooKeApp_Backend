@@ -16,6 +16,7 @@ using FinBookeAPI.Services.Email;
 using FinBookeAPI.Services.Payment;
 using FinBookeAPI.Services.SecurityUtility;
 using FinBookeAPI.Services.Token;
+using FinBookeAPI.Services.Upload;
 using Microsoft.Extensions.Compliance.Redaction;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,6 +53,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IUploadService, UploadService>();
 builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
 builder.Services.AddScoped<IAmountManagementService, AmountManagementService>();
 builder.Services.AddTransient<ExceptionHandling>();

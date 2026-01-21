@@ -37,6 +37,9 @@ public static class SettingsExtension
 
         // Add data import settings
         services.Configure<DataImport>(configuration.GetSection(DataImport.SectionName));
+
+        // Add file storage settings
+        services.Configure<FileStorage>(configuration.GetSection(FileStorage.SectionName));
         return services;
     }
 }

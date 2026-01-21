@@ -1,34 +1,30 @@
 namespace FinBookeAPI.Models.Configuration;
 
-public static class FileStorage
+/// <summary>
+/// This class represents the application configuration for
+/// file storage.
+/// </summary>
+public class FileStorage
 {
     /// <summary>
-    /// This method returns the path where the receipts of the
-    /// specified user are stored.
+    /// The key of the section in the JSON file.
     /// </summary>
-    /// <param name="userId">
-    /// The user id.
-    /// </param>
-    /// <returns>
-    /// The absolute path where receipt files are stored.
-    /// </returns>
-    public static string GetReceiptPath(Guid userId)
-    {
-        return $"documents/{userId}/receipts/";
-    }
+    public const string SectionName = "FileStorage";
 
     /// <summary>
-    /// This method returns the path where the bank statements
-    /// of a specified user are stored.
+    /// The name of the root folder.
     /// </summary>
-    /// <param name="userId">
-    /// The user id.
-    /// </param>
-    /// <returns>
-    /// The absolute path where bank statement files are stored.
-    /// </returns>
-    public static string GetBankStatementPath(Guid userId)
-    {
-        return $"documents/{userId}/statements/";
-    }
+    public string Root { get; set; } = "";
+
+    /// <summary>
+    /// The maximum size of a file in MB.
+    /// </summary>
+    public long MaxFileSize { get; set; }
+
+    /// <summary>
+    /// A dictionary of all valid file formats. The key
+    /// represents the file extension and the value
+    /// the actual content type.
+    /// </summary>
+    public Dictionary<string, string> FileFormats { get; set; } = [];
 }
