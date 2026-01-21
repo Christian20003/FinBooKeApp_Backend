@@ -9,4 +9,9 @@ public class FileUpload
     /// The actual file.
     /// </summary>
     public required IFormFile File { get; set; }
+
+    /// <summary>
+    /// The date where this file has been created.
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
