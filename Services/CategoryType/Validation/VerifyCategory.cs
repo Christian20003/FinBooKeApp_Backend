@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Attributes;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
@@ -38,7 +37,7 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private async Task<Category> VerifyExistingCategory(Category category)
     {
-        _logger.LogDebug("Verify existing category {category}", category.ToString());
+        LogCategoryValidation(category);
         var entity = await VerifyCategoryAccess(category.Id, category.UserId);
         VerifyCategoryName(category.Name);
         VerifyCategoryColor(category.Color);
@@ -86,14 +85,13 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private async Task VerifyNewCategory(Category category)
     {
-        _logger.LogDebug("Verify new category {category}", category.ToString());
+        LogCategoryValidation(category);
         var entity = await VerfiyCategoryId(category.Id);
         if (entity is not null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new DuplicateEntityException("Category id is does already exist")
-            );
+        {
+            LogDuplicateCategory(category);
+            throw new DuplicateEntityException("Category id is does already exist");
+        }
         VerifyCategoryName(category.Name);
         VerifyCategoryColor(category.Color);
         if (category.Limit is null)
@@ -126,13 +124,12 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private async Task<Category?> VerfiyCategoryId(Guid categoryId)
     {
-        _logger.LogDebug("Verify category id {id}", categoryId);
+        LogCategoryIdValidation(categoryId);
         if (categoryId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Category id is not valid", nameof(categoryId))
-            );
+        {
+            LogInvalidCategoryId(categoryId);
+            throw new ArgumentException("Category id is not valid", nameof(categoryId));
+        }
         return await _collection.GetCategory(category => category.Id == categoryId);
     }
 
@@ -164,26 +161,23 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private async Task<Category> VerifyCategoryAccess(Guid categoryId, Guid userId)
     {
-        _logger.LogDebug("Verify category access {id} of user {user}", categoryId, userId);
+        LogCategoryAccessValidation(categoryId);
         var entity = await VerfiyCategoryId(categoryId);
         if (userId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("UserId of category is not valid", nameof(userId))
-            );
+        {
+            LogInvalidUserId(userId);
+            throw new ArgumentException("UserId of category is not valid", nameof(userId));
+        }
         if (entity is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new EntityNotFoundException("Category does not exist")
-            );
+        {
+            LogNotFoundCategory(categoryId);
+            throw new EntityNotFoundException("Category does not exist");
+        }
         if (entity.UserId != userId)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new AuthorizationException("Category is not accessible")
-            );
+        {
+            LogNotAccessibleCategory(entity);
+            throw new AuthorizationException("Category is not accessible");
+        }
         return entity;
     }
 
@@ -198,13 +192,12 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private void VerifyCategoryName(string name)
     {
-        _logger.LogDebug("Verify category name {name}", name);
+        LogCategoryNameValidation(name);
         if (string.IsNullOrWhiteSpace(name))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Category name is null or empty", nameof(name))
-            );
+        {
+            LogInvalidCategoryName(name);
+            throw new ArgumentException("Category name is null or empty", nameof(name));
+        }
     }
 
     /// <summary>
@@ -221,20 +214,18 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private void VerifyCategoryColor(string color)
     {
-        _logger.LogDebug("Verify category color {color}", color);
+        LogCategoryColorValidation(color);
         var colorValidator = new ColorAttribute();
         if (string.IsNullOrWhiteSpace(color))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Category color is null or empty", nameof(color))
-            );
+        {
+            LogInvalidCategoryColor(color);
+            throw new ArgumentException("Category color is null or empty", nameof(color));
+        }
         if (!colorValidator.IsValid(color))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new FormatException("Category color is not a valid color encoding")
-            );
+        {
+            LogInvalidCategoryColor(color);
+            throw new FormatException("Category color is not a valid color encoding");
+        }
     }
 
     /// <summary>
@@ -268,34 +259,32 @@ public partial class CategoryService : ICategoryService
         Guid userId
     )
     {
-        _logger.LogDebug("Verify category children");
+        LogCategoryChildrenValidation(childrenIds);
         if (userId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("UserId of category is not valid", nameof(userId))
-            );
+        {
+            LogInvalidUserId(userId);
+            throw new ArgumentException("UserId of category is not valid", nameof(userId));
+        }
         if (childrenIds.Any(elem => elem == Guid.Empty))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Children id is not valid", nameof(childrenIds))
-            );
+        {
+            LogInvalidCategoryId(Guid.Empty);
+            throw new ArgumentException("Children id is not valid", nameof(childrenIds));
+        }
         var children = await _collection.GetCategories(category =>
             childrenIds.Contains(category.Id)
         );
-        if (!childrenIds.All(childId => children.Any(child => child.Id == childId)))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new EntityNotFoundException("Category children does not exist")
-            );
-        if (!children.All(child => child.UserId == userId))
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new AuthorizationException("Category children is not accessible")
-            );
+        var notFound = childrenIds.Where(id => !children.Any(child => child.Id == id));
+        var notAccessible = children.Where(child => child.UserId != userId);
+        if (notFound.Any())
+        {
+            LogNotFoundCategory(notFound.First());
+            throw new EntityNotFoundException("Category children does not exist");
+        }
+        if (notAccessible.Any())
+        {
+            LogNotAccessibleCategory(notAccessible.First());
+            throw new AuthorizationException("Category children is not accessible");
+        }
         return children;
     }
 
@@ -338,7 +327,7 @@ public partial class CategoryService : ICategoryService
         IEnumerable<Guid> childrenIds
     )
     {
-        _logger.LogDebug("Verify category limit {limit}", limit.ToString());
+        LogCategoryLimitValidation(limit);
         var children = await VerifyCategoryChildren(childrenIds, userId);
         var parent = await _collection.GetCategory(category =>
             category.Children.Contains(categoryId)
@@ -348,34 +337,111 @@ public partial class CategoryService : ICategoryService
             (sum, cat) => sum += cat.Limit?.Amount ?? 0
         );
         if (limit.Amount <= 0)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Limit amount must be larger than zero", nameof(limit))
-            );
+        {
+            LogInvalidCategoryLimit(limit);
+            throw new ArgumentException("Limit amount must be larger than zero", nameof(limit));
+        }
         if (parent is not null && parent.Limit!.Amount < limit.Amount)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "Limit amount must be smaller than the amount of the parent",
-                    nameof(limit)
-                )
+        {
+            LogInvalidCategoryLimit(limit);
+            throw new ArgumentException(
+                "Limit amount must be smaller than the amount of the parent",
+                nameof(limit)
             );
+        }
         if (sum != 0 && limit.Amount < sum)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException(
-                    "Limit amount must be larger than the amount of its children",
-                    nameof(limit)
-                )
+        {
+            LogInvalidCategoryLimit(limit);
+            throw new ArgumentException(
+                "Limit amount must be larger than the amount of its children",
+                nameof(limit)
             );
+        }
         if (limit.PeriodDays <= 0)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.CategoryOperationFailed,
-                new ArgumentException("Limit period must be larger than zero", nameof(limit))
-            );
+        {
+            LogInvalidCategoryLimit(limit);
+            throw new ArgumentException("Limit period must be larger than zero", nameof(limit));
+        }
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category - {Category}"
+    )]
+    private partial void LogCategoryValidation(Category category);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "CategoryType: Validate category id - {Id}")]
+    private partial void LogCategoryIdValidation(Guid id);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category access - {Id}"
+    )]
+    private partial void LogCategoryAccessValidation(Guid id);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category name - {Name}"
+    )]
+    private partial void LogCategoryNameValidation(string name);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category color - {Color}"
+    )]
+    private partial void LogCategoryColorValidation(string color);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category children - {Children}"
+    )]
+    private partial void LogCategoryChildrenValidation(IEnumerable<Guid> children);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Validate category limit - {Limit}"
+    )]
+    private partial void LogCategoryLimitValidation(Limit limit);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryDuplicate,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category already exist - {Category}"
+    )]
+    private partial void LogDuplicateCategory(Category category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryNotFound,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category does not exist - {Id}"
+    )]
+    private partial void LogNotFoundCategory(Guid id);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryInvalidId,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category id is invalid - {Id}"
+    )]
+    private partial void LogInvalidCategoryId(Guid id);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryInvalidName,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category name is invalid - {Name}"
+    )]
+    private partial void LogInvalidCategoryName(string name);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryInvalidColor,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category color is invalid - {Color}"
+    )]
+    private partial void LogInvalidCategoryColor(string color);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryInvalidLimit,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category limit is invalid - {Limit}"
+    )]
+    private partial void LogInvalidCategoryLimit(Limit limit);
 }

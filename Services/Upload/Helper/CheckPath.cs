@@ -12,9 +12,13 @@ public partial class UploadService : IUploadService
     /// <exception cref="UnauthorizedAccessException">
     /// The directory cannot be created due to missing permissions.
     /// </exception>
-    private static void CheckPath(string path)
+    private void CheckPath(string path)
     {
+        LogCheckPath(path);
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Check path - {path}")]
+    private partial void LogCheckPath(string path);
 }

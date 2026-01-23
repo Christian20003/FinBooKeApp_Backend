@@ -7,7 +7,7 @@ public partial class PaymentMethodService : IPaymentMethodService
 {
     public async Task<PaymentMethod> UpdatePaymentMethod(PaymentMethod method)
     {
-        _logger.LogDebug("Update existing payment method {method}", method.ToString());
+        LogUpdatePaymentMethod(method);
         VerifyPaymentMethod(method);
         var entity = await VerifyPaymentMethodAccess(method.Id, method.UserId);
         if (entity.Type != method.Type)
@@ -24,10 +24,21 @@ public partial class PaymentMethodService : IPaymentMethodService
 
         _collection.UpdatePaymentMethod(entity);
         await _collection.SaveChanges();
-        _logger.LogInformation(
-            LogEvents.PaymentMethodUpdateSuccess,
-            "Payment method has been updated successfully"
-        );
+        LogUpdatePaymentMethodSuccess(entity);
         return method;
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodUpdate,
+        Level = LogLevel.Information,
+        Message = "Payment: Update payment method - {Method}"
+    )]
+    private partial void LogUpdatePaymentMethod(PaymentMethod method);
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodUpdateSuccess,
+        Level = LogLevel.Information,
+        Message = "Payment: Payment method has been updated successfully - {Method}"
+    )]
+    private partial void LogUpdatePaymentMethodSuccess(PaymentMethod method);
 }

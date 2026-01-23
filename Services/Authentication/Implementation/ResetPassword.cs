@@ -1,5 +1,3 @@
-using System.Net.Mail;
-using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -11,43 +9,27 @@ public partial class AuthenticationService : IAuthenticationService
 
     public async Task ResetPassword(string email, string code)
     {
-        _logger.LogDebug("Reset password call of {email}", PrivacyGuard.Hide(_redactor, email));
+        LogResetPassword();
         if (!VerifyEmail(email))
         {
-            _logger.LogWarning(
-                LogEvents.ResetCredentialsFailed,
-                "{email} is not a valid email address",
-                PrivacyGuard.Hide(_redactor, email)
-            );
+            LogInvalidEmail(email);
             throw new ArgumentException($"{email} is not a valid email address", nameof(email));
         }
         var user = await VerifyUserAccount(email);
         if (user.AccessCode == null || user.AccessCodeCreatedAt == null)
         {
-            _logger.LogWarning(
-                LogEvents.ResetCredentialsFailed,
-                "Access code of {id} is null",
-                user.Id
-            );
+            LogInvalidAccessCode(code);
             throw new AuthorizationException("Invalid access code");
         }
         var expire = user.AccessCodeCreatedAt.Value.AddMinutes(10);
         if (DateTime.UtcNow.Ticks - expire.Ticks > 0)
         {
-            _logger.LogWarning(
-                LogEvents.AuthorizationFailed,
-                "Access code of {id} expired",
-                user.Id
-            );
+            LogExpiredAccessCode(code);
             throw new AuthorizationException("Access code expired");
         }
         if (user.AccessCode != _protector.Protect(code))
         {
-            _logger.LogWarning(
-                LogEvents.AuthorizationFailed,
-                "Access code of {id} is invalid",
-                user.Id
-            );
+            LogInvalidAccessCode(code);
             throw new AuthorizationException("Invalid access code");
         }
         var password = _securityUtilityService.GeneratePassword(20);
@@ -64,11 +46,10 @@ public partial class AuthenticationService : IAuthenticationService
                 || exception is IOException
             )
         {
-            _logger.LogError(
-                LogEvents.ConfigurationError,
-                exception,
-                "{path} could not be used",
-                TemplateFilePwd
+            LogConfigurationError(
+                exception.GetType().ToString(),
+                exception.Message,
+                exception.StackTrace
             );
             throw new ApplicationException($"{TemplateFilePwd} could not be used", exception);
         }
@@ -79,10 +60,34 @@ public partial class AuthenticationService : IAuthenticationService
         await _accountManager.SetPasswordAsync(user, password);
 
         _emailService.Send(email, subject, body);
-        _logger.LogInformation(
-            LogEvents.ResetCredentialsSuccess,
-            "Successful password reset for {id}",
-            user.Id
-        );
+        LogSucceededResetPassword();
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationResetPassword,
+        Level = LogLevel.Information,
+        Message = "Authentication: Try to reset password"
+    )]
+    private partial void LogResetPassword();
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidAccessCode,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid access code - {Code}"
+    )]
+    private partial void LogInvalidAccessCode(string code);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationExpiredAccessCode,
+        Level = LogLevel.Error,
+        Message = "Authentication: Expired access code - {Code}"
+    )]
+    private partial void LogExpiredAccessCode(string code);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationSucceededResetPassword,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful reset password"
+    )]
+    private partial void LogSucceededResetPassword();
 }

@@ -7,22 +7,36 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<JwtToken> IssueJwtToken(string refreshToken)
     {
-        _logger.LogDebug("Generate a new access token.");
+        LogCreateToken();
         var (id, _) = _tokenService.VerifyRefreshToken(refreshToken);
         if (await _tokenService.TokenExists(refreshToken))
         {
-            _logger.LogError(
-                LogEvents.AuthenticationFailed,
-                "Used refresh token is blacklisted: {token}",
-                refreshToken
-            );
+            LogInvalidToken(refreshToken);
             throw new ArgumentException("Provided refresh token is revoked", nameof(refreshToken));
         }
         var result = _tokenService.GenerateAccessToken(id);
-        _logger.LogInformation(
-            LogEvents.AuthenticationSuccess,
-            "Generated new access token successfully"
-        );
+        LogCreatedToken();
         return result;
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationCreateToken,
+        Level = LogLevel.Information,
+        Message = "Authentication: Create new JWT access token"
+    )]
+    private partial void LogCreateToken();
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidToken,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid refresh token - {RefreshToken}"
+    )]
+    private partial void LogInvalidToken(string refreshToken);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationTokenCreated,
+        Level = LogLevel.Information,
+        Message = "Authentication: New JWT access token created"
+    )]
+    private partial void LogCreatedToken();
 }

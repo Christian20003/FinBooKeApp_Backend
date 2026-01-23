@@ -9,7 +9,7 @@ public partial class CategoryService : ICategoryService
 {
     public async Task<Category> DeleteCategory(Guid categoryId, Guid userId)
     {
-        _logger.LogDebug("Delete category: {category}", categoryId);
+        LogDeleteCategory(categoryId);
 
         var entity = await VerifyCategoryAccess(categoryId, userId);
         var parent = await _collection.GetCategory(category =>
@@ -18,11 +18,10 @@ public partial class CategoryService : ICategoryService
         if (parent is not null)
         {
             if (parent.UserId != userId)
-                Logging.ThrowAndLogWarning(
-                    _logger,
-                    LogEvents.CategoryOperationFailed,
-                    new AuthorizationException("Category parent is not accessible")
-                );
+            {
+                LogNotAccessibleCategory(parent);
+                throw new AuthorizationException("Category parent is not accessible");
+            }
             parent.Children = parent.Children.Where(childId => childId != categoryId);
             _collection.UpdateCategory(parent);
         }
@@ -30,12 +29,22 @@ public partial class CategoryService : ICategoryService
         _collection.DeleteCategory(entity);
         await _collection.SaveChanges();
 
-        _logger.LogInformation(
-            LogEvents.CategoryDeleteSuccess,
-            "Category {category} has been deleted",
-            entity.ToString()
-        );
+        LogCategoryDeleted(entity);
 
         return new Category(entity);
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryDelete,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Delete category - {Id}"
+    )]
+    private partial void LogDeleteCategory(Guid id);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryDeleteSuccess,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Category deleted successfully - {Category}"
+    )]
+    private partial void LogCategoryDeleted(Category category);
 }

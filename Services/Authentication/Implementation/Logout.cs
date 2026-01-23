@@ -7,33 +7,44 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task Logout(string accessToken, string refreshToken)
     {
-        _logger.LogDebug("Logout call");
+        LogLogout(accessToken, refreshToken);
         try
         {
             await _tokenService.StoreAccessToken(accessToken);
         }
-        catch (SecurityTokenExpiredException exception)
+        catch (SecurityTokenExpiredException)
         {
-            _logger.LogInformation(
-                LogEvents.OperationIgnored,
-                exception,
-                "Access token has already expired: {token}",
-                accessToken
-            );
+            LogExpiredToken(accessToken);
         }
         try
         {
             await _tokenService.StoreRefreshToken(refreshToken);
         }
-        catch (SecurityTokenExpiredException exception)
+        catch (SecurityTokenExpiredException)
         {
-            _logger.LogInformation(
-                LogEvents.OperationIgnored,
-                exception,
-                "Refresh token has already expired: {token}",
-                refreshToken
-            );
+            LogExpiredToken(refreshToken);
         }
-        _logger.LogInformation(LogEvents.AuthenticationSuccess, "Successful logout");
+        LogSucceededLogout(accessToken, refreshToken);
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationLogout,
+        Level = LogLevel.Information,
+        Message = "Authentication: Try to logout - {AccessToken}, {RefreshToken}"
+    )]
+    private partial void LogLogout(string accessToken, string refreshToken);
+
+    [LoggerMessage(
+        EventId = LogEvents.OperationIgnored,
+        Level = LogLevel.Information,
+        Message = "Authentication: Token has already expired - {Token}"
+    )]
+    private partial void LogExpiredToken(string token);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationSucceededLogout,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful logout - {AccessToken}, {RefreshToken}"
+    )]
+    private partial void LogSucceededLogout(string accessToken, string refreshToken);
 }

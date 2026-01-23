@@ -1,11 +1,10 @@
-using FinBookeAPI.AppConfig;
 using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Email;
 using FinBookeAPI.Services.SecurityUtility;
 using FinBookeAPI.Services.Token;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Compliance.Redaction;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -16,7 +15,6 @@ public partial class AuthenticationService(
     ITokenService tokenService,
     IEmailService emailService,
     IDataProtection protection,
-    IRedactorProvider redactor,
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
 {
@@ -26,6 +24,19 @@ public partial class AuthenticationService(
     private readonly ITokenService _tokenService = tokenService;
     private readonly IEmailService _emailService = emailService;
     private readonly IDataProtection _protector = protection;
-    private readonly IRedactorProvider _redactor = redactor;
     private readonly ILogger<AuthenticationService> _logger = logger;
+
+    [LoggerMessage(
+        EventId = LogEvents.ConfigurationError,
+        Level = LogLevel.Critical,
+        Message = "{Type}: {Message} - {Trace}"
+    )]
+    private partial void LogConfigurationError(string type, string message, string? trace);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidCredentials,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid email - {Email}"
+    )]
+    private partial void LogInvalidEmail(string email);
 }

@@ -1,5 +1,3 @@
-using FinBookeAPI.AppConfig.Documentation;
-using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Upload;
 
 namespace FinBookeAPI.Services.Upload;
@@ -8,19 +6,18 @@ public partial class UploadService : IUploadService
 {
     public async Task<string> UploadImage(FileUpload upload, Guid userId)
     {
-        _logger.LogDebug("Upload image");
+        LogUploadFile(userId, upload.File.FileName);
         if (userId == Guid.Empty)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.UploadFileFailed,
-                new ArgumentException("User id is empty", nameof(userId))
-            );
+        {
+            LogInvalidUserId(userId);
+            throw new ArgumentException("User id is empty", nameof(userId));
+        }
 
         var path = GetImagePath(userId);
         var name = "profile_image";
         name = await CreateFile(upload, path, name);
 
-        _logger.LogInformation(LogEvents.UploadFileSuccess, "File uploaded {name}", name);
+        LogUploadFileSuccess(userId, name);
         return name;
     }
 

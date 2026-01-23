@@ -7,16 +7,26 @@ public partial class CategoryService : ICategoryService
 {
     public async Task<Category> CreateCategory(Category category)
     {
-        _logger.LogDebug("Add new category {category}", category.ToString());
+        LogCreateCategory(category);
         await VerifyNewCategory(category);
         _collection.CreateCategory(category);
         await _collection.SaveChanges();
 
-        _logger.LogInformation(
-            LogEvents.CategoryInsertSuccess,
-            "{category} is added",
-            category.ToString()
-        );
+        LogCategoryCreated(category);
         return new Category(category);
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryCreate,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Create new category - {Category}"
+    )]
+    private partial void LogCreateCategory(Category category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryCreateSuccess,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Category created successfully - {Category}"
+    )]
+    private partial void LogCategoryCreated(Category category);
 }

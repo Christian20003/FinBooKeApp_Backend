@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Payment;
 
@@ -8,7 +7,7 @@ public partial class PaymentMethodService : IPaymentMethodService
 {
     public async Task<PaymentMethod> GetPaymentMethodById(Guid id, Guid userId)
     {
-        _logger.LogDebug("Get payment method from id {id}", id);
+        LogGetPaymentMethodById(id, userId);
         var entity = await _collection.GetPaymentMethod(elem =>
             elem.Instances.Any(instance => instance.Id == id)
         );
@@ -20,10 +19,21 @@ public partial class PaymentMethodService : IPaymentMethodService
         {
             entity = await VerifyPaymentMethodAccess(entity.Id, userId);
         }
-        _logger.LogInformation(
-            LogEvents.PaymentMethodReadSuccess,
-            "Payment method has been read successfully"
-        );
+        LogGetPaymentMethodByIdSuccess(entity);
         return entity.Copy();
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodRead,
+        Level = LogLevel.Information,
+        Message = "Payment: Get payment method by id - {Id} from {UserId}"
+    )]
+    private partial void LogGetPaymentMethodById(Guid id, Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodReadSuccess,
+        Level = LogLevel.Information,
+        Message = "Payment: Payment method has been read successfully - {Method}"
+    )]
+    private partial void LogGetPaymentMethodByIdSuccess(PaymentMethod method);
 }

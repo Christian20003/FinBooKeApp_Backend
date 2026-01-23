@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.CategoryType;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
@@ -9,7 +8,7 @@ public partial class CategoryService : ICategoryService
 {
     public async Task<IEnumerable<Category>> UpdateCategory(Category category)
     {
-        _logger.LogDebug("Update category: {catgeory}", category.ToString());
+        LogUpdateCategory(category);
 
         var entity = await VerifyExistingCategory(category);
         var result = new List<Category> { new(category) };
@@ -48,11 +47,10 @@ public partial class CategoryService : ICategoryService
                 if (parent is null)
                     continue;
                 if (parent.UserId != category.UserId)
-                    Logging.ThrowAndLogWarning(
-                        _logger,
-                        LogEvents.CategoryOperationFailed,
-                        new AuthorizationException("Category parent is not accessible")
-                    );
+                {
+                    LogNotAccessibleCategory(parent);
+                    throw new AuthorizationException("Category parent is not accessible");
+                }
                 parent.Children = [.. parent.Children.Where(childId => childId != child)];
                 parent.ModifiedAt = DateTime.UtcNow;
                 if (result.Any(elem => elem.Id == parent.Id))
@@ -62,14 +60,13 @@ public partial class CategoryService : ICategoryService
             entity.Children = category.Children;
 
             if (await VerifyAfterCycle(category.Id, category.Children))
-                Logging.ThrowAndLogWarning(
-                    _logger,
-                    LogEvents.CategoryUpdateFailed,
-                    new ArgumentException(
-                        $"Category children of {category.Id} produce a cyclic relationship",
-                        nameof(category)
-                    )
+            {
+                LogInvalidChildren(category);
+                throw new ArgumentException(
+                    $"Category children of {category.Id} produce a cyclic relationship",
+                    nameof(category)
                 );
+            }
         }
 
         if (!category.Equals(entity))
@@ -78,12 +75,29 @@ public partial class CategoryService : ICategoryService
         _collection.UpdateCategory(entity);
         await _collection.SaveChanges();
 
-        _logger.LogInformation(
-            LogEvents.CategoryUpdateSuccess,
-            "{category} has been updated successfully",
-            entity.ToString()
-        );
+        LogCategoryUpdated(result);
 
         return result;
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.CategorUpdate,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Update category - {Category}"
+    )]
+    private partial void LogUpdateCategory(Category category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategorUpdateSuccess,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Updated category successfully - {Category}"
+    )]
+    private partial void LogCategoryUpdated(IEnumerable<Category> category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryInvalidChild,
+        Level = LogLevel.Error,
+        Message = "CategoryType: Category produces cyclic dependency - {Category}"
+    )]
+    private partial void LogInvalidChildren(Category category);
 }

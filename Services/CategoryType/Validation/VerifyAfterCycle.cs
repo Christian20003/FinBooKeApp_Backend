@@ -21,6 +21,7 @@ public partial class CategoryService : ICategoryService
     /// </exception>
     private async Task<bool> VerifyAfterCycle(Guid start, IEnumerable<Guid> categoryIds)
     {
+        LogCheckCycle(start);
         if (categoryIds.Any())
             return false;
         var map = new HashSet<Guid> { start };
@@ -60,4 +61,10 @@ public partial class CategoryService : ICategoryService
 
         return false;
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Check for cycles starting with - {Start}"
+    )]
+    private partial void LogCheckCycle(Guid start);
 }

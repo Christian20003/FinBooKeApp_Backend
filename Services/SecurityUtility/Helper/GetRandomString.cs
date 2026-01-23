@@ -16,8 +16,9 @@ public partial class SecurityUtilityService : ISecurityUtilityService
     /// <returns>
     /// A char array containing random selected characters
     /// </returns>
-    private static char[] GetRandomString(int length, string options)
+    private char[] GetRandomString(int length, string options)
     {
+        LogGetRandomString(length, options);
         char[] result = new char[length];
         for (int i = 0; i < length; i++)
         {
@@ -26,4 +27,10 @@ public partial class SecurityUtilityService : ISecurityUtilityService
         }
         return result;
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "SecurityUtility: Generate random string - length: {length}, options: {options}"
+    )]
+    private partial void LogGetRandomString(int length, string options);
 }

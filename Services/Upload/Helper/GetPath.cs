@@ -13,6 +13,7 @@ public partial class UploadService : IUploadService
     /// </returns>
     private string GetImagePath(Guid userId)
     {
+        LogGetImagePath(userId);
         return Path.Combine(_options.Value.Root, userId.ToString());
     }
 
@@ -27,6 +28,7 @@ public partial class UploadService : IUploadService
     /// </returns>
     private string GetBankStatementPath(Guid userId)
     {
+        LogGetBankStatementPath(userId);
         return Path.Combine(_options.Value.Root, userId.ToString(), "statements");
     }
 
@@ -41,6 +43,22 @@ public partial class UploadService : IUploadService
     /// </returns>
     private string GetReceiptPath(Guid userId)
     {
+        LogGetReceiptPath(userId);
         return Path.Combine(_options.Value.Root, userId.ToString(), "receipts");
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Get image path for user - {userId}")]
+    private partial void LogGetImagePath(Guid userId);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Upload: Get bank statement path for user - {userId}"
+    )]
+    private partial void LogGetBankStatementPath(Guid userId);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Upload: Get receipt path for user - {userId}"
+    )]
+    private partial void LogGetReceiptPath(Guid userId);
 }

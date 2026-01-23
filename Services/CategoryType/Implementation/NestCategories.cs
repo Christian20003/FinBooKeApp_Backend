@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.CategoryType;
+using FinBookeAPI.Models.Configuration;
 
 namespace FinBookeAPI.Services.CategoryType;
 
@@ -6,6 +7,7 @@ public partial class CategoryService : ICategoryService
 {
     public IEnumerable<CategoryNested> NestCategories(IEnumerable<Category> categories)
     {
+        LogNestCategories(categories);
         var result = new List<CategoryNested>();
         var childIds = categories.SelectMany(elem => elem.Children);
         var mainCategories = categories.Where(elem => !childIds.Contains(elem.Id));
@@ -17,7 +19,7 @@ public partial class CategoryService : ICategoryService
         {
             result.Add(TransformCategory(category, subCategories));
         }
-
+        LogCategoriesNested(result);
         return result;
     }
 
@@ -34,11 +36,12 @@ public partial class CategoryService : ICategoryService
     /// <returns>
     /// A <see cref="CategoryNested"/> object.
     /// </returns>
-    private static CategoryNested TransformCategory(
+    private CategoryNested TransformCategory(
         Category category,
         Dictionary<Guid, Category> categories
     )
     {
+        LogTransform(category);
         var result = new CategoryNested(category);
         foreach (var childId in category.Children)
         {
@@ -54,4 +57,24 @@ public partial class CategoryService : ICategoryService
         }
         return result;
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryNest,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Nest categories - {Categories}"
+    )]
+    private partial void LogNestCategories(IEnumerable<Category> categories);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryNestSuccess,
+        Level = LogLevel.Information,
+        Message = "CategoryType: Nested categories successfully - {Categories}"
+    )]
+    private partial void LogCategoriesNested(IEnumerable<CategoryNested> categories);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "CategoryType: Transform category - {Category}"
+    )]
+    private partial void LogTransform(Category category);
 }

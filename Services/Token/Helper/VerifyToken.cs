@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using FinBookeAPI.Models.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FinBookeAPI.Services.Token;
@@ -55,27 +54,24 @@ public partial class TokenService : ITokenService
     /// </exception>
     private (string, long) VerifyToken(string token, string secret)
     {
-        _logger.LogDebug("Verify token {token}", token);
+        LogVerifyToken();
         var audience = _settings.Value.Audience;
         var issuer = _settings.Value.Issuer;
         var bytes = Encoding.UTF8.GetBytes(secret);
 
         if (audience == null)
         {
-            _logger.LogError(LogEvents.ConfigurationError, "Audience configuration is null");
+            LogInvalidAudience(audience);
             throw new ApplicationException("Audience configuration is null");
         }
         if (issuer == null)
         {
-            _logger.LogError(LogEvents.ConfigurationError, "Issuer configuration is null");
+            LogInvalidIssuer(issuer);
             throw new ApplicationException("Issuer configuration is null");
         }
         if (bytes.Length < 16)
         {
-            _logger.LogError(
-                LogEvents.ConfigurationError,
-                "Given secret is too small to generated symmetric key"
-            );
+            LogInvalidSecret();
             throw new ApplicationException("Given secret is too small to generated symmetric key");
         }
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -97,4 +93,7 @@ public partial class TokenService : ITokenService
         var expDateTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expires.Value)).UtcDateTime;
         return (id.Value, expDateTime.Ticks);
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Token: Verify token")]
+    private partial void LogVerifyToken();
 }

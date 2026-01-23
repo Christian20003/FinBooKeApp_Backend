@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
@@ -9,24 +8,16 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<User> Register(string email, string userName, string password)
     {
-        _logger.LogDebug("Register call of {email}", PrivacyGuard.Hide(_redactor, email));
+        LogRegister();
 
         if (userName == string.Empty)
         {
-            _logger.LogWarning(
-                LogEvents.AuthenticationFailed,
-                "User name of {email} is empty",
-                PrivacyGuard.Hide(_redactor, email)
-            );
+            LogInvalidUsername(userName);
             throw new ArgumentException("User name is empty", nameof(userName));
         }
         if (!VerifyEmail(email))
         {
-            _logger.LogWarning(
-                LogEvents.AuthenticationFailed,
-                "{email} is not a valid email address",
-                PrivacyGuard.Hide(_redactor, email)
-            );
+            LogInvalidEmail(email);
             throw new ArgumentException($"{email} is not a valid email-address", nameof(email));
         }
         var newUser = new UserAccount
@@ -37,7 +28,7 @@ public partial class AuthenticationService : IAuthenticationService
         var result = await _accountManager.CreateUserAsync(newUser, password);
         if (!result.Succeeded)
         {
-            _logger.LogWarning(LogEvents.AuthenticationFailed, "User account conditions violated");
+            LogInvalidSettings();
             throw new IdentityResultException(result.Errors, "User account conditions violated");
         }
 
@@ -45,11 +36,7 @@ public partial class AuthenticationService : IAuthenticationService
         var refreshToken = _tokenService.GenerateRefreshToken(newUser.Id);
         var jwtToken = _tokenService.GenerateAccessToken(newUser.Id);
 
-        _logger.LogInformation(
-            LogEvents.AuthenticationSuccess,
-            "Successfully created new user account: {Id}",
-            newUser.Id
-        );
+        LogSucceededRegister(newUser.Id);
         return new User
         {
             Id = Guid.Parse(newUser.Id),
@@ -60,4 +47,32 @@ public partial class AuthenticationService : IAuthenticationService
             RefreshToken = refreshToken,
         };
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationRegister,
+        Level = LogLevel.Information,
+        Message = "Authentication: Try to register new user"
+    )]
+    private partial void LogRegister();
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidUsername,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid username - {Username}"
+    )]
+    private partial void LogInvalidUsername(string userName);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidCredentials,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid registration data"
+    )]
+    private partial void LogInvalidSettings();
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationSucceededRegister,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful registration - {UserId}"
+    )]
+    private partial void LogSucceededRegister(string userId);
 }

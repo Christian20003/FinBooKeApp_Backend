@@ -13,6 +13,7 @@ public partial class UploadService : IUploadService
     /// </returns>
     private bool HasValidSize(IFormFile file)
     {
+        LogHasValidSize(file.FileName, file.Length);
         return file.Length <= (_options.Value.MaxFileSize * 1024 * 1024);
     }
 
@@ -28,8 +29,18 @@ public partial class UploadService : IUploadService
     private bool HasValidFormat(IFormFile file)
     {
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        LogHasValidFormat(file.FileName, extension);
         if (_options.Value.FileFormats.TryGetValue(extension, out string? contentType))
             return contentType == file.ContentType;
         return false;
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Check file size - {name}, {Size}")]
+    private partial void LogHasValidSize(string name, long size);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Upload: Check file format - {name}, {extension}"
+    )]
+    private partial void LogHasValidFormat(string name, string extension);
 }

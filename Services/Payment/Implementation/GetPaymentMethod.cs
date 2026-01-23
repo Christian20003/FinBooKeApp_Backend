@@ -7,12 +7,23 @@ public partial class PaymentMethodService : IPaymentMethodService
 {
     public async Task<PaymentMethod> GetPaymentMethod(Guid methodId, Guid userId)
     {
-        _logger.LogDebug("Get payment method {id}", methodId);
+        LogGetPaymentMethod(methodId, userId);
         var entity = await VerifyPaymentMethodAccess(methodId, userId);
-        _logger.LogInformation(
-            LogEvents.PaymentMethodReadSuccess,
-            "Payment method has been read successfully"
-        );
+        LogGetPaymentMethodSuccess(entity);
         return entity.Copy();
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodRead,
+        Level = LogLevel.Information,
+        Message = "Payment: Get payment method - {Id} from {UserId}"
+    )]
+    private partial void LogGetPaymentMethod(Guid id, Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentMethodReadSuccess,
+        Level = LogLevel.Information,
+        Message = "Payment: Payment method has been read successfully - {Method}"
+    )]
+    private partial void LogGetPaymentMethodSuccess(PaymentMethod method);
 }

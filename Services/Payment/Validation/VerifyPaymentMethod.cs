@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Models.Payment;
@@ -19,8 +18,9 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// If the provided payment method does not fulfill a defined
     /// data annotation attribute.
     /// </exception>
-    private static void VerifyPaymentMethod(PaymentMethod method)
+    private void VerifyPaymentMethod(PaymentMethod method)
     {
+        LogPaymentMethodValidation(method);
         var context = new ValidationContext(method);
         Validator.ValidateObject(method, context, true);
 
@@ -51,24 +51,41 @@ public partial class PaymentMethodService : IPaymentMethodService
     /// </exception>
     private async Task<PaymentMethod> VerifyPaymentMethodAccess(Guid methodId, Guid userId)
     {
-        _logger.LogDebug(
-            "Verify payment method access for id {id} and user {userId}",
-            methodId,
-            userId
-        );
+        LogPaymentMethodAccessible(methodId);
         var entity = await _collection.GetPaymentMethod(elem => elem.Id == methodId);
         if (entity is null)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.PaymentMethodOperationFailed,
-                new EntityNotFoundException("Payment method does not exist")
-            );
+        {
+            LogNotFoundPaymentMethod(methodId);
+            throw new EntityNotFoundException("Payment method does not exist");
+        }
         if (entity.UserId != userId)
-            Logging.ThrowAndLogWarning(
-                _logger,
-                LogEvents.PaymentMethodOperationFailed,
-                new AuthorizationException("Payment method is not accessible")
-            );
+        {
+            LogNotAccessiblePaymentMethod(methodId);
+            throw new AuthorizationException("Payment method is not accessible");
+        }
         return entity;
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Payment: Verify payment method - {Method}")]
+    private partial void LogPaymentMethodValidation(PaymentMethod method);
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Payment: Verify if payment method is accessible - {Id}"
+    )]
+    private partial void LogPaymentMethodAccessible(Guid id);
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentNotFound,
+        Level = LogLevel.Error,
+        Message = "Payment: Payment method does not exist - {Id}"
+    )]
+    private partial void LogNotFoundPaymentMethod(Guid id);
+
+    [LoggerMessage(
+        EventId = LogEvents.PaymentNotAccessible,
+        Level = LogLevel.Error,
+        Message = "Payment: Payment method not accessible - {Id}"
+    )]
+    private partial void LogNotAccessiblePaymentMethod(Guid id);
 }

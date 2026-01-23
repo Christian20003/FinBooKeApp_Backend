@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Upload;
 
@@ -32,24 +31,23 @@ public partial class UploadService : IUploadService
     /// </exception>
     private async Task<string> CreateFile(FileUpload upload, string path, string name)
     {
-        _logger.LogDebug("Create a new file {name} in {path}", name, path);
+        LogCreateFile(name, path);
         var file = upload.File;
         CheckPath(path);
         if (!HasValidSize(file))
-            Logging.ThrowAndLogError(
-                _logger,
-                LogEvents.UploadFileFailed,
-                new FormatException($"File can only have a size of {_options.Value.MaxFileSize} MB")
+        {
+            LogInvalidFileSize(file.FileName);
+            throw new FormatException(
+                $"File can only have a size of {_options.Value.MaxFileSize} MB"
             );
+        }
         if (!HasValidFormat(file))
-            Logging.ThrowAndLogError(
-                _logger,
-                LogEvents.UploadFileFailed,
-                new FormatException(
-                    $"File can only have one of the following formats: {string.Join(",", _options.Value.FileFormats.Values)}"
-                )
+        {
+            LogInvalidFileFormat(file.FileName);
+            throw new FormatException(
+                $"File can only have one of the following formats: {string.Join(",", _options.Value.FileFormats.Values)}"
             );
-
+        }
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         var uniqueName = $"{name}_{Guid.NewGuid()}{extension}";
         var filePath = Path.Combine(path, uniqueName);
@@ -59,9 +57,30 @@ public partial class UploadService : IUploadService
         if (OperatingSystem.IsLinux())
             File.SetUnixFileMode(filePath, UnixFileMode.UserRead);
         else
-            _logger.LogWarning(
-                "File permissions could not be restricted. Running OS is not Linux."
-            );
+            LogOSNotSupported();
         return uniqueName;
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Create file - {name}, {path}")]
+    private partial void LogCreateFile(string name, string path);
+
+    [LoggerMessage(
+        EventId = LogEvents.UploadInvalidFileFormat,
+        Level = LogLevel.Error,
+        Message = "Upload: Invalid file format - {name}"
+    )]
+    private partial void LogInvalidFileFormat(string name);
+
+    [LoggerMessage(
+        EventId = LogEvents.UploadInvalidFileSize,
+        Level = LogLevel.Error,
+        Message = "Upload: Invalid file size - {name}"
+    )]
+    private partial void LogInvalidFileSize(string name);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Upload: OS not supported for setting file permissions"
+    )]
+    private partial void LogOSNotSupported();
 }
