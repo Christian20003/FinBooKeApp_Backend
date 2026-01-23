@@ -21,7 +21,7 @@ public static class LogEvents
     public const int SecurityCreateAccessCode = 1041;
     public const int SecurityCreatePassword = 1042;
     public const int SecurityHashGeneration = 1043;
-    public const int SecurityHashVerification = 1043;
+    public const int SecurityHashVerification = 1044;
 
     public const int TokenCleanDatabase = 1051;
     public const int TokenCreateAccessToken = 1052;
