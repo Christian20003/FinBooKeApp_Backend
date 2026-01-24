@@ -35,12 +35,12 @@ public partial class UploadService : IUploadService
         return false;
     }
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Check file size - {name}, {Size}")]
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Check file size - {Name}, {Size}")]
     private partial void LogHasValidSize(string name, long size);
 
     [LoggerMessage(
         Level = LogLevel.Trace,
-        Message = "Upload: Check file format - {name}, {extension}"
+        Message = "Upload: Check file format - {Name}, {Extension}"
     )]
     private partial void LogHasValidFormat(string name, string extension);
 }

@@ -1,64 +1,83 @@
+using FinBookeAPI.Models.Upload;
+
 namespace FinBookeAPI.Services.Upload;
 
 public partial class UploadService : IUploadService
 {
     /// <summary>
-    /// This method returns the path of the profile image.
+    /// This method returns the path where the new file
+    /// should be stored.
     /// </summary>
+    /// <param name="upload">
+    /// The file upload.
+    /// </param>
     /// <param name="userId">
-    /// The id of the user who has access on that image.
+    /// The id of the user who has access to the file.
+    /// </param>
+    /// <param name="type">
+    /// The upload type.
     /// </param>
     /// <returns>
-    /// The path where this image is stored.
+    /// The path where the file should be uploaded.
     /// </returns>
-    private string GetImagePath(Guid userId)
+    private string GetPath(FileUpload upload, Guid userId, UploadType type)
     {
-        LogGetImagePath(userId);
-        return Path.Combine(_options.Value.Root, userId.ToString());
+        LogGetPath(userId, type);
+        var date = upload.CreatedAt;
+        var extension = Path.GetExtension(upload.File.FileName).ToLowerInvariant();
+        var id = Guid.NewGuid();
+        var name = type switch
+        {
+            UploadType.BANK_STATEMENT => $"bank_statement_{date.Month}_{date.Year}{id}{extension}",
+            UploadType.RECEIPT => $"receipt_{date.Month}_{date.Year}{id}{extension}",
+            _ => $"profile_image_{id}{extension}",
+        };
+        return GetPath(userId, type, name);
     }
 
     /// <summary>
-    /// This method returns the path of all uploaded bank statement files.
+    /// This method returns the path where a file is stored.
     /// </summary>
     /// <param name="userId">
-    /// The id of the user who has access on these statement files.
+    /// The id of the user who has access to this file.
+    /// </param>
+    /// <param name="type">
+    /// The upload type.
+    /// </param>
+    /// <param name="name">
+    /// The name of the file.
     /// </param>
     /// <returns>
-    /// The path where all bank statement files are stored.
+    /// The path of the file.
     /// </returns>
-    private string GetBankStatementPath(Guid userId)
+    private string GetPath(Guid userId, UploadType type, string name)
     {
-        LogGetBankStatementPath(userId);
-        return Path.Combine(_options.Value.Root, userId.ToString(), "statements");
+        LogGetPath(userId, type, name);
+        var path = Path.Combine(_options.Value.Root, userId.ToString());
+        switch (type)
+        {
+            case UploadType.BANK_STATEMENT:
+                path = Path.Combine(path, "statements");
+                break;
+            case UploadType.RECEIPT:
+                path = Path.Combine(path, "receipts");
+                break;
+            case UploadType.IMAGE:
+            default:
+                break;
+        }
+        return Path.Combine(path, name);
     }
-
-    /// <summary>
-    /// This method returns the path of all uploaded receipt files.
-    /// </summary>
-    /// <param name="userId">
-    /// The id if the user who has access on these receipt files.
-    /// </param>
-    /// <returns>
-    /// The path where all receipt files are stored.
-    /// </returns>
-    private string GetReceiptPath(Guid userId)
-    {
-        LogGetReceiptPath(userId);
-        return Path.Combine(_options.Value.Root, userId.ToString(), "receipts");
-    }
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Upload: Get image path for user - {userId}")]
-    private partial void LogGetImagePath(Guid userId);
 
     [LoggerMessage(
         Level = LogLevel.Trace,
-        Message = "Upload: Get bank statement path for user - {userId}"
+        Message = "Upload: Get storage path of file - User: {UserId}, Type: {Type}, Name: {Name}"
     )]
-    private partial void LogGetBankStatementPath(Guid userId);
+    private partial void LogGetPath(Guid userId, UploadType type, string name);
 
     [LoggerMessage(
         Level = LogLevel.Trace,
-        Message = "Upload: Get receipt path for user - {userId}"
+        Message = "Upload: Get storage path of new file - User: {userId}, Type: {Type}"
     )]
-    private partial void LogGetReceiptPath(Guid userId);
+    private partial void LogGetPath(Guid userId, UploadType type);
 }

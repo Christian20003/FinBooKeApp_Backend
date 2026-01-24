@@ -17,6 +17,7 @@ public static class LogEvents
     public const int EmailSend = 1021;
 
     public const int UploadFile = 1031;
+    public const int UploadGetFile = 1032;
 
     public const int SecurityCreateAccessCode = 1041;
     public const int SecurityCreatePassword = 1042;
@@ -56,6 +57,7 @@ public static class LogEvents
     public const int EmailSendSuccess = 2021;
 
     public const int UploadFileSuccess = 2031;
+    public const int UploadGetFileSuccess = 2032;
 
     public const int SecurityCreateAccessCodeSuccess = 2041;
     public const int SecurityCreatePasswordSuccess = 2042;
@@ -99,6 +101,8 @@ public static class LogEvents
 
     public const int UploadInvalidFileFormat = 4031;
     public const int UploadInvalidFileSize = 4032;
+    public const int UploadFileDoesNotExist = 4033;
+    public const int UploadInvalidFileName = 4034;
 
     public const int SecurityInvalidLength = 4041;
     public const int SecurityInvalidHash = 4042;
