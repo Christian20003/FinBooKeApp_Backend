@@ -5,7 +5,7 @@ namespace FinBookeAPI.DTO.Error;
 /// <summary>
 /// This class represents an error response.
 /// </summary>
-public class ErrorResponse
+public class ErrorDTO
 {
     /// <summary>
     /// The type of the error (e.g. a specific exception type)
@@ -36,12 +36,6 @@ public class ErrorResponse
     /// </summary>
     [JsonProperty(PropertyName = "instance")]
     public string Instance { get; set; } = "";
-
-    /// <summary>
-    /// A list of invalid or missing properties.
-    /// </summary>
-    [JsonProperty(PropertyName = "properties", NullValueHandling = NullValueHandling.Ignore)]
-    public Dictionary<string, List<string>>? Properties { get; set; } = null;
 
     /// <summary>
     /// The date where this error was created

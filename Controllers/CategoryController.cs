@@ -40,8 +40,8 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetCategories([FromQuery] bool nested = false)
     {
         _logger.LogInformation(LogEvents.CategoryRequest, "Get request for categories");
@@ -71,10 +71,10 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(CategoryDTO), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 401)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 401)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetCategory(
         [Guid(ErrorMessage = "Id is not a valid GUID")] string id
     )
@@ -101,9 +101,9 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpPost]
     [ProducesResponseType(typeof(CategoryDTO), 201)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 401)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 401)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> CreateCategory(CreateCategoryDTO category)
     {
         _logger.LogInformation(LogEvents.CategoryRequest, "Post request for a category");
@@ -138,10 +138,10 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 401)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 401)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> UpdateCategory(
         [Guid(ErrorMessage = "Id is not a valid GUID")] string id,
         UpdateCategoryDTO category
@@ -170,10 +170,10 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(CategoryDTO), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 401)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 401)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> DeleteCategory(
         [Guid(ErrorMessage = "Id is not a valid GUID")] string id
     )

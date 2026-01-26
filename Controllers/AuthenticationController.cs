@@ -31,10 +31,10 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("login")]
     [ProducesResponseType(typeof(UserDTO), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 403)]
-    [ProducesResponseType(typeof(ErrorResponse), 423)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 403)]
+    [ProducesResponseType(typeof(ErrorDTO), 423)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> Login([FromBody] LoginDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Login request");
@@ -53,8 +53,8 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("register")]
     [ProducesResponseType(typeof(UserDTO), 201)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> Register([FromBody] RegisterDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Register request");
@@ -74,9 +74,9 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("logout")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 403)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 403)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> Logout([FromBody] LogoutDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Logout request");
@@ -96,9 +96,9 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("forgotPwd")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 403)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 403)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> ForgotPassword([FromBody] ForgotPwdDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Forgot password request");
@@ -122,9 +122,9 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("resetPwd")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 403)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 403)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Reset password request");
@@ -144,10 +144,10 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("refreshToken")]
     [ProducesResponseType(typeof(SessionDTO), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 403)]
-    [ProducesResponseType(typeof(ErrorResponse), 406)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 403)]
+    [ProducesResponseType(typeof(ErrorDTO), 406)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult<SessionDTO>> RefreshAccessToken(
         [FromBody] RefreshAccessTokenDTO data
     )

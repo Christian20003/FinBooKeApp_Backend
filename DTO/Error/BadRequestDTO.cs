@@ -1,14 +1,15 @@
+using Newtonsoft.Json;
+
 namespace FinBookeAPI.DTO.Error;
 
-public class BadRequestDTO
+/// <summary>
+/// This class represent a bad request response.
+/// </summary>
+public class BadRequestDTO : ErrorDTO
 {
-    public string Type { get; set; } = "";
-
-    public string Title { get; set; } = "";
-
-    public int Status { get; set; }
-
-    public Dictionary<string, List<string>> Errors { get; set; } = [];
-
-    public string TraceId { get; set; } = "";
+    /// <summary>
+    /// A list of invalid or missing properties.
+    /// </summary>
+    [JsonProperty(PropertyName = "properties")]
+    public Dictionary<string, List<string>> Properties { get; set; } = [];
 }

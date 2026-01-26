@@ -101,8 +101,8 @@ public partial class UploadController(
     /// <response code="500">If any other kind of server error occur.</response>
     [HttpPost("image")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostImage(UploadDTO upload)
     {
         var name = await Upload(upload, UploadType.IMAGE);
@@ -121,8 +121,8 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpPost("bank_statement")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostBankStatement(UploadDTO upload)
     {
         var name = await Upload(upload, UploadType.BANK_STATEMENT);
@@ -141,8 +141,8 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpPost("receipt")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostReceipt(UploadDTO upload)
     {
         var name = await Upload(upload, UploadType.RECEIPT);
@@ -162,9 +162,9 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("image/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetImage(string name)
     {
         return await Download(name, UploadType.IMAGE);
@@ -182,9 +182,9 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("bank_statement/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetBankStatement(string name)
     {
         return await Download(name, UploadType.BANK_STATEMENT);
@@ -202,9 +202,9 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("receipt/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(ErrorResponse), 400)]
-    [ProducesResponseType(typeof(ErrorResponse), 404)]
-    [ProducesResponseType(typeof(ErrorResponse), 500)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetReceipt(string name)
     {
         return await Download(name, UploadType.RECEIPT);
