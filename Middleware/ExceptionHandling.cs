@@ -42,6 +42,7 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Status = (int)HttpStatusCode.Forbidden;
                 break;
             }
+            case FileNotFoundException:
             case EntityNotFoundException:
             {
                 body.Type = "EntityNotFoundException";
