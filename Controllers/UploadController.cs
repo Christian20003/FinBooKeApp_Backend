@@ -38,10 +38,10 @@ public partial class UploadController(
     /// <exception cref="ArgumentException">
     /// <see cref="IUploadService.UploadFile(FileUpload, Guid, UploadType)"/>
     /// </exception>
-    /// /// <exception cref="FormatException">
+    /// <exception cref="FormatException">
     /// <see cref="IUploadService.UploadFile(FileUpload, Guid, UploadType)"/>
     /// </exception>
-    /// /// <exception cref="UnauthorizedAccessException">
+    /// <exception cref="UnauthorizedAccessException">
     /// <see cref="IUploadService.UploadFile(FileUpload, Guid, UploadType)"/>
     /// </exception>
     private async Task<string> Upload(UploadDTO upload, UploadType type)
@@ -88,6 +88,31 @@ public partial class UploadController(
         {
             throw new FormatException($"File format {extension} is not supported", exception);
         }
+    }
+
+    /// <summary>
+    /// This method deletes a file.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the file.
+    /// </param>
+    /// <param name="type">
+    /// The upload type.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// <see cref="IUploadService.DeleteFile(Guid, UploadType, string)"/>
+    /// </exception>
+    /// <exception cref="FileNotFoundException">
+    /// <see cref="IUploadService.DeleteFile(Guid, UploadType, string)"/>
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// <see cref="IUploadService.DeleteFile(Guid, UploadType, string)"/>
+    /// </exception>
+    private void Delete(string name, UploadType type)
+    {
+        var userId = HttpContext.User.GetUserId();
+        LogDeleteFile(userId, name, type);
+        _service.DeleteFile(userId, type, name);
     }
 
     /// <summary>
@@ -210,6 +235,69 @@ public partial class UploadController(
         return await Download(name, UploadType.RECEIPT);
     }
 
+    /// <summary>
+    /// This method deletes an uploaded profile image.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the profile image.
+    /// </param>
+    /// <response code="200">If the image could be deleted</response>
+    /// <response code="400">If filename is not supported.</response>
+    /// <response code="404">If requested file does not exist.</response>
+    /// <response code="500">If any kind of server error occur.</response>
+    [HttpDelete("image/{name}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    public ActionResult DeleteImage(string name)
+    {
+        Delete(name, UploadType.IMAGE);
+        return Ok();
+    }
+
+    /// <summary>
+    /// This method deletes an uploaded bank statement file.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the bank statement file.
+    /// </param>
+    /// <response code="200">If the file could be deleted</response>
+    /// <response code="400">If filename is not supported.</response>
+    /// <response code="404">If requested file does not exist.</response>
+    /// <response code="500">If any kind of server error occur.</response>
+    [HttpDelete("bank_statement/{name}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    public ActionResult DeleteBankStatement(string name)
+    {
+        Delete(name, UploadType.BANK_STATEMENT);
+        return Ok();
+    }
+
+    /// <summary>
+    /// This method deletes an uploaded receipt file.
+    /// </summary>
+    /// <param name="name">
+    /// The name of the receipt file.
+    /// </param>
+    /// <response code="200">If the file could be deleted</response>
+    /// <response code="400">If filename is not supported.</response>
+    /// <response code="404">If requested file does not exist.</response>
+    /// <response code="500">If any kind of server error occur.</response>
+    [HttpDelete("receipt/{name}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(ErrorDTO), 404)]
+    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    public ActionResult DeleteReceipt(string name)
+    {
+        Delete(name, UploadType.RECEIPT);
+        return Ok();
+    }
+
     [LoggerMessage(
         EventId = LogEvents.UploadPostRequest,
         Level = LogLevel.Information,
@@ -223,4 +311,11 @@ public partial class UploadController(
         Message = "Received download - User: {UserId}, Name: {Name}, Type: {Type}"
     )]
     private partial void LogGetFile(Guid userId, string name, UploadType type);
+
+    [LoggerMessage(
+        EventId = LogEvents.UploadDeleteRequest,
+        Level = LogLevel.Information,
+        Message = "Received delete request - User: {UserId}, Name: {Name}, Type: {Type}"
+    )]
+    private partial void LogDeleteFile(Guid userId, string name, UploadType type);
 }

@@ -28,7 +28,7 @@ public partial class UploadService : IUploadService
         {
             LogInvalidFileFormat(userId, file.FileName);
             throw new FormatException(
-                $"File can only have one of the following formats: {string.Join(",", _options.Value.FileFormats.Values)}"
+                $"File can only have one of the following formats: {string.Join(", ", _options.Value.FileFormats.Values)}"
             );
         }
 

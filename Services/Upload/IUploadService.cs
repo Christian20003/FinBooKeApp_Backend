@@ -56,4 +56,28 @@ public interface IUploadService
     /// If the file does not exist.
     /// </exception>
     public Task<byte[]> GetFile(Guid userId, UploadType type, string name);
+
+    /// <summary>
+    /// This method deletes a specified file.
+    /// </summary>
+    /// <param name="userId">
+    /// The id of the user who has access to the file.
+    /// </param>
+    /// <param name="type">
+    /// The type of upload.
+    /// </param>
+    /// <param name="name">
+    /// The name of file which should be deleted.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// If the user id is an empty GUID.
+    /// </exception>
+    /// <exception cref="FileNotFoundException">
+    /// If the file does not exist.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// If the file could not be deleted on the system due
+    /// to missing permissions.
+    /// </exception>
+    public void DeleteFile(Guid userId, UploadType type, string name);
 }

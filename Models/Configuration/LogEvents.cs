@@ -18,6 +18,7 @@ public static class LogEvents
 
     public const int UploadFile = 1031;
     public const int UploadGetFile = 1032;
+    public const int UploadDeleteFile = 1033;
 
     public const int SecurityCreateAccessCode = 1041;
     public const int SecurityCreatePassword = 1042;
@@ -58,6 +59,7 @@ public static class LogEvents
 
     public const int UploadFileSuccess = 2031;
     public const int UploadGetFileSuccess = 2032;
+    public const int UploadDeleteFileSuccess = 2033;
 
     public const int SecurityCreateAccessCodeSuccess = 2041;
     public const int SecurityCreatePasswordSuccess = 2042;
@@ -133,6 +135,7 @@ public static class LogEvents
 
     public const int UploadPostRequest = 5020;
     public const int UploadGetRequest = 5021;
+    public const int UploadDeleteRequest = 5022;
 
     // 6000 - 6999
 
