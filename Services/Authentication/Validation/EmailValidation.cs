@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using FinBookeAPI.AppConfig.Redaction;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -17,15 +16,11 @@ public partial class AuthenticationService : IAuthenticationService
     private bool VerifyEmail(string email)
     {
         // TODO: User needs to verify his address
-        _logger.LogDebug(
-            "Verify given email address: {email}",
-            PrivacyGuard.Hide(_redactor, email)
-        );
+        LogEmailValidation(email);
         var emailValidator = new EmailAddressAttribute();
-        if (!emailValidator.IsValid(email))
-        {
-            return false;
-        }
-        return true;
+        return emailValidator.IsValid(email);
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Authentication: Verify email: {Email}")]
+    private partial void LogEmailValidation(string email);
 }

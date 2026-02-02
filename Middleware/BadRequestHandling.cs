@@ -4,8 +4,21 @@ using Newtonsoft.Json;
 
 namespace FinBookeAPI.Middleware;
 
+/// <summary>
+/// This middleware transforms .NET generated 'Bad request'
+/// responses into a custom model.
+/// </summary>
 public class BadRequestHandling : IMiddleware
 {
+    private class InternalBadRequest
+    {
+        public string Type { get; set; } = "";
+        public string Title { get; set; } = "";
+        public int Status { get; set; }
+        public Dictionary<string, List<string>> Errors { get; set; } = [];
+        public string TraceId { get; set; } = "";
+    };
+
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         // intercept stream
@@ -21,7 +34,7 @@ public class BadRequestHandling : IMiddleware
             stream.Seek(0, SeekOrigin.Begin);
             using var reader = new StreamReader(stream);
             var content = await reader.ReadToEndAsync();
-            var body = JsonConvert.DeserializeObject<BadRequestDTO>(content);
+            var body = JsonConvert.DeserializeObject<InternalBadRequest>(content);
 
             if (body!.TraceId == string.Empty)
             {
@@ -34,7 +47,7 @@ public class BadRequestHandling : IMiddleware
                 using var writer = new StreamWriter(newStream);
                 // Read current content
                 // Restructure the error message
-                var newBody = new ErrorResponse
+                var newBody = new BadRequestDTO
                 {
                     Type = "StructureException",
                     Title = "Faulty message structure",

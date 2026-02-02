@@ -7,6 +7,11 @@ using Newtonsoft.Json;
 
 namespace FinBookeAPI.Middleware;
 
+/// <summary>
+/// This middleware processes all kinds of exception that can
+/// occur in this application. Thereby it creates corresponding
+/// error message which are sent to the client.
+/// </summary>
 public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
 {
     private readonly ILogger<ExceptionHandling> _logger = logger;
@@ -19,14 +24,14 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
         }
         catch (Exception exception)
         {
+            _logger.LogError(exception, "Exception has been processed");
             await HandleException(context, exception);
         }
     }
 
     private Task HandleException(HttpContext context, Exception exception)
     {
-        context.Response.ContentType = "application/json";
-        var body = new ErrorResponse
+        var body = new ErrorDTO
         {
             Status = context.Response.StatusCode,
             Instance =
@@ -40,6 +45,15 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Title = "Invalid credentials";
                 body.Detail = "Provided email or password is not valid";
                 body.Status = (int)HttpStatusCode.Forbidden;
+                break;
+            }
+            case FileNotFoundException:
+            case EntityNotFoundException:
+            {
+                body.Type = "EntityNotFoundException";
+                body.Title = "Requested entity not found";
+                body.Detail = "The requested resource could not be found in the database";
+                body.Status = (int)HttpStatusCode.NotFound;
                 break;
             }
             case ResourceLockedException:
@@ -69,6 +83,7 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
             }
             case IdentityResultException:
             {
+                var msg = body as BadRequestDTO;
                 var data = (IdentityResultException)exception;
                 var dict = new Dictionary<string, List<string>>();
                 foreach (var error in data.Errors)
@@ -99,13 +114,15 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                         }
                     }
                 }
-                body.Properties = dict;
-                body.Type = "AuthenticationException";
-                body.Title = "Insufficient credentials";
-                body.Detail = "Provided credentials do not fulfill all requirements";
-                body.Status = (int)HttpStatusCode.BadRequest;
+                msg!.Properties = dict;
+                msg.Type = "AuthenticationException";
+                msg.Title = "Insufficient credentials";
+                msg.Detail = "Provided credentials do not fulfill all requirements";
+                msg.Status = (int)HttpStatusCode.BadRequest;
+                body = msg;
                 break;
             }
+            case FormatException:
             case ArgumentException:
             {
                 body.Type = "ArgumentException";
@@ -120,10 +137,10 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Title = "Unexpected failure";
                 body.Detail = "Requested operation failed due to an unexpected server failure";
                 body.Status = (int)HttpStatusCode.InternalServerError;
-                _logger.LogWarning(exception, "Exception that must be fixed by the administrator");
                 break;
             }
         }
+        context.Response.ContentType = "application/json";
         context.Response.StatusCode = body.Status;
         return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
     }

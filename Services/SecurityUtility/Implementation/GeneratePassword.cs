@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using FinBookeAPI.Models.Configuration;
 
 namespace FinBookeAPI.Services.SecurityUtility;
 
@@ -6,10 +7,12 @@ public partial class SecurityUtilityService : ISecurityUtilityService
 {
     public string GeneratePassword(int length)
     {
-        _logger.LogDebug("Generating a new password of length {length}", length);
+        LogGeneratePassword(length);
         if (length <= 0)
+        {
+            LogInvalidPasswordLength(length);
             throw new ArgumentException("length must be larger than zero", nameof(length));
-
+        }
         var options = new List<string>
         {
             _lowerCaseLetters,
@@ -36,6 +39,28 @@ public partial class SecurityUtilityService : ISecurityUtilityService
             password[position] = value;
             index++;
         }
+        LogGeneratePasswordSuccess();
         return new string(password);
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.SecurityCreatePassword,
+        Level = LogLevel.Information,
+        Message = "SecurityUtility: Generate password with length - {length}"
+    )]
+    private partial void LogGeneratePassword(int length);
+
+    [LoggerMessage(
+        EventId = LogEvents.SecurityInvalidLength,
+        Level = LogLevel.Error,
+        Message = "SecurityUtility: Invalid password length - {length}"
+    )]
+    private partial void LogInvalidPasswordLength(int length);
+
+    [LoggerMessage(
+        EventId = LogEvents.SecurityCreatePasswordSuccess,
+        Level = LogLevel.Information,
+        Message = "SecurityUtility: Successfully generated password"
+    )]
+    private partial void LogGeneratePasswordSuccess();
 }

@@ -9,7 +9,6 @@ using FinBookeAPI.Tests.Mocks.Manager;
 using FinBookeAPI.Tests.Mocks.Services;
 using FinBookeAPI.Tests.Records;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Compliance.Redaction;
 using Moq;
 
 namespace FinBookeAPI.Tests.Authentication;
@@ -22,7 +21,6 @@ public partial class AuthenticationServiceUnitTests
     private readonly Mock<ITokenService> _tokenService;
     private readonly Mock<IEmailService> _emailService;
     private readonly Mock<IDataProtection> _dataProtection;
-    private readonly Mock<IRedactorProvider> _redactor;
     private readonly Mock<ILogger<AuthenticationService>> _logger;
     private readonly AuthenticationService _service;
 
@@ -42,7 +40,6 @@ public partial class AuthenticationServiceUnitTests
         _securityUtilityService = MockISecurityUtilityService.GetMock();
         _emailService = MockIEmailService.GetMock();
         _dataProtection = MockDataProtection.GetMock();
-        _redactor = MockRedactorProvider.GetMock();
         _logger = new Mock<ILogger<AuthenticationService>>();
 
         // Mocking methods that have in most cases the same output
@@ -60,7 +57,6 @@ public partial class AuthenticationServiceUnitTests
             _tokenService.Object,
             _emailService.Object,
             _dataProtection.Object,
-            _redactor.Object,
             _logger.Object
         );
     }

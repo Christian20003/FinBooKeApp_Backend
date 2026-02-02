@@ -1,4 +1,3 @@
-using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Models.Configuration;
 
 namespace FinBookeAPI.Services.Authentication;
@@ -9,17 +8,10 @@ public partial class AuthenticationService : IAuthenticationService
 
     public async Task SendAccessCode(string email)
     {
-        _logger.LogDebug(
-            "Generate new access code for {email}",
-            PrivacyGuard.Hide(_redactor, email)
-        );
+        LogSendAccessCode();
         if (!VerifyEmail(email))
         {
-            _logger.LogWarning(
-                LogEvents.ResetCredentialsFailed,
-                "{email} is not a valid email address",
-                PrivacyGuard.Hide(_redactor, email)
-            );
+            LogInvalidEmail(email);
             throw new ArgumentException($"{email} is not a valid email address", nameof(email));
         }
         var user = await VerifyUserAccount(email);
@@ -37,11 +29,10 @@ public partial class AuthenticationService : IAuthenticationService
                 || exception is IOException
             )
         {
-            _logger.LogError(
-                LogEvents.ConfigurationError,
-                exception,
-                "{path} could not be used",
-                TemplateFileCode
+            LogConfigurationError(
+                exception.GetType().ToString(),
+                exception.Message,
+                exception.StackTrace
             );
             throw new ApplicationException($"{TemplateFileCode} could not be used", exception);
         }
@@ -51,5 +42,20 @@ public partial class AuthenticationService : IAuthenticationService
         await _accountManager.UpdateUserAsync(user);
 
         _emailService.Send(email, subject, body);
+        LogSucceededSendAccessCode();
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationSendAccessCode,
+        Level = LogLevel.Information,
+        Message = "Authentication: Try to send access code"
+    )]
+    private partial void LogSendAccessCode();
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationSucceededSendAccessCode,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful send access code"
+    )]
+    private partial void LogSucceededSendAccessCode();
 }

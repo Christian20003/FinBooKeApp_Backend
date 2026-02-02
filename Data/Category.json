@@ -1,0 +1,39 @@
+[
+    {
+        "Id": "d902eb2b-c60f-402e-a236-a75f77b0d3cb",
+        "Name": "Home",
+        "Color": "rgb(80, 80, 80)",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Limit": {
+            "Amount": 550,
+            "PeriodDays": 30
+        }
+    },
+    {
+        "Id": "c8532595-9b20-4eea-9357-616c2e2f503f",
+        "Name": "Hobbies",
+        "Color": "rgb(160, 80, 190)",
+        "Children": ["03612804-3445-4f07-8321-f512b1be0279", "e56c6914-75f9-4f11-8518-8f7e550eeabc"],
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199"
+    },
+    {
+        "Id": "03612804-3445-4f07-8321-f512b1be0279",
+        "Name": "Club",
+        "Color": "rgb(200, 50, 20)",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Limit": {
+            "Amount": 400,
+            "PeriodDays": 30
+        }
+    },
+    {
+        "Id": "e56c6914-75f9-4f11-8518-8f7e550eeabc",
+        "Name": "Bike",
+        "Color": "rgb(200, 50, 20)",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Limit": {
+            "Amount": 300,
+            "PeriodDays": 30
+        }
+    }
+]

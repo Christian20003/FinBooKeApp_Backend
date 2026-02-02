@@ -1,5 +1,4 @@
 using System.Security.Authentication;
-using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
@@ -26,10 +25,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task VerifyPassword(UserAccount user, string password)
     {
-        _logger.LogDebug(
-            "Verify user password of {email}",
-            PrivacyGuard.Hide(_redactor, user.Email)
-        );
+        LogPasswordValidation(user.Id);
         var check = await _signInManager.CheckPasswordSignInAsync(
             user,
             password,
@@ -37,23 +33,33 @@ public partial class AuthenticationService : IAuthenticationService
         );
         if (check == SignInResult.Failed)
         {
-            _logger.LogWarning(
-                LogEvents.AuthenticationFailed,
-                "Provided password of user {id} is not valid",
-                user.Id
-            );
-            throw new InvalidCredentialException("Invalid password");
+            LogInvalidPassword(user.Id);
+            throw new InvalidCredentialException("Invalid credentials");
         }
         else if (check == SignInResult.LockedOut)
         {
-            _logger.LogWarning(
-                LogEvents.AuthenticationFailed,
-                "The user account of {id} is temporarily locked.",
-                user.Id
-            );
-            throw new ResourceLockedException(
-                "The user account has been temporarily locked for login."
-            );
+            LogLockedAccount(user.Id);
+            throw new ResourceLockedException("User account is temporarily locked.");
         }
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Authentication: Verify password of user - {UserId}"
+    )]
+    private partial void LogPasswordValidation(string userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidCredentials,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid password for user - {UserId}"
+    )]
+    private partial void LogInvalidPassword(string userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationLockedAccount,
+        Level = LogLevel.Error,
+        Message = "Authentication: Locked user account of - {UserId}"
+    )]
+    private partial void LogLockedAccount(string userId);
 }

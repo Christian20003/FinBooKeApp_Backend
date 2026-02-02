@@ -8,28 +8,39 @@ public partial class TokenService : ITokenService
 {
     public JwtToken GenerateAccessToken(string userId)
     {
-        _logger.LogDebug("Generate a new access token for {userId}", userId);
+        LogGenerateAccessToken(userId);
         var lifetime = _settings.Value.AccessTokenExpireM;
         var secret = _settings.Value.AccessTokenSecret;
         if (lifetime <= 0)
         {
-            _logger.LogError(
-                LogEvents.ConfigurationError,
-                "Invalid expiration time for the access token: {time}",
-                lifetime
-            );
+            LogInvalidAccessTokenLifetime(lifetime);
             throw new ApplicationException(
                 "Expiration time of access tokens must be larger than zero"
             );
         }
         if (secret == null)
         {
-            _logger.LogError(LogEvents.ConfigurationError, "AccessTokenSecret is null");
+            LogInvalidSecret();
             throw new ApplicationException("AccessTokenSecret is null");
         }
         var expire = DateTime.UtcNow.AddMinutes(lifetime);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId) };
         var token = GenerateToken(claims, secret, expire);
+        LogGenerateAccessTokenSuccess(userId, expire);
         return new JwtToken { Value = token, Expires = expire.Ticks };
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.TokenCreateAccessToken,
+        Level = LogLevel.Information,
+        Message = "Token: Generate access token for user - {userId}"
+    )]
+    private partial void LogGenerateAccessToken(string userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.TokenCreateAccessTokenSuccess,
+        Level = LogLevel.Information,
+        Message = "Token: Successfully generated access token for user - {userId} with expiration at {expire}"
+    )]
+    private partial void LogGenerateAccessTokenSuccess(string userId, DateTime expire);
 }

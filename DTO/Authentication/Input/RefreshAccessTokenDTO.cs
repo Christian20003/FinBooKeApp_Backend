@@ -8,15 +8,12 @@ namespace FinBookeAPI.DTO.Authentication.Input;
 public class RefreshAccessTokenDTO
 {
     /// <summary>
-    /// The email address of the user account.
-    /// </summary>
-    [Required(ErrorMessage = "Email property is missing")]
-    [EmailAddress(ErrorMessage = "Email property is not a valid email address")]
-    public string Email { get; set; } = "";
-
-    /// <summary>
     /// The refresh token to verify it's authorization.
     /// </summary>
-    [Required(ErrorMessage = "Refresh token property is missing")]
+    [Required(ErrorMessage = "Refresh token is missing")]
     public string RefreshToken { get; set; } = "";
+
+    [Required(ErrorMessage = "Expire value is missing")]
+    [Range(1, Int64.MaxValue, ErrorMessage = "Expire value must be larger than 0")]
+    public long RefreshTokenExpires { get; set; }
 }

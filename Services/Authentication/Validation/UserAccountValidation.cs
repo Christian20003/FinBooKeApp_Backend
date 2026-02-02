@@ -1,7 +1,5 @@
 using System.Security.Authentication;
-using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Models.Authentication;
-using FinBookeAPI.Models.Configuration;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -21,7 +19,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task<UserAccount> VerifyUserAccount(string email)
     {
-        _logger.LogDebug("Verify user account of {email}", PrivacyGuard.Hide(_redactor, email));
+        LogUserAccountValidation(email);
         var accounts = _accountManager.GetUsersAsync();
         var user = await accounts.FirstOrDefaultAsync(account =>
             email == _protector.UnprotectEmail(account.Email!)
@@ -29,13 +27,15 @@ public partial class AuthenticationService : IAuthenticationService
         // Proof if user exist
         if (user == null)
         {
-            _logger.LogWarning(
-                LogEvents.AuthenticationFailed,
-                "{email} does not have a user account",
-                PrivacyGuard.Hide(_redactor, email)
-            );
-            throw new InvalidCredentialException($"{email} does not have a user account");
+            LogInvalidEmail(email);
+            throw new InvalidCredentialException("Invalid credentials");
         }
         return user;
     }
+
+    [LoggerMessage(
+        Level = LogLevel.Trace,
+        Message = "Authentication: Verify user account of - {Email}"
+    )]
+    private partial void LogUserAccountValidation(string email);
 }

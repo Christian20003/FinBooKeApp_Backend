@@ -6,13 +6,29 @@ public partial class TokenService : ITokenService
 {
     public (string, long) VerifyAccessToken(string token)
     {
-        _logger.LogDebug("Verify access token {token}", token);
+        LogVerifyAccessToken();
         var secret = _settings.Value.AccessTokenSecret;
         if (secret == null)
         {
-            _logger.LogError(LogEvents.ConfigurationError, "Access token secret is null");
+            LogInvalidSecret();
             throw new ApplicationException("Access token secret is null");
         }
-        return VerifyToken(token, secret);
+        var (id, expires) = VerifyToken(token, secret);
+        LogVerifyAccessTokenSuccess();
+        return (id, expires);
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.TokenVerifyAccessToken,
+        Level = LogLevel.Information,
+        Message = "Token: Verify access token"
+    )]
+    private partial void LogVerifyAccessToken();
+
+    [LoggerMessage(
+        EventId = LogEvents.TokenVerifyAccessTokenSuccess,
+        Level = LogLevel.Information,
+        Message = "Token: Successfully verified access token"
+    )]
+    private partial void LogVerifyAccessTokenSuccess();
 }
