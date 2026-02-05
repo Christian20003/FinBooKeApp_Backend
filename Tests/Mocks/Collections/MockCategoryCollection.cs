@@ -1,43 +1,56 @@
+using System.Linq.Expressions;
 using FinBookeAPI.Collections.CategoryCollection;
-using FinBookeAPI.Models.CategoryType;
+using FinBookeAPI.Models.Category;
 using Moq;
 
 namespace FinBookeAPI.Tests.Mocks.Collections;
 
 public static class MockCategoryCollection
 {
-    public static Mock<ICategoryCollection> GetMock(List<Category> data)
+    public static Mock<ICategoryCollection> GetMock(List<CategoryTag> data)
     {
         var result = new Mock<ICategoryCollection>();
-        result.Setup(obj => obj.CreateCategory(It.IsAny<Category>())).Callback<Category>(data.Add);
         result
-            .Setup(obj => obj.UpdateCategory(It.IsAny<Category>()))
-            .Callback<Category>(input =>
+            .Setup(obj => obj.CreateCategory(It.IsAny<CategoryTag>()))
+            .Callback<CategoryTag>(data.Add);
+        result
+            .Setup(obj => obj.UpdateCategory(It.IsAny<CategoryTag>()))
+            .Callback<CategoryTag>(input =>
             {
                 var idx = data.FindIndex(elem => elem.Id == input.Id);
                 if (idx != -1)
                     data[idx] = input;
             });
         result
-            .Setup(obj => obj.DeleteCategory(It.IsAny<Category>()))
-            .Callback<Category>(input =>
+            .Setup(obj => obj.DeleteCategory(It.IsAny<CategoryTag>()))
+            .Callback<CategoryTag>(input =>
             {
                 data.Remove(input);
             });
         result
-            .Setup(obj => obj.GetCategory(It.IsAny<Func<Category, bool>>()))
+            .Setup(obj => obj.GetCategory(It.IsAny<Expression<Func<CategoryTag, bool>>>()))
             .ReturnsAsync(
-                (Func<Category, bool> condition) =>
+                (Expression<Func<CategoryTag, bool>> condition) =>
                 {
-                    return data.FirstOrDefault(elem => condition(elem));
+                    var func = condition.Compile();
+                    return data.FirstOrDefault(elem => func(elem));
                 }
             );
         result
-            .Setup(obj => obj.GetCategories(It.IsAny<Func<Category, bool>>()))
+            .Setup(obj => obj.GetCategories(It.IsAny<Expression<Func<CategoryTag, bool>>>()))
             .ReturnsAsync(
-                (Func<Category, bool> condition) =>
+                (Expression<Func<CategoryTag, bool>> condition) =>
                 {
-                    return data.Where(elem => condition(elem));
+                    var func = condition.Compile();
+                    return data.Where(elem => func(elem));
+                }
+            );
+        result
+            .Setup(obj => obj.GetUniqueId(It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid id) =>
+                {
+                    return id;
                 }
             );
         return result;

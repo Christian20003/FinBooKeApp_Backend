@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Security.Authentication;
 using FinBookeAPI.DTO.Error;
@@ -124,6 +125,7 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
             }
             case FormatException:
             case ArgumentException:
+            case ValidationException:
             {
                 body.Type = "ArgumentException";
                 body.Title = "Invalid argument";

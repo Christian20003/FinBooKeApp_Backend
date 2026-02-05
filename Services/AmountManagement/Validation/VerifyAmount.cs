@@ -1,6 +1,6 @@
 using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.Models.AmountManagement;
-using FinBookeAPI.Models.CategoryType;
+using FinBookeAPI.Models.Category;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Exceptions;
 
@@ -8,7 +8,7 @@ namespace FinBookeAPI.Services.AmountManagement;
 
 public partial class AmountManagementService : IAmountManagementService
 {
-    private async Task<(Amount?, Category?)> VerifyAmount(Amount amount)
+    private async Task<(Amount?, CategoryTag?)> VerifyAmount(Amount amount)
     {
         var amountDb = await VerifyUserId(amount.Id, amount.UserId);
         var categoryDb = await _category.GetCategory(amount.CategoryId, amount.UserId);

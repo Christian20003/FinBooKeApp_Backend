@@ -1,5 +1,5 @@
 using FinBookeAPI.Models.AmountManagement;
-using FinBookeAPI.Models.CategoryType;
+using FinBookeAPI.Models.Category;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Payment;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ public class DataDbContext(
     IOptions<FinancialDataDtabaseSettings> _settings
 ) : DbContext(options)
 {
-    public DbSet<Category> Categories { get; init; }
+    public DbSet<CategoryTag> Categories { get; init; }
 
     public DbSet<Amount> Amounts { get; init; }
 
@@ -53,7 +53,7 @@ public class DataDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<Category>().ToCollection("categories");
+        builder.Entity<CategoryTag>().ToCollection("categories");
         builder.Entity<Amount>().ToCollection("amounts");
         builder.Entity<PaymentMethod>().ToCollection("payment");
     }

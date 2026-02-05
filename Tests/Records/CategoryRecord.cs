@@ -1,12 +1,12 @@
-using FinBookeAPI.Models.CategoryType;
+using FinBookeAPI.Models.Category;
 
 namespace FinBookeAPI.Tests.Records;
 
 public static class CategoryRecord
 {
-    public static Category GetObject()
+    public static CategoryTag GetObject()
     {
-        return new Category
+        return new CategoryTag
         {
             Name = "Living",
             Color = "rgb(66,55,88)",
@@ -16,21 +16,21 @@ public static class CategoryRecord
         };
     }
 
-    public static List<Category> GetObjects()
+    public static List<CategoryTag> GetObjects()
     {
         var userId = Guid.NewGuid();
         var firstChild = Guid.NewGuid();
         var secondChild = Guid.NewGuid();
         return
         [
-            new Category
+            new CategoryTag
             {
                 UserId = Guid.NewGuid(),
                 Name = "Hobbys",
                 Color = "rgb(77,44,33)",
                 Limit = new Limit { Amount = 50.0M, PeriodDays = 30 },
             },
-            new Category
+            new CategoryTag
             {
                 UserId = userId,
                 Name = "apartment",
@@ -38,7 +38,7 @@ public static class CategoryRecord
                 Children = [firstChild, secondChild],
                 Limit = new Limit { Amount = 250.0M, PeriodDays = 30 },
             },
-            new Category
+            new CategoryTag
             {
                 UserId = userId,
                 Name = "electricity",
@@ -46,7 +46,7 @@ public static class CategoryRecord
                 Color = "rgb(235,64,14)",
                 Limit = new Limit { Amount = 200.0M, PeriodDays = 30 },
             },
-            new Category
+            new CategoryTag
             {
                 UserId = userId,
                 Name = "heating",

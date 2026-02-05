@@ -11,7 +11,7 @@ using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.AmountManagement;
 using FinBookeAPI.Services.Authentication;
-using FinBookeAPI.Services.CategoryType;
+using FinBookeAPI.Services.Category;
 using FinBookeAPI.Services.Email;
 using FinBookeAPI.Services.Payment;
 using FinBookeAPI.Services.SecurityUtility;

@@ -131,7 +131,11 @@ public static class LogEvents
     // 5000 - 5999
 
     public const int AuthenticationRequest = 5000;
-    public const int CategoryRequest = 5010;
+    public const int CategoryGetAllRequest = 5010;
+    public const int CategoryGetRequest = 5011;
+    public const int CategoryPostRequest = 5012;
+    public const int CategoryPutRequest = 5013;
+    public const int CategoryDeleteRequest = 5014;
 
     public const int UploadPostRequest = 5020;
     public const int UploadGetRequest = 5021;

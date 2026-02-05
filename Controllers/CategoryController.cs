@@ -1,10 +1,11 @@
 using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.Attributes;
-using FinBookeAPI.DTO.CategoryType.Input;
-using FinBookeAPI.DTO.CategoryType.Output;
+using FinBookeAPI.Controllers.Helper;
+using FinBookeAPI.DTO.Category.Input;
+using FinBookeAPI.DTO.Category.Output;
 using FinBookeAPI.DTO.Error;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Services.CategoryType;
+using FinBookeAPI.Services.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,22 +14,19 @@ namespace FinBookeAPI.Controllers;
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public class CategoryController(ICategoryService service, ILogger<CategoryController> logger)
-    : ControllerBase
+public partial class CategoryController(
+    ICategoryService service,
+    ILogger<CategoryController> logger
+) : ControllerBase
 {
     private readonly ICategoryService _service = service;
     private readonly ILogger<CategoryController> _logger = logger;
-
-    private string GetPath()
-    {
-        return $"{Request.Scheme}://{Request.Host.Value}";
-    }
 
     /// <summary>
     /// This method returns a list of categories that corresponds
     /// to a specific user.
     /// </summary>
-    /// <param name="nested">
+    /// <param name="linked">
     /// Whether the categories should be arranged in a nested structure
     /// or in a simple list.
     /// </param>
@@ -42,17 +40,38 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), 200)]
     [ProducesResponseType(typeof(BadRequestDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
-    public async Task<ActionResult> GetCategories([FromQuery] bool nested = false)
+    public async Task<ActionResult> GetCategories([FromQuery] bool linked = false)
     {
-        _logger.LogInformation(LogEvents.CategoryRequest, "Get request for categories");
+        LogGetCategories(linked);
         var userId = HttpContext.User.GetUserId();
         var categories = await _service.GetCategories(userId);
-        if (nested)
-        {
-            var nestedCategories = _service.NestCategories(categories);
-            return Ok(nestedCategories.Select(elem => new CategoryNestedDTO(elem, GetPath(), Url)));
-        }
-        return Ok(categories.Select(elem => new CategoryDTO(elem, GetPath(), Url)));
+        if (!linked)
+            return Ok(
+                categories.Select(category =>
+                {
+                    var url = UrlGenerator.GenerateUrl(
+                        Request,
+                        Url,
+                        nameof(GetCategory),
+                        new { id = category.Id }
+                    );
+                    return new CategoryDTO(category, url);
+                })
+            );
+
+        var nested = _service.NestCategories(categories);
+        return Ok(
+            nested.Select(category =>
+            {
+                var url = UrlGenerator.GenerateUrl(
+                    Request,
+                    Url,
+                    nameof(GetCategory),
+                    new { id = category.Id }
+                );
+                return new CategoryLinkedDTO(category, url);
+            })
+        );
     }
 
     /// <summary>
@@ -64,7 +83,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <returns>
     /// The requested category.
     /// </returns>
-    /// <response code="200">If the categories could be read successfully</response>
+    /// <response code="200">If the category could be read successfully</response>
     /// <response code="400">If the received data does not fulfill the requirements</response>
     /// <response code="401">If the user does not have access to the requested category</response>
     /// <response code="404">If the requested category does not exist</response>
@@ -79,11 +98,17 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
         [Guid(ErrorMessage = "Id is not a valid GUID")] string id
     )
     {
-        _logger.LogInformation(LogEvents.CategoryRequest, "Get request for category {id}", id);
+        LogGetCategory(id);
         var categoryId = Guid.Parse(id);
         var userId = HttpContext.User.GetUserId();
         var result = await _service.GetCategory(categoryId, userId);
-        return Ok(new CategoryDTO(result, GetPath(), Url));
+        var url = UrlGenerator.GenerateUrl(
+            Request,
+            Url,
+            nameof(GetCategory),
+            new { id = result.Id }
+        );
+        return Ok(new CategoryDTO(result, url));
     }
 
     /// <summary>
@@ -106,13 +131,19 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> CreateCategory(CreateCategoryDTO category)
     {
-        _logger.LogInformation(LogEvents.CategoryRequest, "Post request for a category");
+        LogCreateCategory(category);
         var userId = HttpContext.User.GetUserId();
         var result = await _service.CreateCategory(category.GetCategory(userId));
+        var url = UrlGenerator.GenerateUrl(
+            Request,
+            Url,
+            nameof(GetCategory),
+            new { id = result.Id }
+        );
         return CreatedAtAction(
             nameof(GetCategory),
             new { id = result.Id },
-            new CategoryDTO(result, GetPath(), Url)
+            new CategoryDTO(result, url)
         );
     }
 
@@ -147,11 +178,22 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
         UpdateCategoryDTO category
     )
     {
-        _logger.LogInformation(LogEvents.CategoryRequest, "Put request for category {id}", id);
+        LogUpdateCategory(id, category);
         var categoryId = Guid.Parse(id);
         var userId = HttpContext.User.GetUserId();
-        var updatedCategory = await _service.UpdateCategory(category.GetCategory(userId));
-        return Ok(updatedCategory.Select(elem => new CategoryDTO(elem, GetPath(), Url)));
+        var update = await _service.UpdateCategory(category.GetCategory(userId));
+        return Ok(
+            update.Select(category =>
+            {
+                var url = UrlGenerator.GenerateUrl(
+                    Request,
+                    Url,
+                    nameof(GetCategory),
+                    new { id = category.Id }
+                );
+                return new CategoryDTO(category, url);
+            })
+        );
     }
 
     /// <summary>
@@ -178,10 +220,45 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
         [Guid(ErrorMessage = "Id is not a valid GUID")] string id
     )
     {
-        _logger.LogInformation(LogEvents.CategoryRequest, "Delete request for category {id}", id);
+        LogDeleteCategory(id);
         var categoryId = Guid.Parse(id);
         var userId = HttpContext.User.GetUserId();
         var result = await _service.DeleteCategory(categoryId, userId);
-        return Ok(new CategoryDTO(result, GetPath(), Url));
+        return Ok(new CategoryDTO(result, null));
     }
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryGetAllRequest,
+        Level = LogLevel.Information,
+        Message = "Received get all categories request - Linked: {Linked}"
+    )]
+    private partial void LogGetCategories(bool linked);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryGetRequest,
+        Level = LogLevel.Information,
+        Message = "Received get category request - Id: {Id}"
+    )]
+    private partial void LogGetCategory(string id);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryPostRequest,
+        Level = LogLevel.Information,
+        Message = "Received post category request - Category: {Category}"
+    )]
+    private partial void LogCreateCategory(CreateCategoryDTO category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryPutRequest,
+        Level = LogLevel.Information,
+        Message = "Received put category request - Id: {Id}, Category: {Category}"
+    )]
+    private partial void LogUpdateCategory(string id, UpdateCategoryDTO category);
+
+    [LoggerMessage(
+        EventId = LogEvents.CategoryDeleteRequest,
+        Level = LogLevel.Information,
+        Message = "Received delete category request - Id: {Id}"
+    )]
+    private partial void LogDeleteCategory(string id);
 }

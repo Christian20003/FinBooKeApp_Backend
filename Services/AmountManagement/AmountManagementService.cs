@@ -1,5 +1,5 @@
 using FinBookeAPI.Collections.AmountCollection;
-using FinBookeAPI.Services.CategoryType;
+using FinBookeAPI.Services.Category;
 
 namespace FinBookeAPI.Services.AmountManagement;
 
