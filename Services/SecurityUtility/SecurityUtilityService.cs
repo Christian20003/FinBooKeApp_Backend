@@ -15,4 +15,6 @@ public partial class SecurityUtilityService(ILogger<SecurityUtilityService> logg
     private const int _saltSize = 16;
     private const int _hashSize = 16;
     private const int _iterations = 100000;
+
+    private const int _idGenerationTrials = 10;
 }

@@ -24,6 +24,7 @@ public static class LogEvents
     public const int SecurityCreatePassword = 1042;
     public const int SecurityHashGeneration = 1043;
     public const int SecurityHashVerification = 1044;
+    public const int SecurityGenerateId = 1045;
 
     public const int TokenCleanDatabase = 1051;
     public const int TokenCreateAccessToken = 1052;
@@ -108,6 +109,7 @@ public static class LogEvents
 
     public const int SecurityInvalidLength = 4041;
     public const int SecurityInvalidHash = 4042;
+    public const int SecurityFailedIdGeneration = 4043;
 
     public const int TokenInvalidIssuer = 4051;
     public const int TokenInvalidAudience = 4052;
