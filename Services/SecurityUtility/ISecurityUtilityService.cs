@@ -1,3 +1,5 @@
+using FinBookeAPI.Models.Exceptions;
+
 namespace FinBookeAPI.Services.SecurityUtility;
 
 public interface ISecurityUtilityService
@@ -58,4 +60,22 @@ public interface ISecurityUtilityService
     /// If the provided hash is not valid.
     /// </exception>
     public bool IsHash(string content, string contentHash);
+
+    /// <summary>
+    /// This method verifies if the provided id is unique, otherwise
+    /// a new id will be generated.
+    /// </summary>
+    /// <param name="id">
+    /// The id that should be verified.
+    /// </param>
+    /// <param name="exist">
+    /// A function that proofs if an id is unique.
+    /// </param>
+    /// <returns>
+    /// A unique id.
+    /// </returns>
+    /// <exception cref="IdGenerationException">
+    /// If this method could not generate a unique id.
+    /// </exception>
+    public Task<Guid> GenerateUniqueId(Guid id, Func<Guid, Task<bool>> exist);
 }
