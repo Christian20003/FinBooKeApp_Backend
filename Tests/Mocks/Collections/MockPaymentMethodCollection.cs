@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FinBookeAPI.Collections.PaymentMethodCollection;
 using FinBookeAPI.Models.Payment;
 using Moq;
@@ -27,19 +28,37 @@ public static class MockPaymentMethodCollection
                 data.Remove(input);
             });
         result
-            .Setup(obj => obj.GetPaymentMethod(It.IsAny<Func<PaymentMethod, bool>>()))
+            .Setup(obj => obj.GetPaymentMethod(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
             .ReturnsAsync(
-                (Func<PaymentMethod, bool> predicate) =>
+                (Expression<Func<PaymentMethod, bool>> predicate) =>
                 {
-                    return data.FirstOrDefault(elem => predicate(elem));
+                    var func = predicate.Compile();
+                    return data.FirstOrDefault(elem => func(elem));
                 }
             );
         result
-            .Setup(obj => obj.GetPaymentMethods(It.IsAny<Func<PaymentMethod, bool>>()))
+            .Setup(obj => obj.GetPaymentMethods(It.IsAny<Expression<Func<PaymentMethod, bool>>>()))
             .ReturnsAsync(
-                (Func<PaymentMethod, bool> predicate) =>
+                (Expression<Func<PaymentMethod, bool>> predicate) =>
                 {
-                    return data.Where(elem => predicate(elem));
+                    var func = predicate.Compile();
+                    return data.Where(elem => func(elem));
+                }
+            );
+        result
+            .Setup(obj => obj.IsPaymentMethodIdUnique(It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid id) =>
+                {
+                    return data.Any(elem => elem.Id == id);
+                }
+            );
+        result
+            .Setup(obj => obj.IsPaymentInstanceIdUnique(It.IsAny<Guid>()))
+            .ReturnsAsync(
+                (Guid id) =>
+                {
+                    return data.Any(elem => elem.Instances.Any(instance => instance.Id == id));
                 }
             );
         return result;

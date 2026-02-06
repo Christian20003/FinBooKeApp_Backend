@@ -6,7 +6,7 @@ namespace FinBookeAPI.Models.Payment;
 public class PaymentInstance
 {
     [NonEmptyGuid(ErrorMessage = "Payment instance id is invalid")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.CreateVersion7();
 
     [StringLength(
         100,
@@ -15,10 +15,9 @@ public class PaymentInstance
     )]
     public string Name { get; set; } = string.Empty;
 
-    [StringLength(
+    [MaxLength(
         1000,
-        MinimumLength = 0,
-        ErrorMessage = "Payment instance description must be between {2} and {1} characters long"
+        ErrorMessage = "Payment instance description can only have up to {1} characters"
     )]
     public string? Description { get; set; }
 

@@ -18,7 +18,16 @@ public partial class PaymentMethodService : IPaymentMethodService
             .Select(elem => elem.Copy());
         var toRemove = entity.Instances.Where(elem => !method.Instances.Contains(elem));
         if (toAdd.Any())
+        {
+            foreach (var instance in toAdd)
+            {
+                instance.Id = await _security.GenerateUniqueId(
+                    instance.Id,
+                    _collection.IsPaymentInstanceIdUnique
+                );
+            }
             entity.Instances = [.. entity.Instances, .. toAdd];
+        }
         if (toRemove.Any())
             entity.Instances = [.. entity.Instances.Where(elem => !toRemove.Contains(elem))];
 

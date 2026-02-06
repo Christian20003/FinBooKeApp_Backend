@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.Models.Payment;
 using Microsoft.EntityFrameworkCore;
@@ -25,15 +26,29 @@ public class PaymentMethodCollection(DataDbContext context)
         _context.PaymentMethods.Remove(method);
     }
 
-    public async Task<PaymentMethod?> GetPaymentMethod(Func<PaymentMethod, bool> condition)
+    public async Task<PaymentMethod?> GetPaymentMethod(
+        Expression<Func<PaymentMethod, bool>> condition
+    )
     {
-        return await _context.PaymentMethods.FirstOrDefaultAsync(elem => condition(elem));
+        return await _context.PaymentMethods.FirstOrDefaultAsync(condition);
     }
 
     public async Task<IEnumerable<PaymentMethod>> GetPaymentMethods(
-        Func<PaymentMethod, bool> condition
+        Expression<Func<PaymentMethod, bool>> condition
     )
     {
-        return await _context.PaymentMethods.Where(elem => condition(elem)).ToListAsync();
+        return await _context.PaymentMethods.Where(condition).ToListAsync();
+    }
+
+    public async Task<bool> IsPaymentMethodIdUnique(Guid id)
+    {
+        return await _context.PaymentMethods.AnyAsync(method => method.Id == id);
+    }
+
+    public async Task<bool> IsPaymentInstanceIdUnique(Guid id)
+    {
+        return await _context.PaymentMethods.AnyAsync(method =>
+            method.Instances.Any(instance => instance.Id == id)
+        );
     }
 }

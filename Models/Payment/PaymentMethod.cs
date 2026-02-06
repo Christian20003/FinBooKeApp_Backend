@@ -6,7 +6,7 @@ namespace FinBookeAPI.Models.Payment;
 public class PaymentMethod
 {
     [NonEmptyGuid(ErrorMessage = "Payment method id is not valid")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.CreateVersion7();
 
     [NonEmptyGuid(ErrorMessage = "Payment method user id is not valid")]
     public Guid UserId { get; set; } = Guid.NewGuid();
@@ -23,8 +23,6 @@ public class PaymentMethod
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
-
-    public PaymentMethod() { }
 
     public PaymentMethod Copy()
     {

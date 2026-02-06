@@ -1,5 +1,5 @@
+using System.Linq.Expressions;
 using FinBookeAPI.Models.Payment;
-using Microsoft.EntityFrameworkCore;
 
 namespace FinBookeAPI.Collections.PaymentMethodCollection;
 
@@ -46,7 +46,7 @@ public interface IPaymentMethodCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<PaymentMethod?> GetPaymentMethod(Func<PaymentMethod, bool> condition);
+    public Task<PaymentMethod?> GetPaymentMethod(Expression<Func<PaymentMethod, bool>> condition);
 
     /// <summary>
     /// This method returns a list of instances that fulfill the
@@ -64,5 +64,39 @@ public interface IPaymentMethodCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<IEnumerable<PaymentMethod>> GetPaymentMethods(Func<PaymentMethod, bool> condition);
+    public Task<IEnumerable<PaymentMethod>> GetPaymentMethods(
+        Expression<Func<PaymentMethod, bool>> condition
+    );
+
+    /// <summary>
+    /// This method proofs if the provided id is already assigned
+    /// to a payment method.
+    /// </summary>
+    /// <param name="id">
+    /// The id which should be checked.
+    /// </param>
+    /// <returns>
+    /// `true` if the id is already assigned, otherwise `false`.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If an operation could not be executed at the application level
+    /// and has been canceled.
+    /// </exception>
+    public Task<bool> IsPaymentMethodIdUnique(Guid id);
+
+    /// <summary>
+    /// This method proofs if the provided id is already assigned
+    /// to a payment instance.
+    /// </summary>
+    /// <param name="id">
+    /// The id which should be checked.
+    /// </param>
+    /// <returns>
+    /// `true` if the id is already assigned, otherwise `false`.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If an operation could not be executed at the application level
+    /// and has been canceled.
+    /// </exception>
+    public Task<bool> IsPaymentInstanceIdUnique(Guid id);
 }

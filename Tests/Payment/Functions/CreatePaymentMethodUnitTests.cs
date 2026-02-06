@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using FinBookeAPI.Models.Exceptions;
 using Newtonsoft.Json;
 
 namespace FinBookeAPI.Tests.Payment;
@@ -12,16 +11,6 @@ public partial class PaymentMethodServiceUnitTests
         _paymentMethod.Id = Guid.Empty;
 
         await Assert.ThrowsAsync<ValidationException>(
-            () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
-        );
-    }
-
-    [Fact]
-    public async Task Should_FailCreatingPaymentMethod_WhenIdExist()
-    {
-        _paymentMethod.Id = _database.First().Id;
-
-        await Assert.ThrowsAsync<DuplicateEntityException>(
             () => _paymentMethodService.CreatePaymentMethod(_paymentMethod)
         );
     }

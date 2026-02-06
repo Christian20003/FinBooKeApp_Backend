@@ -16,8 +16,9 @@ public interface IPaymentMethodService
     /// <returns>
     /// The inserted payment method.
     /// </returns>
-    /// <exception cref="DuplicateEntityException">
-    /// If the payment method id already exists.
+    /// <exception cref="IdGenerationException">
+    /// If no unique id could be generated for a payment method or
+    /// payment instance.
     /// </exception>
     /// <exception cref="ValidationException">
     /// If the payment method is invalid.
