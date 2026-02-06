@@ -6,10 +6,12 @@ using FinBookeAPI.DTO.Payment;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Payment;
 using FinBookeAPI.Services.Payment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinBookeAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public partial class PaymentMethodController(

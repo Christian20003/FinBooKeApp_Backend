@@ -1,0 +1,40 @@
+[
+    {
+        "Id": "b4e2cc68-f6bd-44d4-a3af-6563c591f76a",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Type": "Cash",
+        "Instances": []
+    },
+    {
+        "Id": "587da30e-e9e5-434b-9d8b-f3ae09b54997",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Type": "Crypto",
+        "Instances": [
+            {
+                "Id": "1a007a2b-48cd-49f4-b970-bc36ae573f3b",
+                "Name": "Bitcoin",
+                "Description": "My Bitcoin wallet"
+            },
+            {
+                "Id": "be307988-e9a8-4584-903a-29b2ff070338",
+                "Name": "Stablecoin",
+                "Description": "My Stablecoin wallet"
+            }
+        ]
+    },
+    {
+        "Id": "9c388a4b-b469-486e-ac47-706caf65ed34",
+        "UserId": "8851855e-1971-428c-93aa-07697cc53199",
+        "Type": "Credit card",
+        "Instances": [
+            {
+                "Id": "3e3240bc-4ebd-4db7-aa61-8380db9697c2",
+                "Name": "Comdirect"
+            },
+            {
+                "Id": "fd5adc88-c55e-420f-a130-6072a4287191",
+                "Name": "Easybank visa"
+            }
+        ]
+    }
+]

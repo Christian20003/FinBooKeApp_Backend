@@ -30,7 +30,6 @@ public static class UrlGenerator
     )
     {
         var path = url.Action(endpoint, values);
-        System.Console.WriteLine(endpoint);
         return $"{request.Scheme}://{request.Host}{path}";
     }
 }

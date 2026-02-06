@@ -17,6 +17,7 @@ public static class ImportDataExtension
     private static void LoadData(DataDbContext database, string path, ILogger logger)
     {
         AddToDatabase("Category.json", path, database.Categories, logger);
+        AddToDatabase("Payment.json", path, database.PaymentMethods, logger);
     }
 
     /// <summary>
