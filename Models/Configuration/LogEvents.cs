@@ -143,6 +143,13 @@ public static class LogEvents
     public const int UploadGetRequest = 5021;
     public const int UploadDeleteRequest = 5022;
 
+    public const int PaymentGetAllRequest = 5031;
+    public const int PaymentGetMethodRequest = 5032;
+    public const int PaymentGetInstanceRequest = 5033;
+    public const int PaymentPostRequest = 5034;
+    public const int PaymentPutRequest = 5035;
+    public const int PaymentDeleteRequest = 5036;
+
     // 6000 - 6999
 
     public const int OperationIgnored = 6000;
