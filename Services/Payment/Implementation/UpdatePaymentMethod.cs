@@ -23,7 +23,7 @@ public partial class PaymentMethodService : IPaymentMethodService
             {
                 instance.Id = await _security.GenerateUniqueId(
                     instance.Id,
-                    _collection.IsPaymentInstanceIdUnique
+                    _collection.ExistsPaymentInstanceId
                 );
             }
             entity.Instances = [.. entity.Instances, .. toAdd];

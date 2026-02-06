@@ -10,15 +10,12 @@ public partial class PaymentMethodService : IPaymentMethodService
         LogCreatePaymentMethod(method);
 
         VerifyPaymentMethod(method);
-        method.Id = await _security.GenerateUniqueId(
-            method.Id,
-            _collection.IsPaymentMethodIdUnique
-        );
+        method.Id = await _security.GenerateUniqueId(method.Id, _collection.ExistsPaymentMethodId);
         foreach (var instance in method.Instances)
         {
             instance.Id = await _security.GenerateUniqueId(
                 instance.Id,
-                _collection.IsPaymentInstanceIdUnique
+                _collection.ExistsPaymentInstanceId
             );
         }
 

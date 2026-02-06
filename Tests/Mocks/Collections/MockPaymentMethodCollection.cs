@@ -46,7 +46,7 @@ public static class MockPaymentMethodCollection
                 }
             );
         result
-            .Setup(obj => obj.IsPaymentMethodIdUnique(It.IsAny<Guid>()))
+            .Setup(obj => obj.ExistsPaymentMethodId(It.IsAny<Guid>()))
             .ReturnsAsync(
                 (Guid id) =>
                 {
@@ -54,7 +54,7 @@ public static class MockPaymentMethodCollection
                 }
             );
         result
-            .Setup(obj => obj.IsPaymentInstanceIdUnique(It.IsAny<Guid>()))
+            .Setup(obj => obj.ExistsPaymentInstanceId(It.IsAny<Guid>()))
             .ReturnsAsync(
                 (Guid id) =>
                 {

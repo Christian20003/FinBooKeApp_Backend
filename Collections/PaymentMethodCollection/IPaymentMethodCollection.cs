@@ -82,7 +82,7 @@ public interface IPaymentMethodCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<bool> IsPaymentMethodIdUnique(Guid id);
+    public Task<bool> ExistsPaymentMethodId(Guid id);
 
     /// <summary>
     /// This method proofs if the provided id is already assigned
@@ -98,5 +98,5 @@ public interface IPaymentMethodCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<bool> IsPaymentInstanceIdUnique(Guid id);
+    public Task<bool> ExistsPaymentInstanceId(Guid id);
 }

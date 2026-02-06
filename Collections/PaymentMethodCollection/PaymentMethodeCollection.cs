@@ -40,12 +40,12 @@ public class PaymentMethodCollection(DataDbContext context)
         return await _context.PaymentMethods.Where(condition).ToListAsync();
     }
 
-    public async Task<bool> IsPaymentMethodIdUnique(Guid id)
+    public async Task<bool> ExistsPaymentMethodId(Guid id)
     {
         return await _context.PaymentMethods.AnyAsync(method => method.Id == id);
     }
 
-    public async Task<bool> IsPaymentInstanceIdUnique(Guid id)
+    public async Task<bool> ExistsPaymentInstanceId(Guid id)
     {
         return await _context.PaymentMethods.AnyAsync(method =>
             method.Instances.Any(instance => instance.Id == id)
