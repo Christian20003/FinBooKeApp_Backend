@@ -38,18 +38,8 @@ public class CategoryCollection(DataDbContext context)
         return await _dbContext.Categories.Where(condition).ToListAsync();
     }
 
-    public async Task<Guid> GetUniqueId(Guid id)
+    public async Task<bool> ExistsCategoryId(Guid id)
     {
-        var result = id;
-        var trials = 10;
-        while (
-            await _dbContext.Categories.AnyAsync(category => category.Id == result) && trials >= 0
-        )
-        {
-            if (trials == 0)
-                throw new OperationCanceledException("Could not derive unique id for category");
-            result = Guid.NewGuid();
-        }
-        return result;
+        return await _dbContext.Categories.AnyAsync(category => category.Id == id);
     }
 }

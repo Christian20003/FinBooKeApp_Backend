@@ -1,14 +1,16 @@
 using FinBookeAPI.Collections.CategoryCollection;
-using FinBookeAPI.Models.Category;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Services.SecurityUtility;
 
 namespace FinBookeAPI.Services.Category;
 
 public partial class CategoryService(
+    ISecurityUtilityService security,
     ICategoryCollection collection,
     ILogger<CategoryService> logger
 ) : ICategoryService
 {
+    private readonly ISecurityUtilityService _security = security;
     private readonly ICategoryCollection _collection = collection;
     private readonly ILogger<CategoryService> _logger = logger;
 

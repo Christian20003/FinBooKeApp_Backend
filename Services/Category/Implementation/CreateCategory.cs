@@ -10,7 +10,7 @@ public partial class CategoryService : ICategoryService
         LogCreateCategory(category);
 
         await VerifyCategory(category);
-        category.Id = await _collection.GetUniqueId(category.Id);
+        category.Id = await _security.GenerateUniqueId(category.Id, _collection.ExistsCategoryId);
         _collection.CreateCategory(category);
         await _collection.SaveChanges();
 

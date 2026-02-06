@@ -9,7 +9,7 @@ namespace FinBookeAPI.Models.Category;
 public class CategoryBase
 {
     [NonEmptyGuid(ErrorMessage = "Category id is invalid")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.CreateVersion7();
 
     [NonEmptyGuid(ErrorMessage = "User id is invalid")]
     public Guid UserId { get; set; } = Guid.Empty;

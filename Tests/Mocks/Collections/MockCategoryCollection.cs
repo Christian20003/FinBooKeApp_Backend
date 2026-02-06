@@ -46,11 +46,11 @@ public static class MockCategoryCollection
                 }
             );
         result
-            .Setup(obj => obj.GetUniqueId(It.IsAny<Guid>()))
+            .Setup(obj => obj.ExistsCategoryId(It.IsAny<Guid>()))
             .ReturnsAsync(
                 (Guid id) =>
                 {
-                    return id;
+                    return false;
                 }
             );
         return result;

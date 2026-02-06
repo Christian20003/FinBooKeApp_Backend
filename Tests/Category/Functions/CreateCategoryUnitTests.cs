@@ -171,16 +171,4 @@ public partial class CategoryServiceUnitTests
 
         Assert.Contains(_database, elem => elem.Id == _category.Id);
     }
-
-    [Fact]
-    public async Task Should_CreateNewId_WhenIdAlreadyExist()
-    {
-        var id = Guid.NewGuid();
-        _collection.Setup(obj => obj.GetUniqueId(It.IsAny<Guid>())).ReturnsAsync(id);
-        _category.Id = _database.First().Id;
-
-        var result = await _service.CreateCategory(_category);
-
-        Assert.Equal(id, result.Id);
-    }
 }

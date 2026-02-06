@@ -64,17 +64,17 @@ public interface ICategoryCollection : IDataCollection
     );
 
     /// <summary>
-    /// This method returns a unique id for a new category.
+    /// This method proofs if the provided id is already assigned.
     /// </summary>
     /// <param name="id">
-    /// An id that should be checked.
+    /// The id to verify.
     /// </param>
     /// <returns>
-    /// A unique category id.
+    /// `true` if the id is already assigned, otherwise `false`.
     /// </returns>
     /// <exception cref="OperationCanceledException">
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<Guid> GetUniqueId(Guid id);
+    public Task<bool> ExistsCategoryId(Guid id);
 }
