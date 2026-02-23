@@ -47,6 +47,8 @@ public static class LogEvents
     public const int PaymentMethodDelete = 1093;
     public const int PaymentMethodRead = 1094;
 
+    public const int AmountCreate = 1111;
+
     // 2000 - 2999
 
     public const int AuthenticationSucceededLogin = 2000;
@@ -85,6 +87,8 @@ public static class LogEvents
     public const int PaymentMethodUpdateSuccess = 2092;
     public const int PaymentMethodDeleteSuccess = 2093;
     public const int PaymentMethodReadSuccess = 2094;
+
+    public const int AmountCreateSuccess = 2111;
 
     // 4000 - 4999
 
@@ -129,6 +133,9 @@ public static class LogEvents
     public const int PaymentNotFound = 4091;
     public const int PaymentNotAccessible = 4092;
     public const int PaymentMethodDuplicate = 4093;
+
+    public const int AmountNotFound = 4111;
+    public const int AmountNotAccessible = 4112;
 
     // 5000 - 5999
 

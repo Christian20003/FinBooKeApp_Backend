@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FinBookeAPI.Models.AmountManagement;
 
 namespace FinBookeAPI.Collections.AmountCollection;
@@ -44,7 +45,7 @@ public interface IAmountCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<Amount?> GetAmount(Func<Amount, bool> condition);
+    public Task<Amount?> GetAmount(Expression<Func<Amount, bool>> condition);
 
     /// <summary>
     /// This method returns a list of instances that fulfill the
@@ -62,5 +63,21 @@ public interface IAmountCollection : IDataCollection
     /// If an operation could not be executed at the application level
     /// and has been canceled.
     /// </exception>
-    public Task<IEnumerable<Amount>> GetAmounts(Func<Amount, bool> condition);
+    public Task<IEnumerable<Amount>> GetAmounts(Expression<Func<Amount, bool>> condition);
+
+    /// <summary>
+    /// This method proofs if the provided id is already assigned.
+    /// </summary>
+    /// <param name="id">
+    /// The id that should be checked.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the id is already assigned otherwise
+    /// <c>false</c>.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">
+    /// If an operation could not be executed at the application level
+    /// and has been canceled.
+    /// </exception>
+    public Task<bool> ExistsAmountId(Guid id);
 }

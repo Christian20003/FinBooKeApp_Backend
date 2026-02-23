@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.Models.AmountManagement;
 using Microsoft.EntityFrameworkCore;
@@ -23,13 +24,18 @@ public class AmountCollection(DataDbContext context) : DataCollection(context), 
         _context.Amounts.Remove(amount);
     }
 
-    public async Task<Amount?> GetAmount(Func<Amount, bool> condition)
+    public async Task<Amount?> GetAmount(Expression<Func<Amount, bool>> condition)
     {
-        return await _context.Amounts.FirstOrDefaultAsync(amount => condition(amount));
+        return await _context.Amounts.FirstOrDefaultAsync(condition);
     }
 
-    public async Task<IEnumerable<Amount>> GetAmounts(Func<Amount, bool> condition)
+    public async Task<IEnumerable<Amount>> GetAmounts(Expression<Func<Amount, bool>> condition)
     {
-        return await _context.Amounts.Where(amount => condition(amount)).ToListAsync();
+        return await _context.Amounts.Where(condition).ToListAsync();
+    }
+
+    public async Task<bool> ExistsAmountId(Guid id)
+    {
+        return await _context.Amounts.AnyAsync(amount => amount.Id == id);
     }
 }

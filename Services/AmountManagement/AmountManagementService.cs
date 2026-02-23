@@ -1,17 +1,15 @@
 using FinBookeAPI.Collections.AmountCollection;
-using FinBookeAPI.Services.Category;
+using FinBookeAPI.Services.SecurityUtility;
 
 namespace FinBookeAPI.Services.AmountManagement;
 
 public partial class AmountManagementService(
     IAmountCollection collection,
-    ICategoryService category,
+    ISecurityUtilityService security,
     ILogger<AmountManagementService> logger
 ) : IAmountManagementService
 {
     private readonly IAmountCollection _collection = collection;
-
-    private readonly ICategoryService _category = category;
-
+    private readonly ISecurityUtilityService _security = security;
     private readonly ILogger<AmountManagementService> _logger = logger;
 }
