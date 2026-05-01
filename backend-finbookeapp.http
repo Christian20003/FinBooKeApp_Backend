@@ -1,6 +1,0 @@
-@backend_finbookeapp_HostAddress = http://localhost:5038
-
-GET {{backend_finbookeapp_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
