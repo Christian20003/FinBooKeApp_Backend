@@ -1,8 +1,8 @@
-using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.Attributes;
 using FinBookeAPI.DTO.CategoryType.Input;
 using FinBookeAPI.DTO.CategoryType.Output;
 using FinBookeAPI.DTO.Error;
+using FinBookeAPI.Extensions;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Services.CategoryType;
 using Microsoft.AspNetCore.Authorization;

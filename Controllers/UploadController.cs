@@ -1,6 +1,6 @@
-using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.DTO.Error;
 using FinBookeAPI.DTO.Upload;
+using FinBookeAPI.Extensions;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Upload;
 using FinBookeAPI.Services.Upload;
