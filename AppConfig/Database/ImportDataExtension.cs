@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace FinBookeAPI.AppConfig.Database;
 
+// TODO: Refactor to delete this class
 public static class ImportDataExtension
 {
     /// <summary>

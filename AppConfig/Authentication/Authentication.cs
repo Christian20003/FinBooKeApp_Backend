@@ -7,16 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FinBookeAPI.AppConfig.Authentication;
 
-public static class SecurityExtension
+public static class Authentication
 {
-    /// <summary>
-    /// This method adds a authentication provider to this application, specifically <c>JWT</c>.
-    /// </summary>
-    /// <param name="services">Specifies the contract for a collection of service descriptors.</param>
-    /// <param name="_configuration">A set of key/value application configuration properties.</param>
-    /// <returns>The modified <c>IServiceCollection</c></returns>
-    /// <exception cref="ApplicationException">If necessary settings from the <c>appsettings.json</c> file are missing.</exception>
-    public static IServiceCollection AddSecurity(
+    public static IServiceCollection AddAuthenticationConfig(
         this IServiceCollection services,
         IConfiguration _configuration
     )
@@ -42,7 +35,7 @@ public static class SecurityExtension
             // User restrictions
             options.User.RequireUniqueEmail = true;
 
-            // Restricted number of tries
+            // Request restrictions
             options.Lockout.MaxFailedAccessAttempts = 3;
             options.Lockout.AllowedForNewUsers = true;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);

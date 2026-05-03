@@ -40,7 +40,7 @@ public partial class AmountManagementService : IAmountManagementService
     private async Task<Amount?> VerifyId(Guid amountId)
     {
         if (Guid.Empty == amountId)
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException("Amount id is not a valid GUID", nameof(amountId))
@@ -77,7 +77,7 @@ public partial class AmountManagementService : IAmountManagementService
     {
         var amount = await VerifyId(amountId);
         if (Guid.Empty == userId)
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException("User id is not a valid GUID", nameof(userId))
@@ -85,7 +85,7 @@ public partial class AmountManagementService : IAmountManagementService
         if (amount is null)
             return null;
         if (amount.UserId != userId)
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new AuthorizationException("Amount resource is not accessible")
@@ -106,7 +106,7 @@ public partial class AmountManagementService : IAmountManagementService
     private void VerifyValue(decimal value)
     {
         if (value <= 0)
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException("Amount value must be larger than zero", nameof(value))
@@ -126,7 +126,7 @@ public partial class AmountManagementService : IAmountManagementService
     private void VerifyComment(string comment)
     {
         if (comment.Length > 300)
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException(
@@ -155,7 +155,7 @@ public partial class AmountManagementService : IAmountManagementService
         if (string.IsNullOrEmpty(filename))
             return;
         if (!File.Exists(path))
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException("Amount receipt document does not exist", nameof(filename))
@@ -181,7 +181,7 @@ public partial class AmountManagementService : IAmountManagementService
         if (string.IsNullOrEmpty(filename))
             return;
         if (!File.Exists(path))
-            Logging.ThrowAndLogWarning(
+            LoggingDeprecated.ThrowAndLogWarning(
                 _logger,
                 LogEvents.AmountManagementOperationFailed,
                 new ArgumentException(

@@ -1,10 +1,10 @@
 namespace FinBookeAPI.Models.Configuration;
 
 /// <summary>
-/// Class <c>FinancialDataDtabaseSettings</c> models the configurations of the financial data database from <c>appsettings.json</c>
+/// Class <c>FinanceDatabaseSettings</c> models the configurations of the financial data database from <c>appsettings.json</c>
 /// and any specified secret.
 /// </summary>
-public class FinancialDataDtabaseSettings
+public class FinanceDatabaseSettings
 {
     /// <summary>
     /// The name of the section in the <c>appsettings.json</c> file.

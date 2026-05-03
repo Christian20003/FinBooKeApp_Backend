@@ -1,8 +1,8 @@
 namespace FinBookeAPI.AppConfig.Redaction;
 
-public static class RedactionExtension
+public static class Redaction
 {
-    public static IServiceCollection AddRedactionExt(this IServiceCollection collection)
+    public static IServiceCollection AddRedactionConfig(this IServiceCollection collection)
     {
         collection.AddRedaction(redactionBuilder =>
         {

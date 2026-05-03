@@ -2,8 +2,8 @@ using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.AppConfig.Localization;
-using FinBookeAPI.AppConfig.Mapping;
 using FinBookeAPI.AppConfig.Redaction;
+using FinBookeAPI.AppConfig.Settings;
 using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
@@ -25,14 +25,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add app configurations.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddConfig(builder.Configuration);
-builder.Services.AddSwagger();
-builder.Services.AddLogger(builder.Configuration);
-builder.Services.AddRedactionExt();
+builder.Services.AddSettingsConfig(builder.Configuration);
 builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
-builder.Services.AddSecurity(builder.Configuration);
+builder.Services.AddAuthenticationConfig(builder.Configuration);
+builder.Services.AddRedactionConfig();
+builder.Services.AddLoggingConfig(builder.Configuration);
 builder.Services.AddLocalizationConfig();
+builder.Services.AddSwaggerConfig();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 

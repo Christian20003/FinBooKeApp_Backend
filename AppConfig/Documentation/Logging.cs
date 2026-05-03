@@ -1,66 +1,54 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
+using NReco.Logging.File;
 
 namespace FinBookeAPI.AppConfig.Documentation;
 
-/// <summary>
-/// This class provides function to log and throw exceptions
-/// </summary>
 public static class Logging
 {
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ThrowAndLogInformation(ILogger logger, int logEvent, Exception exception)
+    public static IServiceCollection AddLoggingConfig(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        logger.LogInformation(
-            new EventId(logEvent),
-            "{Exception}: {Message}",
-            exception.GetType(),
-            exception.Message
-        );
+        services.AddLogging(loggingBuilder =>
+        {
+            var loggingSettings = configuration.GetSection("Logging");
 
-        throw exception;
-    }
+            loggingBuilder.ClearProviders();
+            loggingBuilder.EnableRedaction();
 
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ThrowAndLogWarning(ILogger logger, int logEvent, Exception exception)
-    {
-        logger.LogWarning(
-            new EventId(logEvent),
-            "{Exception}: {Message}",
-            exception.GetType(),
-            exception.Message
-        );
+            loggingBuilder.AddFile(
+                loggingSettings,
+                fileLoggerOptions =>
+                {
+                    fileLoggerOptions.FormatLogEntry = (msg) =>
+                    {
+                        var builder = new System.Text.StringBuilder();
+                        var writer = new StringWriter(builder);
+                        var json = new Newtonsoft.Json.JsonTextWriter(writer);
+                        json.WriteStartObject();
+                        json.WritePropertyName("log");
+                        json.WriteStartObject();
+                        json.WritePropertyName("time");
+                        json.WriteValue(DateTime.Now.ToString("O"));
+                        json.WritePropertyName("level");
+                        json.WriteValue(msg.LogLevel.ToString());
+                        json.WritePropertyName("name");
+                        json.WriteValue(msg.LogName);
+                        json.WritePropertyName("event");
+                        json.WriteValue(msg.EventId.Id);
+                        json.WritePropertyName("message");
+                        json.WriteValue(msg.Message);
+                        json.WritePropertyName("exception");
+                        json.WriteValue(msg.Exception?.ToString());
+                        json.WriteEndObject();
+                        json.WriteEndObject();
+                        return builder.ToString();
+                    };
+                }
+            );
 
-        throw exception;
-    }
-
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ThrowAndLogError(ILogger logger, int logEvent, Exception exception)
-    {
-        logger.LogError(
-            new EventId(logEvent),
-            "{Exception}: {Message}",
-            exception.GetType(),
-            exception.Message
-        );
-
-        throw exception;
-    }
-
-    [DoesNotReturn]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ThrowAndLogCritical(ILogger logger, int logEvent, Exception exception)
-    {
-        logger.LogError(
-            new EventId(logEvent),
-            "{Exception}: {Message}",
-            exception.GetType(),
-            exception.Message
-        );
-
-        throw exception;
+            loggingBuilder.AddConsole();
+        });
+        return services;
     }
 }
