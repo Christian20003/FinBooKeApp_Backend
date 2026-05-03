@@ -1,6 +1,7 @@
 using FinBookeAPI.AppConfig.Authentication;
 using FinBookeAPI.AppConfig.Database;
 using FinBookeAPI.AppConfig.Documentation;
+using FinBookeAPI.AppConfig.Localization;
 using FinBookeAPI.AppConfig.Mapping;
 using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.Collections.AmountCollection;
@@ -31,6 +32,7 @@ builder.Services.AddRedactionExt();
 builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
 builder.Services.AddSecurity(builder.Configuration);
+builder.Services.AddLocalizationConfig();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -73,6 +75,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<BadRequestHandling>();
 app.UseMiddleware<ExceptionHandling>();
 app.UseHttpsRedirection();
+app.UseRequestLocalization();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

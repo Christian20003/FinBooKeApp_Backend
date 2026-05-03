@@ -12,6 +12,16 @@
   </PropertyGroup> 
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources/DataAnnotationValidation.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedFileName>Resources/DataAnnotationValidation.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>FinBookeAPI</StronglyTypedNamespace>
+      <StronglyTypedClassName>DataAnnotationValidation</StronglyTypedClassName> 
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
