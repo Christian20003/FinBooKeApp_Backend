@@ -59,11 +59,10 @@ builder.Services.AddScoped<IUploadService, UploadService>();
 builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
 builder.Services.AddScoped<IAmountManagementService, AmountManagementService>();
 builder.Services.AddTransient<ExceptionHandling>();
-builder.Services.AddTransient<BadRequestHandling>();
 
-// Import test data into database
-await builder.Services.ImportUsers();
-await builder.Services.ImportData();
+// Import test data into database - deprecated
+//await builder.Services.ImportUsers();
+//await builder.Services.ImportData();
 
 var app = builder.Build();
 
@@ -72,7 +71,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCustomSwagger();
 }
-app.UseMiddleware<BadRequestHandling>();
 app.UseMiddleware<ExceptionHandling>();
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
