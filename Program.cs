@@ -4,6 +4,7 @@ using FinBookeAPI.AppConfig.Documentation;
 using FinBookeAPI.AppConfig.Localization;
 using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.AppConfig.Settings;
+using FinBookeAPI.AppConfig.Version;
 using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
@@ -25,6 +26,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add app configurations.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddVersioningConfig();
 builder.Services.AddSettingsConfig(builder.Configuration);
 builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddDbContext<DataDbContext>();
