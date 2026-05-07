@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FinBookeAPI {
+namespace FinBooKeAPI {
     using System;
     
     
@@ -36,7 +36,7 @@ namespace FinBookeAPI {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FinBookeAPI.DataAnnotationValidation", typeof(DataAnnotationValidation).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FinBooKeAPI.DataAnnotationValidation", typeof(DataAnnotationValidation).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

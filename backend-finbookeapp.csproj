@@ -16,7 +16,7 @@
       <Generator>MSBuild:Compile</Generator>
       <StronglyTypedFileName>Resources/DataAnnotationValidation.cs</StronglyTypedFileName>
       <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
-      <StronglyTypedNamespace>FinBookeAPI</StronglyTypedNamespace>
+      <StronglyTypedNamespace>FinBooKeAPI</StronglyTypedNamespace>
       <StronglyTypedClassName>DataAnnotationValidation</StronglyTypedClassName> 
     </EmbeddedResource>
   </ItemGroup>
