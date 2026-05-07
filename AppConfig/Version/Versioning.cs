@@ -12,6 +12,6 @@ public static class Versioning
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.ReportApiVersions = true;
         });
-        return services;        
+        return services;
     }
 }
