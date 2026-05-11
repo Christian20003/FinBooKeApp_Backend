@@ -1,5 +1,5 @@
-using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

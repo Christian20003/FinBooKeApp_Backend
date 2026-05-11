@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Token;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;

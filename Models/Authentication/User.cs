@@ -1,6 +1,6 @@
 using FinBookeAPI.Models.Token;
 
-namespace FinBookeAPI.Models.Authentication;
+namespace FinBookeAPI.Models.Database.Authentication;
 
 /// <summary>
 /// This class represents a user object sent to the client.

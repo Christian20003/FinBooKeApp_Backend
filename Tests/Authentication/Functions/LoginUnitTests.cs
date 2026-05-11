@@ -1,5 +1,5 @@
 using System.Security.Authentication;
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Exceptions;
 using FinBookeAPI.Tests.Records;
 using Microsoft.AspNetCore.Identity;

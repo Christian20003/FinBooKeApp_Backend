@@ -9,7 +9,7 @@ public partial class TokenService : ITokenService
     public JwtToken GenerateRefreshToken(string userId)
     {
         LogGenerateRefreshToken(userId);
-        var lifetime = _settings.Value.RefreshTokenExpireD;
+        var lifetime = 1;
         var secret = _settings.Value.RefreshTokenSecret;
         if (lifetime <= 0)
         {

@@ -1,6 +1,8 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+// TODO: Deprecated
 
 namespace FinBookeAPI.Models.Wrapper;
 

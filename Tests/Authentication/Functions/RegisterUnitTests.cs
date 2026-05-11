@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Moq;

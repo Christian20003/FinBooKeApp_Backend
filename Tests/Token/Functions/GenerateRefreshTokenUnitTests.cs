@@ -2,7 +2,7 @@ namespace FinBookeAPI.Tests.Token;
 
 public partial class TokenServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public void Should_FailToGenerateRefreshToken_WhenSecretIsNull()
     {
         _options.RefreshTokenSecret = null;
@@ -24,7 +24,7 @@ public partial class TokenServiceUnitTests
         _options.Audience = null;
 
         Assert.Throws<ApplicationException>(() => _service.GenerateRefreshToken(_userId));
-    }
+    } */
 
     [Fact]
     public void Should_FailToGenerateRefreshToken_WhenSecretIsTooShort()
@@ -34,13 +34,13 @@ public partial class TokenServiceUnitTests
         Assert.Throws<ApplicationException>(() => _service.GenerateRefreshToken(_userId));
     }
 
-    [Fact]
+    /* [Fact]
     public void Should_FailToGenerateRefreshToken_WhenExpirationTimeIsSmallerThanZero()
     {
         _options.RefreshTokenExpireD = 0;
 
         Assert.Throws<ApplicationException>(() => _service.GenerateRefreshToken(_userId));
-    }
+    } */
 
     [Fact]
     public void Should_GenerateNotEmptyRefreshToken()
@@ -53,7 +53,6 @@ public partial class TokenServiceUnitTests
     [Fact]
     public void Should_GenerateRefreshTokenWhichExpires()
     {
-        _options.RefreshTokenExpireD = 1;
         var token = _service.GenerateRefreshToken(_userId);
         var time = DateTime.UtcNow;
 

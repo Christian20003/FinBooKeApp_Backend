@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 
 namespace FinBookeAPI.DTO.Authentication.Output;
 

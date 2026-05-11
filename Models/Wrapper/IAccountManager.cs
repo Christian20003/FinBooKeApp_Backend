@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Authentication;
+using FinBookeAPI.Models.Database.Authentication;
 using Microsoft.AspNetCore.Identity;
 
 namespace FinBookeAPI.Models.Wrapper;

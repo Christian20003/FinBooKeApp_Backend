@@ -1,6 +1,6 @@
 using System.Text.Json;
-using FinBookeAPI.Models.Authentication;
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Wrapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

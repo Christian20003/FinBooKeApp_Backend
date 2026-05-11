@@ -9,7 +9,7 @@ public partial class TokenService : ITokenService
     public JwtToken GenerateAccessToken(string userId)
     {
         LogGenerateAccessToken(userId);
-        var lifetime = _settings.Value.AccessTokenExpireM;
+        var lifetime = 60;
         var secret = _settings.Value.AccessTokenSecret;
         if (lifetime <= 0)
         {

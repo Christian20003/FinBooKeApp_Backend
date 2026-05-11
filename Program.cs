@@ -5,6 +5,7 @@ using FinBookeAPI.AppConfig.Localization;
 using FinBookeAPI.AppConfig.Redaction;
 using FinBookeAPI.AppConfig.Settings;
 using FinBookeAPI.AppConfig.Version;
+using FinBooKeAPI.Collections.AccountCollection;
 using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
@@ -48,6 +49,7 @@ builder.Services.AddScoped<ITokenCollection, TokenCollection>();
 builder.Services.AddScoped<ICategoryCollection, CategoryCollection>();
 builder.Services.AddScoped<IPaymentMethodCollection, PaymentMethodCollection>();
 builder.Services.AddScoped<IAmountCollection, AmountCollection>();
+builder.Services.AddScoped<IAccountCollection, AccountCollection>();
 
 // Services that provides additional functionality
 builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();

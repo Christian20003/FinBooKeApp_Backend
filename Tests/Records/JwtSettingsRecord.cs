@@ -1,12 +1,12 @@
-using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Settings;
 
 namespace FinBookeAPI.Tests.Records;
 
 public static class JwtSettingsRecord
 {
-    public static JwtSettings GetObject()
+    public static AuthenticationSettings GetObject()
     {
-        return new JwtSettings
+        return new AuthenticationSettings
         {
             Audience = "http://audience",
             Issuer = "http://issuer",

@@ -1,4 +1,5 @@
 using FinBookeAPI.Models.Configuration;
+using FinBookeAPI.Models.Settings;
 
 namespace FinBookeAPI.AppConfig.Settings;
 
@@ -15,7 +16,12 @@ public static class Settings
         services.Configure<FinanceDatabaseSettings>(
             configuration.GetSection(FinanceDatabaseSettings.SectionName)
         );
-        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services
+            .AddOptions<AuthenticationSettings>()
+            .Bind(configuration.GetSection(AuthenticationSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));
         services.Configure<DataImport>(configuration.GetSection(DataImport.SectionName));
         services.Configure<FileStorage>(configuration.GetSection(FileStorage.SectionName));
