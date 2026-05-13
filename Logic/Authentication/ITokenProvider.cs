@@ -5,11 +5,7 @@ namespace FinBooKeAPI.Logic.Authentication;
 
 public interface ITokenProvider
 {
-    public AuthenticationToken GenerateToken(
-        IEnumerable<Claim> claims,
-        string secret,
-        DateTime expires
-    );
+    public AuthenticationToken CreateToken(CreateTokenPayload payload);
 
-    public AuthenticationToken VerifyToken(string token, string secret);
+    public IEnumerable<Claim> VerifyToken(VerifyTokenPayload payload);
 }

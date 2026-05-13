@@ -1,59 +1,58 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using FinBooKeAPI.Models.Logic.Authentication;
-using FinBookeAPI.Models.Settings;
-using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FinBooKeAPI.Logic.Authentication;
 
-public class TokenProvider(IOptions<AuthenticationSettings> settings) : ITokenProvider
+public class TokenProvider : ITokenProvider
 {
-    private readonly IOptions<AuthenticationSettings> _settings = settings;
+    private const string SIGNATURE_SCHEME = SecurityAlgorithms.HmacSha256Signature;
 
-    public AuthenticationToken GenerateToken(
-        IEnumerable<Claim> claims,
-        string secret,
-        DateTime expires
-    )
+    public AuthenticationToken CreateToken(CreateTokenPayload payload)
     {
-        /* var audience = _settings.Value.Audience;
-        var issuer = _settings.Value.Issuer;
-        if (audience == null)
-        {
-            LogInvalidAudience(audience);
-            throw new ApplicationException("Audience configuration is null");
-        }
-        if (issuer == null)
-        {
-            LogInvalidIssuer(issuer);
-            throw new ApplicationException("Issuer configuration is null");
-        }
-
-        var bytes = Encoding.UTF8.GetBytes(secret);
-        if (bytes.Length < 16)
-        {
-            LogInvalidSecret();
-            throw new ApplicationException("Given secret is too small to generated symmetric key");
-        }
-        var key = new SymmetricSecurityKey(bytes);
+        var key = CreateSymmetricKey(payload.Secret);
+        var credentials = new SigningCredentials(key, SIGNATURE_SCHEME);
+        var subject = new ClaimsIdentity(payload.Claims);
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
-            Expires = expires,
-            Issuer = issuer,
-            Audience = audience,
-            SigningCredentials = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256Signature
-            ),
+            Subject = subject,
+            Expires = payload.Expires,
+            Issuer = payload.Issuer,
+            Audience = payload.Audience,
+            SigningCredentials = credentials,
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token); */
-        throw new NotImplementedException();
+        var tokenString = tokenHandler.WriteToken(token);
+
+        return new AuthenticationToken { Value = tokenString, Expires = payload.Expires.Ticks };
     }
 
-    public AuthenticationToken VerifyToken(string token, string secret)
+    public IEnumerable<Claim> VerifyToken(VerifyTokenPayload payload)
     {
-        throw new NotImplementedException();
+        var key = CreateSymmetricKey(payload.Secret);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validationParam = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+
+            ValidIssuer = payload.Issuer,
+            ValidAudience = payload.Audience,
+            IssuerSigningKey = key,
+            ClockSkew = TimeSpan.Zero,
+        };
+        var principles = tokenHandler.ValidateToken(payload.Token, validationParam, out _);
+        return principles.Claims;
+    }
+
+    private static SymmetricSecurityKey CreateSymmetricKey(string secret)
+    {
+        var secretBytes = Encoding.UTF8.GetBytes(secret);
+        return new SymmetricSecurityKey(secretBytes);
     }
 }

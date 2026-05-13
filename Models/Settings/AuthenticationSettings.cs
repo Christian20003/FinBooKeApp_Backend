@@ -22,7 +22,7 @@ public record AuthenticationSettings
 
     [StringLength(
         int.MaxValue,
-        MinimumLength = 8,
+        MinimumLength = 32,
         ErrorMessage = "Authentication settings: Access token secret too short"
     )]
     public string AccessTokenSecret { get; set; } = "";
