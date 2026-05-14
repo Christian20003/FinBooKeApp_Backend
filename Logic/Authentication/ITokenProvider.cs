@@ -7,5 +7,5 @@ public interface ITokenProvider
 {
     public AuthenticationToken CreateToken(CreateTokenPayload payload);
 
-    public IEnumerable<Claim> VerifyToken(VerifyTokenPayload payload);
+    public ClaimsPrincipal VerifyToken(VerifyTokenPayload payload);
 }

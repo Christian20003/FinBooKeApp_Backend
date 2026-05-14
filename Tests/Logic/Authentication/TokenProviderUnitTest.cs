@@ -7,7 +7,7 @@ namespace FinBooKeAPI.Tests.Logic.Authentication;
 
 public partial class TokenProviderUnitTest
 {
-    private readonly ITokenProvider _provider;
+    private readonly TokenProvider _provider;
     private readonly CreateTokenPayload _createTokenPayload;
     private readonly VerifyTokenPayload _verifyTokenPayload;
     private readonly List<Claim> _claims;
@@ -56,7 +56,8 @@ public partial class TokenProviderUnitTest
     {
         var token = _provider.CreateToken(_createTokenPayload);
         _verifyTokenPayload.Token = token.Value;
-        var claims = _provider.VerifyToken(_verifyTokenPayload);
+        var claim = _provider.VerifyToken(_verifyTokenPayload);
+        var claims = claim.Claims;
 
         var expectedIdentifier = claims
             .First(claim => claim.Type == ClaimTypes.NameIdentifier)

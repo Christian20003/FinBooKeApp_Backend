@@ -30,7 +30,7 @@ public class TokenProvider : ITokenProvider
         return new AuthenticationToken { Value = tokenString, Expires = payload.Expires.Ticks };
     }
 
-    public IEnumerable<Claim> VerifyToken(VerifyTokenPayload payload)
+    public ClaimsPrincipal VerifyToken(VerifyTokenPayload payload)
     {
         var key = CreateSymmetricKey(payload.Secret);
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -47,7 +47,7 @@ public class TokenProvider : ITokenProvider
             ClockSkew = TimeSpan.Zero,
         };
         var principles = tokenHandler.ValidateToken(payload.Token, validationParam, out _);
-        return principles.Claims;
+        return principles;
     }
 
     private static SymmetricSecurityKey CreateSymmetricKey(string secret)
