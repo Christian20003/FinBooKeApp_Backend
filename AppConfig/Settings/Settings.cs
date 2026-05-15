@@ -1,5 +1,5 @@
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Settings;
+using FinBooKeAPI.Models.Settings;
 
 namespace FinBookeAPI.AppConfig.Settings;
 
@@ -22,7 +22,12 @@ public static class Settings
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.Configure<SmtpServer>(configuration.GetSection(SmtpServer.SectionName));
+        services
+            .AddOptions<SmtpSettings>()
+            .Bind(configuration.GetSection(SmtpSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.Configure<DataImport>(configuration.GetSection(DataImport.SectionName));
         services.Configure<FileStorage>(configuration.GetSection(FileStorage.SectionName));
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FinBookeAPI.Models.Settings;
+namespace FinBooKeAPI.Models.Settings;
 
 public record AuthenticationSettings
 {

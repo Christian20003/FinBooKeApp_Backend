@@ -1,12 +1,12 @@
-using FinBookeAPI.Models.Configuration;
+using FinBooKeAPI.Models.Settings;
 
 namespace FinBookeAPI.Tests.Records;
 
-public static class SmtpServerRecord
+public static class SmtpSettingsRecord
 {
-    public static SmtpServer GetObject()
+    public static SmtpSettings GetObject()
     {
-        return new SmtpServer
+        return new SmtpSettings
         {
             Host = "http://host",
             Username = "max",

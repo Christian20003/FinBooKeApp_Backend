@@ -1,5 +1,5 @@
 using FinBookeAPI.Collections.TokenCollection;
-using FinBookeAPI.Models.Settings;
+using FinBooKeAPI.Models.Settings;
 using FinBookeAPI.Models.Token;
 using FinBookeAPI.Services.Token;
 using FinBookeAPI.Tests.Mocks.Collections;

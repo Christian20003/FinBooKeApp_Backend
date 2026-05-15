@@ -1,14 +1,15 @@
 using System.Net;
 using System.Net.Mail;
 using FinBookeAPI.Models.Configuration;
+using FinBooKeAPI.Models.Settings;
 using Microsoft.Extensions.Options;
 
 namespace FinBookeAPI.Services.Email;
 
-public partial class EmailService(IOptions<SmtpServer> config, ILogger<EmailService> logger)
+public partial class EmailService(IOptions<SmtpSettings> config, ILogger<EmailService> logger)
     : IEmailService
 {
-    private readonly IOptions<SmtpServer> _config = config;
+    private readonly IOptions<SmtpSettings> _config = config;
     private readonly ILogger<EmailService> _logger = logger;
 
     public void Send(string email, string subject, string body, bool isHtml = true)

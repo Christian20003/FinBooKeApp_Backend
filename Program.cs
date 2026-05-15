@@ -11,6 +11,7 @@ using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
 using FinBookeAPI.Collections.TokenCollection;
 using FinBooKeAPI.Logic.Authentication;
+using FinBooKeAPI.Logic.Email;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.AmountManagement;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IAccountCollection, AccountCollection>();
 // Logic
 builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IClaimProvider, ClaimProvider>();
+builder.Services.AddScoped<IEmailProvider, EmailProvider>();
 
 // Services that provides additional functionality
 builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();

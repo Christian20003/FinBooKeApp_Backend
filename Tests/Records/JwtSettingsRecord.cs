@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Settings;
+using FinBooKeAPI.Models.Settings;
 
 namespace FinBookeAPI.Tests.Records;
 

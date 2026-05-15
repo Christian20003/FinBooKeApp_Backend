@@ -1,6 +1,6 @@
 using FinBookeAPI.Collections.TokenCollection;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Settings;
+using FinBooKeAPI.Models.Settings;
 using Microsoft.Extensions.Options;
 
 namespace FinBookeAPI.Services.Token;
