@@ -503,3 +503,6 @@ $RECYCLE.BIN/
 # Ignore all local history of files
 .history
 .ionide
+
+# C# Dev Kit
+backend-finbookeapp.csproj.lscache

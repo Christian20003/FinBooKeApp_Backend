@@ -49,7 +49,7 @@ public static class Authentication
         });
         authBuilder.AddJwtBearer(options =>
         {
-            var jwt = _configuration.GetSection("JwtConfig");
+            var jwt = _configuration.GetSection("Authentication");
             var issuer = jwt["Issuer"];
             var audience = jwt["Audience"];
             var secret = jwt["AccessTokenSecret"];
