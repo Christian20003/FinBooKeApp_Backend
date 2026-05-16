@@ -57,6 +57,7 @@ builder.Services.AddScoped<IAccountCollection, AccountCollection>();
 builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IClaimProvider, ClaimProvider>();
 builder.Services.AddScoped<IEmailProvider, EmailProvider>();
+builder.Services.AddScoped<IEmailTemplateBuilder, EmailTemplateBuilder>();
 
 // Services that provides additional functionality
 builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();
