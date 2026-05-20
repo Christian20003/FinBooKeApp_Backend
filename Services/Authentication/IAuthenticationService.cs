@@ -2,7 +2,6 @@ using System.Net.Mail;
 using System.Security.Authentication;
 using FinBookeAPI.Models.Database.Authentication;
 using FinBookeAPI.Models.Exceptions;
-using FinBookeAPI.Models.Token;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -167,7 +166,7 @@ public interface IAuthenticationService
     /// <exception cref="OperationCanceledException">
     /// If the database operation has been canceled.
     /// </exception>
-    public Task<JwtToken> IssueJwtToken(string refreshToken);
+    //public Task<JwtToken> IssueJwtToken(string refreshToken);
 
     /// <summary>
     /// This method logs out a user by revoking both tokens.

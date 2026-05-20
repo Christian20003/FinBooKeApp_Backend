@@ -9,18 +9,13 @@ using FinBooKeAPI.Collections.AccountCollection;
 using FinBookeAPI.Collections.AmountCollection;
 using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
-using FinBookeAPI.Collections.TokenCollection;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
 using FinBookeAPI.Middleware;
-using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.AmountManagement;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.CategoryType;
-using FinBookeAPI.Services.Email;
 using FinBookeAPI.Services.Payment;
-using FinBookeAPI.Services.SecurityUtility;
-using FinBookeAPI.Services.Token;
 using FinBookeAPI.Services.Upload;
 using Microsoft.Extensions.Compliance.Redaction;
 
@@ -42,12 +37,9 @@ builder.Services.AddSwaggerConfig();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 // Wrapper
-builder.Services.AddSingleton<IDataProtection, DataProtection>();
 builder.Services.AddSingleton<IRedactorProvider, StarRedactorProvider>();
-builder.Services.AddScoped<IAccountManager, AccountManager>();
 
 // Collections
-builder.Services.AddScoped<ITokenCollection, TokenCollection>();
 builder.Services.AddScoped<ICategoryCollection, CategoryCollection>();
 builder.Services.AddScoped<IPaymentMethodCollection, PaymentMethodCollection>();
 builder.Services.AddScoped<IAmountCollection, AmountCollection>();
@@ -58,11 +50,6 @@ builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IClaimProvider, ClaimProvider>();
 builder.Services.AddScoped<IEmailProvider, EmailProvider>();
 builder.Services.AddScoped<IEmailTemplateBuilder, EmailTemplateBuilder>();
-
-// Services that provides additional functionality
-builder.Services.AddScoped<ISecurityUtilityService, SecurityUtilityService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

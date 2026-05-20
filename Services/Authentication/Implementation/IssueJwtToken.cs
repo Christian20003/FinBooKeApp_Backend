@@ -1,14 +1,13 @@
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Token;
 
 namespace FinBookeAPI.Services.Authentication;
 
 public partial class AuthenticationService : IAuthenticationService
 {
-    public async Task<JwtToken> IssueJwtToken(string refreshToken)
+    /* public async Task<JwtToken> IssueJwtToken(string refreshToken)
     {
         throw new NotImplementedException();
-        /* LogCreateToken();
+        LogCreateToken();
         var (id, _) = _tokenService.VerifyRefreshToken(refreshToken);
         if (await _tokenService.TokenExists(refreshToken))
         {
@@ -17,8 +16,8 @@ public partial class AuthenticationService : IAuthenticationService
         }
         var result = _tokenService.GenerateAccessToken(id);
         LogCreatedToken();
-        return result; */
-    }
+        return result;
+    } */
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationCreateToken,

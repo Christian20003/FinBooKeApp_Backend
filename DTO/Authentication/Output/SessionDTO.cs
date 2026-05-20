@@ -1,5 +1,4 @@
 using FinBookeAPI.Models.Database.Authentication;
-using FinBookeAPI.Models.Token;
 
 namespace FinBookeAPI.DTO.Authentication.Output;
 
@@ -18,17 +17,17 @@ public class SessionDTO
 
     public SessionDTO(User user)
     {
-        AccessToken = user.AccessToken.Value;
+        /* AccessToken = user.AccessToken.Value;
         AccessTokenExpires = user.AccessToken.Expires;
         RefreshToken = user.RefreshToken.Value;
-        RefreshTokenExpires = user.RefreshToken.Expires;
+        RefreshTokenExpires = user.RefreshToken.Expires; */
     }
 
-    public SessionDTO(JwtToken accessToken, JwtToken refreshToken)
+    /* public SessionDTO(JwtToken accessToken, JwtToken refreshToken)
     {
         AccessToken = accessToken.Value;
         AccessTokenExpires = accessToken.Expires;
         RefreshToken = refreshToken.Value;
         RefreshTokenExpires = refreshToken.Expires;
-    }
+    } */
 }

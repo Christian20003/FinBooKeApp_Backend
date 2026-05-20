@@ -1,13 +1,5 @@
 using FinBookeAPI.Models.Database.Authentication;
-using FinBookeAPI.Models.Token;
-using FinBookeAPI.Models.Wrapper;
 using FinBookeAPI.Services.Authentication;
-using FinBookeAPI.Services.Email;
-using FinBookeAPI.Services.SecurityUtility;
-using FinBookeAPI.Services.Token;
-using FinBookeAPI.Tests.Mocks.Manager;
-using FinBookeAPI.Tests.Mocks.Services;
-using FinBookeAPI.Tests.Records;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 
@@ -15,17 +7,17 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    private readonly Mock<IAccountManager> _userManager;
-    private readonly Mock<SignInManager<UserAccount>> _signInManager;
-    private readonly Mock<ISecurityUtilityService> _securityUtilityService;
-    private readonly Mock<ITokenService> _tokenService;
-    private readonly Mock<IEmailService> _emailService;
-    private readonly Mock<IDataProtection> _dataProtection;
-    private readonly Mock<ILogger<AuthenticationService>> _logger;
-    private readonly AuthenticationService _service;
-
-    private readonly UserAccount _userAccount;
-    private readonly JwtToken _token;
+    /*  private readonly Mock<IAccountManager> _userManager;
+     private readonly Mock<SignInManager<UserAccount>> _signInManager;
+     private readonly Mock<ISecurityUtilityService> _securityUtilityService;
+     private readonly Mock<ITokenService> _tokenService;
+     private readonly Mock<IEmailService> _emailService;
+     private readonly Mock<IDataProtection> _dataProtection;
+     private readonly Mock<ILogger<AuthenticationService>> _logger;
+     private readonly AuthenticationService _service;
+ 
+     private readonly UserAccount _userAccount;
+     private readonly JwtToken _token; */
 
     public AuthenticationServiceUnitTests()
     {

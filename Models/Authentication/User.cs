@@ -1,5 +1,3 @@
-using FinBookeAPI.Models.Token;
-
 namespace FinBookeAPI.Models.Database.Authentication;
 
 /// <summary>
@@ -11,6 +9,6 @@ public class User
     public string Name { get; set; } = "";
     public string Email { get; set; } = "";
     public string ImagePath { get; set; } = "";
-    public JwtToken AccessToken { get; set; } = new();
-    public JwtToken RefreshToken { get; set; } = new();
+    /* public JwtToken AccessToken { get; set; } = new();
+    public JwtToken RefreshToken { get; set; } = new(); */
 }

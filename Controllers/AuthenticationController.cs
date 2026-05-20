@@ -2,7 +2,6 @@ using FinBookeAPI.DTO.Authentication.Input;
 using FinBookeAPI.DTO.Authentication.Output;
 using FinBookeAPI.DTO.Error;
 using FinBookeAPI.Models.Configuration;
-using FinBookeAPI.Models.Token;
 using FinBookeAPI.Services.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +17,7 @@ public class AuthenticationController(
     private readonly ILogger<AuthenticationController> _logger = logger;
     private readonly IAuthenticationService _service = service;
 
-    /// <summary>
+    /* /// <summary>
     /// This method process a login request and proofs if the user has access to his profile.
     /// </summary>
     /// <param name="data">
@@ -159,5 +158,5 @@ public class AuthenticationController(
             Expires = data.RefreshTokenExpires,
         };
         return Ok(new SessionDTO(token, refreshToken));
-    }
+    } */
 }

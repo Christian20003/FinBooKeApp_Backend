@@ -1,7 +1,6 @@
 using System.Text.Json;
 using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Database.Authentication;
-using FinBookeAPI.Models.Wrapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +25,7 @@ public static class ImportDataExtension
     /// </summary>
     public async static Task<IServiceCollection> ImportUsers(this IServiceCollection services)
     {
-        var provider = services.BuildServiceProvider();
+        /* var provider = services.BuildServiceProvider();
         var options = provider.GetRequiredService<IOptions<DataImport>>();
         var manager = provider.GetRequiredService<IAccountManager>();
         var protector = provider.GetRequiredService<IDataProtection>();
@@ -55,7 +54,7 @@ public static class ImportDataExtension
                 logger.LogWarning("User could not be added");
         }
 
-        logger.LogInformation("Users have been stored into the database");
+        logger.LogInformation("Users have been stored into the database"); */
 
         return services;
     }
