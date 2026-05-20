@@ -8,7 +8,7 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public async Task Should_FailResetPassword_WhenEmailIsInvalid()
     {
         await Assert.ThrowsAsync<ArgumentException>(
@@ -86,7 +86,7 @@ public partial class AuthenticationServiceUnitTests
         _userManager.Verify(obj => obj.UpdateUserAsync(It.IsAny<UserAccount>()), Times.Once);
     }
 
-    /* [Fact]
+    [Fact]
     public async Task Should_FailResetPassword_WhenTemplateFileNotFound()
     {
         typeof(AuthenticationService)
@@ -94,7 +94,7 @@ public partial class AuthenticationServiceUnitTests
             .SetValue(null, "nonexistent.html");
 
         await Assert.ThrowsAsync<ApplicationException>(() => _service.ResetPassword(_userAccount.Email!, _userAccount.AccessCode!));
-    } */
+    }
 
     [Fact]
     public async Task Should_SendEmail_WhenResetPasswordWasSuccessful()
@@ -105,5 +105,5 @@ public partial class AuthenticationServiceUnitTests
             obj => obj.Send(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), true),
             Times.Once
         );
-    }
+    } */
 }

@@ -13,9 +13,6 @@ public static class UserAccountRecord
             Email = "max.mustermann@gmx.com",
             PasswordHash = "f5$z(kN)gTz9",
             ImagePath = "",
-            AccessCode = "H78ER9",
-            AccessCodeCreatedAt = DateTime.UtcNow,
-            IsRevoked = false,
         };
     }
 }

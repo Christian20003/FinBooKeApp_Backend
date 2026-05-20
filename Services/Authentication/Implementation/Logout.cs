@@ -7,7 +7,8 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task Logout(string accessToken, string refreshToken)
     {
-        LogLogout(accessToken, refreshToken);
+        throw new NotImplementedException();
+        /* LogLogout(accessToken, refreshToken);
         try
         {
             await _tokenService.StoreAccessToken(accessToken);
@@ -24,7 +25,7 @@ public partial class AuthenticationService : IAuthenticationService
         {
             LogExpiredToken(refreshToken);
         }
-        LogSucceededLogout(accessToken, refreshToken);
+        LogSucceededLogout(accessToken, refreshToken); */
     }
 
     [LoggerMessage(

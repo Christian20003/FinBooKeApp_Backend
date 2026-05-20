@@ -19,7 +19,8 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task<UserAccount> VerifyUserAccount(string email)
     {
-        LogUserAccountValidation(email);
+        throw new NotImplementedException();
+        /* LogUserAccountValidation(email);
         var accounts = _accountManager.GetUsersAsync();
         var user = await accounts.FirstOrDefaultAsync(account =>
             email == _protector.UnprotectEmail(account.Email!)
@@ -30,7 +31,7 @@ public partial class AuthenticationService : IAuthenticationService
             LogInvalidEmail(email);
             throw new InvalidCredentialException("Invalid credentials");
         }
-        return user;
+        return user; */
     }
 
     [LoggerMessage(

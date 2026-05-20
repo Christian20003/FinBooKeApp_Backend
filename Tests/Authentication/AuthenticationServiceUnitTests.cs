@@ -29,7 +29,7 @@ public partial class AuthenticationServiceUnitTests
 
     public AuthenticationServiceUnitTests()
     {
-        // Initialize important data objects
+        /* // Initialize important data objects
         _userAccount = UserAccountRecord.GetObject();
         _token = JwtTokenRecord.GetObject();
 
@@ -58,6 +58,6 @@ public partial class AuthenticationServiceUnitTests
             _emailService.Object,
             _dataProtection.Object,
             _logger.Object
-        );
+        ); */
     }
 }

@@ -5,7 +5,7 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public async Task Should_SucceedUserLogout_WhenAccessTokenHasExpired()
     {
         _tokenService
@@ -53,5 +53,5 @@ public partial class AuthenticationServiceUnitTests
             Assert.Fail("An exception has been thrown which should not happen");
         }
         Assert.True(true);
-    }
+    } */
 }

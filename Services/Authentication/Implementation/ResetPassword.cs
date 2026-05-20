@@ -9,7 +9,8 @@ public partial class AuthenticationService : IAuthenticationService
 
     public async Task ResetPassword(string email, string code)
     {
-        LogResetPassword();
+        throw new NotImplementedException();
+        /* LogResetPassword();
         if (!VerifyEmail(email))
         {
             LogInvalidEmail(email);
@@ -60,7 +61,7 @@ public partial class AuthenticationService : IAuthenticationService
         await _accountManager.SetPasswordAsync(user, password);
 
         _emailService.Send(email, subject, body);
-        LogSucceededResetPassword();
+        LogSucceededResetPassword(); */
     }
 
     [LoggerMessage(

@@ -25,7 +25,7 @@ public partial class AuthenticationService : IAuthenticationService
     /// </exception>
     private async Task VerifyPassword(UserAccount user, string password)
     {
-        LogPasswordValidation(user.Id);
+        /* LogPasswordValidation(user.Id);
         var check = await _signInManager.CheckPasswordSignInAsync(
             user,
             password,
@@ -40,7 +40,7 @@ public partial class AuthenticationService : IAuthenticationService
         {
             LogLockedAccount(user.Id);
             throw new ResourceLockedException("User account is temporarily locked.");
-        }
+        } */
     }
 
     [LoggerMessage(

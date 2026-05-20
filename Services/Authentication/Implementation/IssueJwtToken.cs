@@ -7,7 +7,8 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<JwtToken> IssueJwtToken(string refreshToken)
     {
-        LogCreateToken();
+        throw new NotImplementedException();
+        /* LogCreateToken();
         var (id, _) = _tokenService.VerifyRefreshToken(refreshToken);
         if (await _tokenService.TokenExists(refreshToken))
         {
@@ -16,7 +17,7 @@ public partial class AuthenticationService : IAuthenticationService
         }
         var result = _tokenService.GenerateAccessToken(id);
         LogCreatedToken();
-        return result;
+        return result; */
     }
 
     [LoggerMessage(

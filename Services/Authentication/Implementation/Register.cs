@@ -8,7 +8,8 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<User> Register(string email, string userName, string password)
     {
-        LogRegister();
+        throw new NotImplementedException();
+        /* LogRegister();
 
         if (userName == string.Empty)
         {
@@ -45,7 +46,7 @@ public partial class AuthenticationService : IAuthenticationService
             ImagePath = newUser.ImagePath,
             AccessToken = jwtToken,
             RefreshToken = refreshToken,
-        };
+        }; */
     }
 
     [LoggerMessage(

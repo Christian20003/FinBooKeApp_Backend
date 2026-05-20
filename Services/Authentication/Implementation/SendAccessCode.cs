@@ -8,7 +8,8 @@ public partial class AuthenticationService : IAuthenticationService
 
     public async Task SendAccessCode(string email)
     {
-        LogSendAccessCode();
+        throw new NotImplementedException();
+        /* LogSendAccessCode();
         if (!VerifyEmail(email))
         {
             LogInvalidEmail(email);
@@ -42,7 +43,7 @@ public partial class AuthenticationService : IAuthenticationService
         await _accountManager.UpdateUserAsync(user);
 
         _emailService.Send(email, subject, body);
-        LogSucceededSendAccessCode();
+        LogSucceededSendAccessCode(); */
     }
 
     [LoggerMessage(

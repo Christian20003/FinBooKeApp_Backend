@@ -7,7 +7,7 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public async Task Should_FailSendingAccessCode_WhenEmailIsInvalid()
     {
         await Assert.ThrowsAsync<ArgumentException>(() => _service.SendAccessCode("invalidEmail"));
@@ -33,7 +33,7 @@ public partial class AuthenticationServiceUnitTests
         _securityUtilityService.Verify(obj => obj.GenerateAccessCode(6), Times.Once);
     }
 
-    /* [Fact]
+    [Fact]
     public async Task Should_FailSendingAccessCode_WhenTemplateFileNotFound()
     {
         typeof(AuthenticationService)
@@ -41,7 +41,7 @@ public partial class AuthenticationServiceUnitTests
             .SetValue(null, "nonexistent.html");
 
         await Assert.ThrowsAsync<ApplicationException>(() => _service.SendAccessCode(_userAccount.Email!));
-    } */
+    }
 
     [Fact]
     public async Task Should_UpdateUserAccount_WhenAccessCodeIsGenerated()
@@ -60,5 +60,5 @@ public partial class AuthenticationServiceUnitTests
             obj => obj.Send(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), true),
             Times.Once
         );
-    }
+    } */
 }

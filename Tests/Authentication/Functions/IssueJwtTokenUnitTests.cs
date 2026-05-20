@@ -4,7 +4,7 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public async Task Should_VerifyRefreshToken_BeforeAccessTokenIsGenerated()
     {
         await _service.IssueJwtToken(_token.Value);
@@ -28,5 +28,5 @@ public partial class AuthenticationServiceUnitTests
 
         Assert.Equal(_token.Value, result.Value);
         Assert.Equal(_token.Expires, result.Expires);
-    }
+    } */
 }

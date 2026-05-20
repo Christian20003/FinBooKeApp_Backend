@@ -8,7 +8,8 @@ public partial class AuthenticationService : IAuthenticationService
 {
     public async Task<User> Login(string email, string password)
     {
-        LogLogin();
+        throw new NotImplementedException();
+        /* LogLogin();
         if (!VerifyEmail(email))
         {
             LogInvalidEmail(email);
@@ -35,7 +36,7 @@ public partial class AuthenticationService : IAuthenticationService
             ImagePath = user.ImagePath,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-        };
+        }; */
     }
 
     [LoggerMessage(

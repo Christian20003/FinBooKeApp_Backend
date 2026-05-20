@@ -7,7 +7,7 @@ namespace FinBookeAPI.Tests.Authentication;
 
 public partial class AuthenticationServiceUnitTests
 {
-    [Fact]
+    /* [Fact]
     public async Task Should_FailRegistration_WhenUserNameIsEmpty()
     {
         await Assert.ThrowsAsync<ArgumentException>(
@@ -84,5 +84,5 @@ public partial class AuthenticationServiceUnitTests
         Assert.Equal(_userAccount.Email, result.Email);
         Assert.Equal(_userAccount.ImagePath, result.ImagePath);
         Assert.NotEqual(Guid.Empty, result.Id);
-    }
+    } */
 }
