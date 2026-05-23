@@ -38,25 +38,4 @@ public partial class AuthenticationService : IAuthenticationService
             RefreshToken = refreshToken,
         }; */
     }
-
-    [LoggerMessage(
-        EventId = LogEvents.AuthenticationLogin,
-        Level = LogLevel.Information,
-        Message = "Authentication: Try to login user"
-    )]
-    private partial void LogLogin();
-
-    [LoggerMessage(
-        EventId = LogEvents.AuthenticationRevokedAccount,
-        Level = LogLevel.Error,
-        Message = "Authentication: Revoked account of - {UserId}"
-    )]
-    private partial void LogRevokedAccount(string userId);
-
-    [LoggerMessage(
-        EventId = LogEvents.AuthenticationSucceededLogin,
-        Level = LogLevel.Information,
-        Message = "Authentication: Successful login of user - {UserId}"
-    )]
-    private partial void LogSucceededLogin(string userId);
 }

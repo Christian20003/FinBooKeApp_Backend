@@ -58,11 +58,20 @@ namespace FinBooKeAPI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello World.
+        ///   Looks up a localized string similar to The given value is not a valid email address.
         /// </summary>
-        internal static string Message {
+        internal static string Email {
             get {
-                return ResourceManager.GetString("Message", resourceCulture);
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password is missing.
+        /// </summary>
+        internal static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
             }
         }
     }

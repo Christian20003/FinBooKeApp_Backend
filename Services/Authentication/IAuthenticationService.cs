@@ -1,7 +1,9 @@
 using System.Net.Mail;
 using System.Security.Authentication;
 using FinBookeAPI.Models.Database.Authentication;
+using FinBooKeAPI.Models.DTO.Authentication;
 using FinBookeAPI.Models.Exceptions;
+using FinBookeAPI.Models.Result;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,30 +12,11 @@ namespace FinBookeAPI.Services.Authentication;
 public interface IAuthenticationService
 {
     /// <summary>
-    /// This method processes a login attempt by using the provided login data.
+    /// Tries to login a user with provided credentials to this API.
     /// </summary>
-    /// <param name="email">
-    /// The email address of the user who wants to log in.
-    /// </param>
-    /// <param name="password">
-    /// The password of the user who wants to log in.
-    /// </param>
-    /// <returns>
-    /// A user object with all important properties from the user account.
-    /// </returns>
-    /// <exception cref="ArgumentException">
-    /// If the provided email address is not valid.
-    /// </exception>
-    /// <exception cref="InvalidCredentialException">
-    /// If the provided email address and password cannot be assigned to a stored user account.
-    /// </exception>
-    /// <exception cref="ResourceLockedException">
-    /// If the user account is locked due to incorrect login attempts or user interaction.
-    /// </exception>
-    /// <exception cref="ApplicationException">
-    /// If configuration data for authentication is null or invalid.
-    /// </exception>
-    public Task<User> Login(string email, string password);
+    /// <param name="loginData">The login credentials</param>
+    /// <returns>The user data if the login was successful.</returns>
+    public Task<Result<UserDTO>> LoginAsync(LoginDTO loginData);
 
     /// <summary>
     /// This method process a register request by generating a new user account.

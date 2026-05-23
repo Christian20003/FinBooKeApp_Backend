@@ -50,13 +50,6 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogPasswordValidation(string userId);
 
     [LoggerMessage(
-        EventId = LogEvents.AuthenticationInvalidCredentials,
-        Level = LogLevel.Error,
-        Message = "Authentication: Invalid password for user - {UserId}"
-    )]
-    private partial void LogInvalidPassword(string userId);
-
-    [LoggerMessage(
         EventId = LogEvents.AuthenticationLockedAccount,
         Level = LogLevel.Error,
         Message = "Authentication: Locked user account of - {UserId}"

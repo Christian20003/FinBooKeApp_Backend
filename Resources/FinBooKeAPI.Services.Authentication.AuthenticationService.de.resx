@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Email" xml:space="preserve">
-    <value>The given value is not a valid email address</value>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Email oder Passwort is ungültig</value>
   </data>
-  <data name="Password" xml:space="preserve">
-    <value>Password is missing</value>
+  <data name="AccountLocked" xml:space="preserve">
+    <value>Dein Account ist aufgrund zu vieler Fehlversuche temporär gesperrt</value>
   </data>
 </root>
