@@ -16,7 +16,7 @@ public static class UserMapper
     {
         return new UserDTO
         {
-            Email = protection.Protect(user.Email!),
+            Email = protection.Unprotect(user.Email!),
             Name = user.UserName!,
             ImagePath = user.ImagePath,
             Session = new SessionDTO
