@@ -176,6 +176,36 @@ public class AuthenticationServiceUnitTest
     }
 
     [Fact]
+    public async Task Should_FailLogin_WhenRefreshTokenCouldNotBeStored()
+    {
+        var token = GetAuthenticationToken();
+        var account = GetUserAccount();
+        var loginData = GetLoginDTO();
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(account);
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .ReturnsAsync(IdentityResult.Failed([]));
+        _signInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.Success);
+        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
+
+        var result = await _service.LoginAsync(loginData);
+
+        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+    }
+
+    [Fact]
     public async Task Should_SucceedLogin_WhenCredentialsAreValid()
     {
         var token = GetAuthenticationToken();
@@ -184,6 +214,11 @@ public class AuthenticationServiceUnitTest
         _accountCollection
             .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
             .ReturnsAsync(account);
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .ReturnsAsync(IdentityResult.Success);
         _signInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
@@ -210,6 +245,11 @@ public class AuthenticationServiceUnitTest
         _accountCollection
             .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
             .ReturnsAsync(account);
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .ReturnsAsync(IdentityResult.Success);
         _signInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
@@ -233,5 +273,50 @@ public class AuthenticationServiceUnitTest
         var user = result.Value!;
 
         Assert.Equal(loginData.Email, user.Email);
+    }
+
+    [Fact]
+    public async Task Should_StoreRefreshToken_WhenLoginWasSuccessuful()
+    {
+        var token = GetAuthenticationToken();
+        var account = GetUserAccount();
+        var loginData = GetLoginDTO();
+        string? authenticationToken = null;
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(account);
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .Callback<UserAccount, string>(
+                (account, token) =>
+                {
+                    authenticationToken = token;
+                }
+            )
+            .ReturnsAsync(IdentityResult.Success);
+        _signInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.Success);
+        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
+        _protection
+            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
+            .Returns<string>(
+                (value) =>
+                {
+                    return value;
+                }
+            );
+
+        _ = await _service.LoginAsync(loginData);
+
+        Assert.Equal(token.Value, authenticationToken);
     }
 }

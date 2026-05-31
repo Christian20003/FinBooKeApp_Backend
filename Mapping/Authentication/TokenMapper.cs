@@ -23,7 +23,7 @@ public static class TokenMapper
         };
     }
 
-    public static CreateTokenPayload GetRefreshTokenCreatePayload(
+    public static CreateTokenPayload GetRefreshTokenCreateTokenPayload(
         IEnumerable<Claim> claims,
         DateTime Expiration,
         IOptions<AuthenticationSettings> authenticationSettings

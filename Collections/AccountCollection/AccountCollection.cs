@@ -17,7 +17,7 @@ public class AccountCollection(UserManager<UserAccount> userManager) : IAccountC
         return await _userManager.CreateAsync(user, password);
     }
 
-    public async Task<IdentityResult> DeleteAccountRefreshToken(UserAccount user)
+    public async Task<IdentityResult> DeleteAccountRefreshTokenAsync(UserAccount user)
     {
         return await _userManager.RemoveAuthenticationTokenAsync(
             user,
@@ -36,7 +36,7 @@ public class AccountCollection(UserManager<UserAccount> userManager) : IAccountC
         return await _userManager.Users.FirstOrDefaultAsync(condition);
     }
 
-    public async Task<string?> GetAccountRefreshToken(UserAccount user)
+    public async Task<string?> GetAccountRefreshTokenAsync(UserAccount user)
     {
         return await _userManager.GetAuthenticationTokenAsync(
             user,
@@ -54,7 +54,10 @@ public class AccountCollection(UserManager<UserAccount> userManager) : IAccountC
         return await _userManager.ResetPasswordAsync(user, token, password);
     }
 
-    public async Task<IdentityResult> SetAccountRefreshToken(UserAccount user, string refreshToken)
+    public async Task<IdentityResult> SetAccountRefreshTokenAsync(
+        UserAccount user,
+        string refreshToken
+    )
     {
         return await _userManager.SetAuthenticationTokenAsync(
             user,

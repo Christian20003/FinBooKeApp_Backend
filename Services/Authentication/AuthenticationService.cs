@@ -3,7 +3,6 @@ using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
 using FinBooKeAPI.Logic.Security;
 using FinBooKeAPI.Mapping.Authentication;
-using FinBookeAPI.Models.Configuration;
 using FinBookeAPI.Models.Database.Authentication;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBookeAPI.Models.Result;
@@ -11,7 +10,6 @@ using FinBooKeAPI.Models.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi;
 
 namespace FinBookeAPI.Services.Authentication;
 
@@ -56,13 +54,17 @@ public partial class AuthenticationService(
             LogInvalidCredentials(loginData.Email);
             return Result.BadRequest<UserDTO>(_localizer.GetString("InvalidCredentials"));
         }
-        var result = await _signInManager.CheckPasswordSignInAsync(user, loginData.Password, true);
-        if (result.IsLockedOut)
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(
+            user,
+            loginData.Password,
+            true
+        );
+        if (signInResult.IsLockedOut)
         {
             LogAccountLock(loginData.Email);
             return Result.Forbidden<UserDTO>(_localizer.GetString("AccountLocked"));
         }
-        if (!result.Succeeded)
+        if (!signInResult.Succeeded)
         {
             LogInvalidCredentials(loginData.Email);
             return Result.BadRequest<UserDTO>(_localizer.GetString("InvalidCredentials"));
@@ -76,15 +78,25 @@ public partial class AuthenticationService(
             expirationAccessToken,
             _authenticationSettings
         );
-        var refreshTokenPayload = TokenMapper.GetRefreshTokenCreatePayload(
+        var refreshTokenPayload = TokenMapper.GetRefreshTokenCreateTokenPayload(
             claims,
             expirationRefreshToken,
             _authenticationSettings
         );
         var accessToken = _tokenProvider.CreateToken(accessTokenPayload);
         var refreshToken = _tokenProvider.CreateToken(refreshTokenPayload);
-        var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
+        var tokenResult = await _accountCollection.SetAccountRefreshTokenAsync(
+            user,
+            refreshToken.Value
+        );
+        if (!tokenResult.Succeeded)
+        {
+            var messages = tokenResult.Errors.Select(error => error.Description).ToList();
+            LogInternalError(messages);
+            return Result.InternalError<UserDTO>(messages);
+        }
 
+        var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
         LogLoginSuccess(loginData.Email);
         return Result.Ok(userDTO);
     }

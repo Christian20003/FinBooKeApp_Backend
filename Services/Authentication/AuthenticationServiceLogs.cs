@@ -31,4 +31,11 @@ public partial class AuthenticationService : IAuthenticationService
         Message = "Authentication: Account locked - {Email}"
     )]
     private partial void LogAccountLock(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInternalError,
+        Level = LogLevel.Critical,
+        Message = "Authentication: Internal error - {Messages}"
+    )]
+    private partial void LogInternalError(List<string> messages);
 }

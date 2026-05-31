@@ -94,7 +94,7 @@ public static class LogEvents
     public const int AuthenticationInvalidAccessCode = 4004;
     public const int AuthenticationLockedAccount = 4005;
     public const int AuthenticationExpiredAccessCode = 4006;
-    public const int AuthenticationRevokedAccount = 4007;
+    public const int AuthenticationInternalError = 4007;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;
