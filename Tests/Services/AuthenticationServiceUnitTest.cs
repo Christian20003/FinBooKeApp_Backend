@@ -32,6 +32,9 @@ public class AuthenticationServiceUnitTest
 
     private readonly AuthenticationService _service;
 
+    private readonly List<UserAccount> _userDatabase = [];
+    private readonly List<string> _refreshTokenDatabase = [];
+
     public AuthenticationServiceUnitTest()
     {
         var userManager = new Mock<UserManager<UserAccount>>(
@@ -66,8 +69,6 @@ public class AuthenticationServiceUnitTest
         _localizer = new Mock<IStringLocalizer<AuthenticationService>>();
         _logger = new Mock<ILogger<AuthenticationService>>();
 
-        _authenticationSettings.Setup(obj => obj.Value).Returns(GetAuthenticationSettings());
-
         _service = new AuthenticationService(
             _signInManager.Object,
             _accountCollection.Object,
@@ -83,12 +84,7 @@ public class AuthenticationServiceUnitTest
         );
     }
 
-    public static LoginDTO GetLoginDTO()
-    {
-        return new LoginDTO { Email = "email", Password = "password" };
-    }
-
-    public static UserAccount GetUserAccount()
+    private static UserAccount GetUserAccount()
     {
         return new UserAccount
         {
@@ -96,33 +92,105 @@ public class AuthenticationServiceUnitTest
             UserName = "name",
             Email = "email",
             ImagePath = "path",
-            PasswordHash = "hash",
+            PasswordHash = "password",
         };
     }
 
-    public static AuthenticationSettings GetAuthenticationSettings()
+    private static AuthenticationSettings GetAuthenticationSettings()
     {
         return new AuthenticationSettings
         {
             Issuer = "issuer",
             Audience = "audience",
-            AccessTokenSecret = "secret",
-            RefreshTokenSecret = "secret",
+            AccessTokenSecret = "accessSecret",
+            RefreshTokenSecret = "refreshSecret",
         };
     }
 
-    public static AuthenticationToken GetAuthenticationToken()
+    private static AuthenticationToken GetAccessToken()
     {
-        return new AuthenticationToken { Value = "token", Expires = DateTime.UtcNow.Ticks };
+        return new AuthenticationToken { Value = "access", Expires = DateTime.UtcNow.Ticks };
+    }
+
+    private static AuthenticationToken GetRefreshToken()
+    {
+        return new AuthenticationToken { Value = "refresh", Expires = DateTime.UtcNow.Ticks };
+    }
+
+    private void SetupLogin()
+    {
+        var account = GetUserAccount();
+        _userDatabase.Add(account);
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(
+                (Expression<Func<UserAccount, bool>> condition) =>
+                {
+                    return _userDatabase.FirstOrDefault(condition.Compile());
+                }
+            );
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .Callback<UserAccount, string>(
+                (account, token) =>
+                {
+                    _refreshTokenDatabase.Add(token);
+                }
+            )
+            .ReturnsAsync(IdentityResult.Success);
+        _signInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(
+                (UserAccount account, string password, bool lockout) =>
+                {
+                    if (account.PasswordHash != password)
+                    {
+                        return SignInResult.Failed;
+                    }
+                    return SignInResult.Success;
+                }
+            );
+
+        var settings = GetAuthenticationSettings();
+        var accessToken = GetAccessToken();
+        var refreshToken = GetRefreshToken();
+        _tokenProvider
+            .Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>()))
+            .Returns<CreateTokenPayload>(
+                (payload) =>
+                {
+                    if (payload.Secret == settings.AccessTokenSecret)
+                    {
+                        return accessToken;
+                    }
+                    return refreshToken;
+                }
+            );
+        _authenticationSettings.Setup(obj => obj.Value).Returns(settings);
+
+        _protection
+            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
+            .Returns<string>(
+                (value) =>
+                {
+                    return value;
+                }
+            );
     }
 
     [Fact]
     public async Task Should_FailLogin_WhenEmailIsInvalid()
     {
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync((UserAccount?)null);
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "invalidEmail", Password = "password" };
 
         var result = await _service.LoginAsync(loginData);
 
@@ -132,11 +200,9 @@ public class AuthenticationServiceUnitTest
     [Fact]
     public async Task Should_FailLogin_WhenAccountIsLocked()
     {
+        SetupLogin();
         var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
         _signInManager
             .Setup(obj =>
                 obj.CheckPasswordSignInAsync(
@@ -155,20 +221,8 @@ public class AuthenticationServiceUnitTest
     [Fact]
     public async Task Should_FailLogin_WhenPasswordIsInvalid()
     {
-        var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
-        _signInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserAccount>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Failed);
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "invalidPassword" };
 
         var result = await _service.LoginAsync(loginData);
 
@@ -178,27 +232,13 @@ public class AuthenticationServiceUnitTest
     [Fact]
     public async Task Should_FailLogin_WhenRefreshTokenCouldNotBeStored()
     {
-        var token = GetAuthenticationToken();
-        var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
         _accountCollection
             .Setup(obj =>
                 obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
             )
             .ReturnsAsync(IdentityResult.Failed([]));
-        _signInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserAccount>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
-        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
 
         var result = await _service.LoginAsync(loginData);
 
@@ -208,27 +248,8 @@ public class AuthenticationServiceUnitTest
     [Fact]
     public async Task Should_SucceedLogin_WhenCredentialsAreValid()
     {
-        var token = GetAuthenticationToken();
-        var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
-        _accountCollection
-            .Setup(obj =>
-                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
-            )
-            .ReturnsAsync(IdentityResult.Success);
-        _signInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserAccount>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
-        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
 
         var result = await _service.LoginAsync(loginData);
 
@@ -239,35 +260,8 @@ public class AuthenticationServiceUnitTest
     [Fact]
     public async Task Should_ReturnCorrectUserAccount_WhenLoginWasSuccessuful()
     {
-        var token = GetAuthenticationToken();
-        var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
-        _accountCollection
-            .Setup(obj =>
-                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
-            )
-            .ReturnsAsync(IdentityResult.Success);
-        _signInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserAccount>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
-        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
-        _protection
-            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
-            .Returns<string>(
-                (value) =>
-                {
-                    return value;
-                }
-            );
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
 
         var result = await _service.LoginAsync(loginData);
         var user = result.Value!;
@@ -276,47 +270,25 @@ public class AuthenticationServiceUnitTest
     }
 
     [Fact]
+    public async Task Should_ReturnDifferentTokens_WhenLoginWasSuccessuful()
+    {
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
+
+        var result = await _service.LoginAsync(loginData);
+        var user = result.Value!;
+
+        Assert.NotEqual(user.Session.AccessToken, user.Session.RefreshToken);
+    }
+
+    [Fact]
     public async Task Should_StoreRefreshToken_WhenLoginWasSuccessuful()
     {
-        var token = GetAuthenticationToken();
-        var account = GetUserAccount();
-        var loginData = GetLoginDTO();
-        string? authenticationToken = null;
-        _accountCollection
-            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
-            .ReturnsAsync(account);
-        _accountCollection
-            .Setup(obj =>
-                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
-            )
-            .Callback<UserAccount, string>(
-                (account, token) =>
-                {
-                    authenticationToken = token;
-                }
-            )
-            .ReturnsAsync(IdentityResult.Success);
-        _signInManager
-            .Setup(obj =>
-                obj.CheckPasswordSignInAsync(
-                    It.IsAny<UserAccount>(),
-                    It.IsAny<string>(),
-                    It.IsAny<bool>()
-                )
-            )
-            .ReturnsAsync(SignInResult.Success);
-        _tokenProvider.Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>())).Returns(token);
-        _protection
-            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
-            .Returns<string>(
-                (value) =>
-                {
-                    return value;
-                }
-            );
+        SetupLogin();
+        var loginData = new LoginDTO { Email = "email", Password = "password" };
 
-        _ = await _service.LoginAsync(loginData);
+        var result = await _service.LoginAsync(loginData);
 
-        Assert.Equal(token.Value, authenticationToken);
+        Assert.Contains(result.Value!.Session.RefreshToken, _refreshTokenDatabase);
     }
 }
