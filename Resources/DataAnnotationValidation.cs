@@ -74,5 +74,14 @@ namespace FinBooKeAPI {
                 return ResourceManager.GetString("Password", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username is missing.
+        /// </summary>
+        internal static string Username {
+            get {
+                return ResourceManager.GetString("Username", resourceCulture);
+            }
+        }
     }
 }

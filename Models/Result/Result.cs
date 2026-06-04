@@ -6,6 +6,9 @@ public static class Result
 {
     public static Result<T> Ok<T>(T value) => new(true, value, ErrorType.NONE, [""]);
 
+    public static Result<T> BadRequest<T>(List<string> messages) =>
+        new(false, default, ErrorType.BAD_REQUEST, messages);
+
     public static Result<T> BadRequest<T>(string message) =>
         new(false, default, ErrorType.BAD_REQUEST, [message]);
 

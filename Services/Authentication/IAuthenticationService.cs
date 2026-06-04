@@ -15,35 +15,15 @@ public interface IAuthenticationService
     /// Tries to login a user with provided credentials to this API.
     /// </summary>
     /// <param name="loginData">The login credentials</param>
-    /// <returns>The user data if the login was successful.</returns>
+    /// <returns>The user account data if the login was successful</returns>
     public Task<Result<UserDTO>> LoginAsync(LoginDTO loginData);
 
     /// <summary>
-    /// This method process a register request by generating a new user account.
+    /// Tries to register a new user with provided credentials to this API.
     /// </summary>
-    /// <param name="email">
-    /// The email address of the new user account.
-    /// </param>
-    /// <param name="userName">
-    /// The username of the new user account.
-    /// </param>
-    /// <param name="password">
-    /// The password of the new user account.
-    /// </param>
-    /// <returns>
-    /// An user object with all relevant user data.
-    /// </returns>
-    /// <exception cref="ArgumentException">
-    /// If the provided email is not a valid email address or the user name is an empty string.
-    /// </exception>
-    /// <exception cref="IdentityResultException">
-    /// If at least a user account condition is violated
-    /// (e.g. username is already in use, password has not the required length or strength)
-    /// </exception>
-    /// <exception cref="ApplicationException">
-    /// If configuration data for authentication is null or invalid.
-    /// </exception>
-    public Task<User> Register(string email, string userName, string password);
+    /// <param name="registerData">The data for registration</param>
+    /// <returns> The user account data if the registration was successful</returns>
+    public Task<Result<UserDTO>> RegisterAsync(RegisterDTO registerData);
 
     /// <summary>
     /// This method sends a new generated access code to the provided email through an SMTP-Server and stores the result.

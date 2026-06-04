@@ -12,11 +12,25 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogLogin(string email);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationRegister,
+        Level = LogLevel.Information,
+        Message = "Authentication: Register user - {Email}"
+    )]
+    private partial void LogRegister(string email);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationLoginSuccess,
         Level = LogLevel.Information,
         Message = "Authentication: Successful login - {Email}"
     )]
     private partial void LogLoginSuccess(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationRegisterSuccess,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful registration - {Email}"
+    )]
+    private partial void LogRegisterSuccess(string email);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationInvalidCredentials,

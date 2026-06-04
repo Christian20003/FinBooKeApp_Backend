@@ -186,6 +186,64 @@ public class AuthenticationServiceUnitTest
             );
     }
 
+    private void SetupRegister()
+    {
+        _accountCollection
+            .Setup(obj => obj.CreateAccountAsync(It.IsAny<UserAccount>(), It.IsAny<string>()))
+            .ReturnsAsync(
+                (UserAccount account, string password) =>
+                {
+                    _userDatabase.Add(account);
+                    return IdentityResult.Success;
+                }
+            );
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .ReturnsAsync(
+                (UserAccount account, string token) =>
+                {
+                    _refreshTokenDatabase.Add(token);
+                    return IdentityResult.Success;
+                }
+            );
+
+        var settings = GetAuthenticationSettings();
+        var accessToken = GetAccessToken();
+        var refreshToken = GetRefreshToken();
+        _tokenProvider
+            .Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>()))
+            .Returns<CreateTokenPayload>(
+                (payload) =>
+                {
+                    if (payload.Secret == settings.AccessTokenSecret)
+                    {
+                        return accessToken;
+                    }
+                    return refreshToken;
+                }
+            );
+        _authenticationSettings.Setup(obj => obj.Value).Returns(settings);
+
+        _protection
+            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
+            .Returns<string>(
+                (value) =>
+                {
+                    return value;
+                }
+            );
+        _protection
+            .Setup(obj => obj.Protect(It.IsAny<string>()))
+            .Returns<string>(
+                (value) =>
+                {
+                    return value;
+                }
+            );
+    }
+
     [Fact]
     public async Task Should_FailLogin_WhenEmailIsInvalid()
     {
@@ -290,5 +348,131 @@ public class AuthenticationServiceUnitTest
         var result = await _service.LoginAsync(loginData);
 
         Assert.Contains(result.Value!.Session.RefreshToken, _refreshTokenDatabase);
+    }
+
+    [Fact]
+    public async Task Should_FailRegister_WhenCredentialConditionsAreNotMet()
+    {
+        SetupRegister();
+        _accountCollection
+            .Setup(obj => obj.CreateAccountAsync(It.IsAny<UserAccount>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.Empty(_userDatabase);
+    }
+
+    [Fact]
+    public async Task Should_FailRegister_WhenRefreshTokenCouldNotBeStored()
+    {
+        SetupRegister();
+        _accountCollection
+            .Setup(obj =>
+                obj.SetAccountRefreshTokenAsync(It.IsAny<UserAccount>(), It.IsAny<string>())
+            )
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+        Assert.Empty(_refreshTokenDatabase);
+    }
+
+    [Fact]
+    public async Task Should_SucceedRegister_WhenCredentialsAreValid()
+    {
+        SetupRegister();
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+    }
+
+    [Fact]
+    public async Task Should_ReturnCorrectUserAccount_WhenRegisterWasSuccessuful()
+    {
+        SetupRegister();
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        Assert.Equal(registerData.Email, result.Value!.Email);
+        Assert.Equal(registerData.Username, result.Value!.Name);
+    }
+
+    [Fact]
+    public async Task Should_StoreNewUserAccount_WhenRegisterWasSuccessuful()
+    {
+        SetupRegister();
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        var account = _userDatabase.First();
+        Assert.Equal(registerData.Email, account.Email);
+        Assert.Equal(registerData.Username, account.UserName);
+    }
+
+    [Fact]
+    public async Task Should_ReturnDifferentTokens_WhenRegisterWasSuccessuful()
+    {
+        SetupRegister();
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        Assert.NotEqual(result.Value!.Session.AccessToken, result.Value!.Session.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Should_StoreRefreshToken_WhenRegisterWasSuccessuful()
+    {
+        SetupRegister();
+
+        var registerData = new RegisterDTO
+        {
+            Username = "username",
+            Email = "email",
+            Password = "password",
+        };
+        var result = await _service.RegisterAsync(registerData);
+
+        var token = _refreshTokenDatabase.First();
+        Assert.Equal(token, result.Value!.Session.RefreshToken);
     }
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FinBooKeAPI.Collections.AccountCollection;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
@@ -5,6 +6,7 @@ using FinBooKeAPI.Logic.Security;
 using FinBooKeAPI.Mapping.Authentication;
 using FinBookeAPI.Models.Database.Authentication;
 using FinBooKeAPI.Models.DTO.Authentication;
+using FinBooKeAPI.Models.Logic.Authentication;
 using FinBookeAPI.Models.Result;
 using FinBooKeAPI.Models.Settings;
 using Microsoft.AspNetCore.Identity;
@@ -27,9 +29,6 @@ public partial class AuthenticationService(
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
 {
-    private const long ACCESS_TOKEN_LIFETIME = 600; // seconds
-    private const long REFRESH_TOKEN_LIFETIME = 86400; // seconds
-
     private readonly SignInManager<UserAccount> _signInManager = signInManager;
     private readonly IAccountCollection _accountCollection = accountCollection;
     private readonly ITokenProvider _tokenProvider = tokenProvider;
@@ -52,7 +51,7 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidCredentials(loginData.Email);
-            return Result.BadRequest<UserDTO>(_localizer.GetString("InvalidCredentials"));
+            return Result.BadRequest<UserDTO>(_localizer.GetString(INVALID_CREDENTIALS_KEY));
         }
         var signInResult = await _signInManager.CheckPasswordSignInAsync(
             user,
@@ -62,29 +61,17 @@ public partial class AuthenticationService(
         if (signInResult.IsLockedOut)
         {
             LogAccountLock(loginData.Email);
-            return Result.Forbidden<UserDTO>(_localizer.GetString("AccountLocked"));
+            return Result.Forbidden<UserDTO>(_localizer.GetString(ACCOUNT_LOCKED_KEY));
         }
         if (!signInResult.Succeeded)
         {
             LogInvalidCredentials(loginData.Email);
-            return Result.BadRequest<UserDTO>(_localizer.GetString("InvalidCredentials"));
+            return Result.BadRequest<UserDTO>(_localizer.GetString(INVALID_CREDENTIALS_KEY));
         }
 
         var claims = _claimProvider.CreateClaims(user.Id, _protection.Unprotect(user.Email!));
-        var expirationAccessToken = DateTime.UtcNow.AddSeconds(ACCESS_TOKEN_LIFETIME);
-        var expirationRefreshToken = DateTime.UtcNow.AddSeconds(REFRESH_TOKEN_LIFETIME);
-        var accessTokenPayload = TokenMapper.GetAccessTokenCreateTokenPayload(
-            claims,
-            expirationAccessToken,
-            _authenticationSettings
-        );
-        var refreshTokenPayload = TokenMapper.GetRefreshTokenCreateTokenPayload(
-            claims,
-            expirationRefreshToken,
-            _authenticationSettings
-        );
-        var accessToken = _tokenProvider.CreateToken(accessTokenPayload);
-        var refreshToken = _tokenProvider.CreateToken(refreshTokenPayload);
+        var accessToken = GetAccessToken(claims);
+        var refreshToken = GetRefreshToken(claims);
         var tokenResult = await _accountCollection.SetAccountRefreshTokenAsync(
             user,
             refreshToken.Value
@@ -99,5 +86,63 @@ public partial class AuthenticationService(
         var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
         LogLoginSuccess(loginData.Email);
         return Result.Ok(userDTO);
+    }
+
+    public async Task<Result<UserDTO>> RegisterAsync(RegisterDTO registerData)
+    {
+        LogRegister(registerData.Email);
+        var user = new UserAccount
+        {
+            UserName = registerData.Username,
+            Email = _protection.Protect(registerData.Email),
+        };
+        var registerResult = await _accountCollection.CreateAccountAsync(
+            user,
+            registerData.Password
+        );
+        if (!registerResult.Succeeded)
+        {
+            var messages = registerResult.Errors.Select(error => error.Description).ToList();
+            LogInvalidCredentials(registerData.Email);
+            return Result.BadRequest<UserDTO>(messages);
+        }
+        var claims = _claimProvider.CreateClaims(user.Id, _protection.Unprotect(user.Email!));
+        var accessToken = GetAccessToken(claims);
+        var refreshToken = GetRefreshToken(claims);
+        var tokenResult = await _accountCollection.SetAccountRefreshTokenAsync(
+            user,
+            refreshToken.Value
+        );
+        if (!tokenResult.Succeeded)
+        {
+            var messages = tokenResult.Errors.Select(error => error.Description).ToList();
+            LogInternalError(messages);
+            return Result.InternalError<UserDTO>(messages);
+        }
+        var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
+        LogRegisterSuccess(registerData.Email);
+        return Result.Ok(userDTO);
+    }
+
+    private AuthenticationToken GetAccessToken(IEnumerable<Claim> claims)
+    {
+        var expirationAccessToken = DateTime.UtcNow.AddSeconds(ACCESS_TOKEN_LIFETIME);
+        var accessTokenPayload = TokenMapper.GetAccessTokenCreateTokenPayload(
+            claims,
+            expirationAccessToken,
+            _authenticationSettings
+        );
+        return _tokenProvider.CreateToken(accessTokenPayload);
+    }
+
+    private AuthenticationToken GetRefreshToken(IEnumerable<Claim> claims)
+    {
+        var expirationRefreshToken = DateTime.UtcNow.AddSeconds(REFRESH_TOKEN_LIFETIME);
+        var refreshTokenPayload = TokenMapper.GetRefreshTokenCreateTokenPayload(
+            claims,
+            expirationRefreshToken,
+            _authenticationSettings
+        );
+        return _tokenProvider.CreateToken(refreshTokenPayload);
     }
 }

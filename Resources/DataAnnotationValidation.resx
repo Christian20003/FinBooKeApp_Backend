@@ -123,4 +123,7 @@
   <data name="Password" xml:space="preserve">
     <value>Password is missing</value>
   </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username is missing</value>
+  </data>
 </root>

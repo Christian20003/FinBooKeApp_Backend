@@ -49,7 +49,7 @@ public static class LogEvents
     // 2000 - 2999
 
     public const int AuthenticationLoginSuccess = 2000;
-    public const int AuthenticationSucceededRegister = 2001;
+    public const int AuthenticationRegisterSuccess = 2001;
     public const int AuthenticationSucceededLogout = 2002;
     public const int AuthenticationTokenCreated = 2003;
     public const int AuthenticationSucceededResetPassword = 2004;
