@@ -80,7 +80,7 @@ public partial class AuthenticationService(
         {
             var messages = tokenResult.Errors.Select(error => error.Description).ToList();
             LogInternalError(messages);
-            return Result.InternalError<UserDTO>(messages);
+            return Result.InternalError<UserDTO>(_localizer.GetString(INTERNAL_ERROR_KEY));
         }
 
         var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
@@ -117,7 +117,7 @@ public partial class AuthenticationService(
         {
             var messages = tokenResult.Errors.Select(error => error.Description).ToList();
             LogInternalError(messages);
-            return Result.InternalError<UserDTO>(messages);
+            return Result.InternalError<UserDTO>(_localizer.GetString(INTERNAL_ERROR_KEY));
         }
         var userDTO = UserMapper.GetUserDTO(user, accessToken, refreshToken, _protection);
         LogRegisterSuccess(registerData.Email);

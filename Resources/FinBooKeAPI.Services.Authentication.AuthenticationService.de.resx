@@ -123,4 +123,7 @@
   <data name="AccountLocked" xml:space="preserve">
     <value>Dein Account ist aufgrund zu vieler Fehlversuche temporär gesperrt</value>
   </data>
+  <data name="InternalError" xml:space="preserve">
+    <value>Es ist ein unerwarteter Fehler eingetreten. Bitte versuche es später erneut.</value>
+  </data>
 </root>

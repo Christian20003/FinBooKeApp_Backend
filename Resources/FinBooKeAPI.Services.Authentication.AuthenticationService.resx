@@ -123,4 +123,7 @@
   <data name="AccountLocked" xml:space="preserve">
     <value>Your account has been temporarily suspended due to too many failed login attempts</value>
   </data>
+  <data name="InternalError" xml:space="preserve">
+    <value>Something went wrong during processing your request. Please try it again later.</value>
+  </data>
 </root>
