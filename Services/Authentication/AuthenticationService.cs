@@ -21,6 +21,7 @@ public partial class AuthenticationService(
     ITokenProvider tokenProvider,
     IClaimProvider claimProvider,
     IDataProtection protection,
+    IHashProvider hashProvider,
     IEmailProvider emailProvider,
     IEmailTemplateBuilder emailTemplateBuilder,
     IOptions<AuthenticationSettings> authenticationSettings,
@@ -34,6 +35,7 @@ public partial class AuthenticationService(
     private readonly ITokenProvider _tokenProvider = tokenProvider;
     private readonly IClaimProvider _claimProvider = claimProvider;
     private readonly IDataProtection _protection = protection;
+    private readonly IHashProvider _hashProvider = hashProvider;
     private readonly IEmailProvider _emailProvider = emailProvider;
     private readonly IEmailTemplateBuilder _emailTemplateBuilder = emailTemplateBuilder;
     private readonly IOptions<AuthenticationSettings> _authenticationSettings =
@@ -45,8 +47,9 @@ public partial class AuthenticationService(
     public async Task<Result<UserDTO>> LoginAsync(LoginDTO loginData)
     {
         LogLogin(loginData.Email);
+        var hashedEmail = _hashProvider.Hash(loginData.Email);
         var user = await _accountCollection.GetAccountAsync(account =>
-            _protection.Unprotect(account.Email!) == loginData.Email
+            account.EmailHash! == hashedEmail
         );
         if (user is null)
         {
@@ -95,6 +98,7 @@ public partial class AuthenticationService(
         {
             UserName = registerData.Username,
             Email = _protection.Protect(registerData.Email),
+            EmailHash = _hashProvider.Hash(registerData.Email),
         };
         var registerResult = await _accountCollection.CreateAccountAsync(
             user,

@@ -11,6 +11,7 @@ using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
+using FinBooKeAPI.Logic.Security;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Services.AmountManagement;
 using FinBookeAPI.Services.Authentication;
@@ -50,6 +51,8 @@ builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IClaimProvider, ClaimProvider>();
 builder.Services.AddScoped<IEmailProvider, EmailProvider>();
 builder.Services.AddScoped<IEmailTemplateBuilder, EmailTemplateBuilder>();
+builder.Services.AddScoped<IDataProtection, DataProtection>();
+builder.Services.AddScoped<IHashProvider, HashProvider>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

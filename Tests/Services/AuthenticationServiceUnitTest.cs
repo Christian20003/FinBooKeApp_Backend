@@ -23,6 +23,7 @@ public class AuthenticationServiceUnitTest
     private readonly Mock<ITokenProvider> _tokenProvider;
     private readonly Mock<IClaimProvider> _claimProvider;
     private readonly Mock<IDataProtection> _protection;
+    private readonly Mock<IHashProvider> _hashProvider;
     private readonly Mock<IEmailProvider> _emailProvider;
     private readonly Mock<IEmailTemplateBuilder> _emailTemplateBuilder;
     private readonly Mock<IOptions<AuthenticationSettings>> _authenticationSettings;
@@ -62,6 +63,7 @@ public class AuthenticationServiceUnitTest
         _tokenProvider = new Mock<ITokenProvider>();
         _claimProvider = new Mock<IClaimProvider>();
         _protection = new Mock<IDataProtection>();
+        _hashProvider = new Mock<IHashProvider>();
         _emailProvider = new Mock<IEmailProvider>();
         _emailTemplateBuilder = new Mock<IEmailTemplateBuilder>();
         _authenticationSettings = new Mock<IOptions<AuthenticationSettings>>();
@@ -75,6 +77,7 @@ public class AuthenticationServiceUnitTest
             _tokenProvider.Object,
             _claimProvider.Object,
             _protection.Object,
+            _hashProvider.Object,
             _emailProvider.Object,
             _emailTemplateBuilder.Object,
             _authenticationSettings.Object,
@@ -91,6 +94,7 @@ public class AuthenticationServiceUnitTest
             Id = "id",
             UserName = "name",
             Email = "email",
+            EmailHash = "email",
             ImagePath = "path",
             PasswordHash = "password",
         };
@@ -121,6 +125,14 @@ public class AuthenticationServiceUnitTest
     {
         var account = GetUserAccount();
         _userDatabase.Add(account);
+        _hashProvider
+            .Setup(obj => obj.Hash(It.IsAny<string>()))
+            .Returns<string>(
+                (value) =>
+                {
+                    return value;
+                }
+            );
         _accountCollection
             .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
             .ReturnsAsync(
