@@ -11,7 +11,7 @@ namespace FinBookeAPI.Controllers;
 
 [ApiController]
 [AllowAnonymous]
-[Route("api/v{version:apiVersion}[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthenticationController(
     ILogger<AuthenticationController> logger,
     IAuthenticationService service
@@ -38,43 +38,38 @@ public class AuthenticationController(
 
         if (result.ErrorType == ErrorType.BAD_REQUEST)
         {
-            var badRequest = ErrorMapper.GetBadRequestDTO(
-                result.ErrorMessages,
-                "Password",
-                HttpContext.TraceIdentifier
-            );
+            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Password");
             return StatusCode(badRequest.Status, badRequest);
         }
-        var error = ErrorMapper.GetFailedRequestDTO(
-            result.ErrorMessages,
-            result.ErrorType,
-            HttpContext.TraceIdentifier
-        );
+        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("register")]
+    [ProducesResponseType(typeof(UserDTO), 201)]
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    public async Task<ActionResult> Register([FromBody] RegisterDTO data)
+    {
+        _logger.LogInformation(LogEvents.AuthenticationRequest, "Register request");
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _service.RegisterAsync(data);
+
+        if (result.HasValue)
+            return Created(string.Empty, result.Value);
+
+        if (result.ErrorType == ErrorType.BAD_REQUEST)
+        {
+            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Password");
+            return StatusCode(badRequest.Status, badRequest);
+        }
+        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
         return StatusCode(error.Status, error);
     }
 
     /*
-
-    /// <summary>
-    /// This method process a register request by generating a new user account.
-    /// </summary>
-    /// <param name="data">
-    /// The data to create a new user account.
-    /// </param>
-    /// <response code="201">If the registration was successful</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="500">If any other kind of server error occur</response>
-    [HttpPost("register")]
-    [ProducesResponseType(typeof(UserDTO), 201)]
-    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
-    public async Task<ActionResult> Register([FromBody] RegisterDTO data)
-    {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Register request");
-        var user = await _service.Register(data.Email, data.Name, data.Password);
-        return Created(string.Empty, new UserDTO(user));
-    }
-
     /// <summary>
     /// This method process a logout request by cancelling the current session.
     /// </summary>

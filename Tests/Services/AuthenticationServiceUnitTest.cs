@@ -189,7 +189,7 @@ public class AuthenticationServiceUnitTest
         _authenticationSettings.Setup(obj => obj.Value).Returns(settings);
 
         _protection
-            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
+            .Setup(obj => obj.UnprotectEmail(It.IsAny<string>()))
             .Returns<string>(
                 (value) =>
                 {
@@ -239,7 +239,7 @@ public class AuthenticationServiceUnitTest
         _authenticationSettings.Setup(obj => obj.Value).Returns(settings);
 
         _protection
-            .Setup(obj => obj.Unprotect(It.IsAny<string>()))
+            .Setup(obj => obj.UnprotectEmail(It.IsAny<string>()))
             .Returns<string>(
                 (value) =>
                 {
@@ -247,7 +247,7 @@ public class AuthenticationServiceUnitTest
                 }
             );
         _protection
-            .Setup(obj => obj.Protect(It.IsAny<string>()))
+            .Setup(obj => obj.ProtectEmail(It.IsAny<string>()))
             .Returns<string>(
                 (value) =>
                 {

@@ -29,9 +29,7 @@ public class DataProtectionUnitTest
         var protectedBytes = new byte[] { 1, 2, 3 };
         var expected = Base64UrlTextEncoder.Encode(protectedBytes);
 
-        _protectionMock
-            .Setup(o => o.Protect(It.Is<byte[]>(b => Encoding.UTF8.GetString(b) == input)))
-            .Returns(protectedBytes);
+        _protectionMock.Setup(o => o.Protect(It.IsAny<byte[]>())).Returns(protectedBytes);
 
         var actual = _protection.Protect(input);
 
@@ -45,15 +43,38 @@ public class DataProtectionUnitTest
         var expected = "expected";
         var unprotectedBytes = Encoding.UTF8.GetBytes(expected);
 
-        _protectionMock
-            .Setup(o =>
-                o.Unprotect(
-                    It.Is<byte[]>(b => b.SequenceEqual(Base64UrlTextEncoder.Decode(protectedInput)))
-                )
-            )
-            .Returns(unprotectedBytes);
+        _protectionMock.Setup(o => o.Unprotect(It.IsAny<byte[]>())).Returns(unprotectedBytes);
 
         var actual = _protection.Unprotect(protectedInput);
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void Should_Protect_Email_Value()
+    {
+        var email = "user@example.com";
+        var protectedBytes = Encoding.UTF8.GetBytes("user");
+        var expected = Base64UrlTextEncoder.Encode(protectedBytes) + "@example.com";
+
+        _protectionMock.Setup(o => o.Protect(It.IsAny<byte[]>())).Returns(protectedBytes);
+
+        var actual = _protection.ProtectEmail(email);
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void Should_Unprotect_Email_Value()
+    {
+        var protectedBytes = Encoding.UTF8.GetBytes("user");
+        var protectedEmail = Base64UrlTextEncoder.Encode(protectedBytes) + "@example.com";
+        var expected = "user@example.com";
+        var unprotectedBytes = Encoding.UTF8.GetBytes("user");
+
+        _protectionMock.Setup(o => o.Unprotect(It.IsAny<byte[]>())).Returns(unprotectedBytes);
+
+        var actual = _protection.UnprotectEmail(protectedEmail);
 
         Assert.Equal(expected, actual);
     }

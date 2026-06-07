@@ -18,12 +18,17 @@ using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.CategoryType;
 using FinBookeAPI.Services.Payment;
 using FinBookeAPI.Services.Upload;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Compliance.Redaction;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add app configurations.
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new ProducesAttribute("application/json"));
+    options.Filters.Add(new ConsumesAttribute("application/json"));
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddVersioningConfig();
 builder.Services.AddSettingsConfig(builder.Configuration);

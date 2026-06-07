@@ -72,7 +72,7 @@ public partial class AuthenticationService(
             return Result.BadRequest<UserDTO>(_localizer.GetString(INVALID_CREDENTIALS_KEY));
         }
 
-        var claims = _claimProvider.CreateClaims(user.Id, _protection.Unprotect(user.Email!));
+        var claims = _claimProvider.CreateClaims(user.Id, _protection.UnprotectEmail(user.Email!));
         var accessToken = GetAccessToken(claims);
         var refreshToken = GetRefreshToken(claims);
         var tokenResult = await _accountCollection.SetAccountRefreshTokenAsync(
@@ -97,7 +97,7 @@ public partial class AuthenticationService(
         var user = new UserAccount
         {
             UserName = registerData.Username,
-            Email = _protection.Protect(registerData.Email),
+            Email = _protection.ProtectEmail(registerData.Email),
             EmailHash = _hashProvider.Hash(registerData.Email),
         };
         var registerResult = await _accountCollection.CreateAccountAsync(
@@ -110,7 +110,7 @@ public partial class AuthenticationService(
             LogInvalidCredentials(registerData.Email);
             return Result.BadRequest<UserDTO>(messages);
         }
-        var claims = _claimProvider.CreateClaims(user.Id, _protection.Unprotect(user.Email!));
+        var claims = _claimProvider.CreateClaims(user.Id, _protection.UnprotectEmail(user.Email!));
         var accessToken = GetAccessToken(claims);
         var refreshToken = GetRefreshToken(claims);
         var tokenResult = await _accountCollection.SetAccountRefreshTokenAsync(

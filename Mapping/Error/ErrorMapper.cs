@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FinBooKeAPI.Models.DTO.Error;
 using FinBookeAPI.Models.Result;
 
@@ -5,12 +6,9 @@ namespace FinBooKeAPI.Mapping.Error;
 
 public static class ErrorMapper
 {
-    public static FailedRequestDTO GetFailedRequestDTO(
-        List<string> errors,
-        ErrorType errorType,
-        string traceId
-    )
+    public static FailedRequestDTO GetFailedRequestDTO(List<string> errors, ErrorType errorType)
     {
+        var traceId = Activity.Current?.Id ?? "";
         return errorType switch
         {
             ErrorType.FORBIDDEN => GetForbiddenDTO(errors, traceId),
@@ -18,12 +16,9 @@ public static class ErrorMapper
         };
     }
 
-    public static BadRequestDTO GetBadRequestDTO(
-        List<string> errors,
-        string errorKey,
-        string traceId
-    )
+    public static BadRequestDTO GetBadRequestDTO(List<string> errors, string errorKey)
     {
+        var traceId = Activity.Current?.Id ?? "";
         return new BadRequestDTO
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",

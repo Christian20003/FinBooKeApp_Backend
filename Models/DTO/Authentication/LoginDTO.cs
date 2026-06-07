@@ -8,11 +8,11 @@ public record LoginDTO
         ErrorMessageResourceName = nameof(DataAnnotationValidation.Email),
         ErrorMessageResourceType = typeof(DataAnnotationValidation)
     )]
-    public required string Email { get; init; }
+    public string Email { get; init; } = string.Empty;
 
     [Required(
         ErrorMessageResourceName = nameof(DataAnnotationValidation.Password),
         ErrorMessageResourceType = typeof(DataAnnotationValidation)
     )]
-    public required string Password { get; init; }
+    public string Password { get; init; } = string.Empty;
 }
