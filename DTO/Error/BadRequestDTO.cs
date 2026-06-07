@@ -5,7 +5,7 @@ namespace FinBookeAPI.DTO.Error;
 /// <summary>
 /// This class represent a bad request response.
 /// </summary>
-public class BadRequestDTO : ErrorDTO
+public class BadRequestOldDTO : ErrorDTO
 {
     /// <summary>
     /// A list of invalid or missing properties.

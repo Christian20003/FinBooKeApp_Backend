@@ -1,14 +1,17 @@
-using FinBookeAPI.DTO.Authentication.Input;
-using FinBookeAPI.DTO.Authentication.Output;
-using FinBookeAPI.DTO.Error;
+using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
+using FinBooKeAPI.Models.DTO.Authentication;
+using FinBooKeAPI.Models.DTO.Error;
+using FinBookeAPI.Models.Result;
 using FinBookeAPI.Services.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinBookeAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[AllowAnonymous]
+[Route("api/v{version:apiVersion}[controller]")]
 public class AuthenticationController(
     ILogger<AuthenticationController> logger,
     IAuthenticationService service
@@ -17,29 +20,40 @@ public class AuthenticationController(
     private readonly ILogger<AuthenticationController> _logger = logger;
     private readonly IAuthenticationService _service = service;
 
-    /* /// <summary>
-    /// This method process a login request and proofs if the user has access to his profile.
-    /// </summary>
-    /// <param name="data">
-    /// The login data to authenticate the user.
-    /// </param>
-    /// <response code="200">If the user login was successful</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="403">If the user provided invalid credentials</response>
-    /// <response code="423">If the user is locked due to incorrect login attemps</response>
-    /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("login")]
     [ProducesResponseType(typeof(UserDTO), 200)]
     [ProducesResponseType(typeof(BadRequestDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 403)]
-    [ProducesResponseType(typeof(ErrorDTO), 423)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 403)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Login([FromBody] LoginDTO data)
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Login request");
-        var user = await _service.Login(data.Email, data.Password);
-        return Ok(new UserDTO(user));
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _service.LoginAsync(data);
+
+        if (result.HasValue)
+            return Ok(result.Value);
+
+        if (result.ErrorType == ErrorType.BAD_REQUEST)
+        {
+            var badRequest = ErrorMapper.GetBadRequestDTO(
+                result.ErrorMessages,
+                "Password",
+                HttpContext.TraceIdentifier
+            );
+            return StatusCode(badRequest.Status, badRequest);
+        }
+        var error = ErrorMapper.GetFailedRequestDTO(
+            result.ErrorMessages,
+            result.ErrorType,
+            HttpContext.TraceIdentifier
+        );
+        return StatusCode(error.Status, error);
     }
+
+    /*
 
     /// <summary>
     /// This method process a register request by generating a new user account.
@@ -52,7 +66,7 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("register")]
     [ProducesResponseType(typeof(UserDTO), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> Register([FromBody] RegisterDTO data)
     {
@@ -73,7 +87,7 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("logout")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 403)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> Logout([FromBody] LogoutDTO data)
@@ -95,7 +109,7 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("forgotPwd")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 403)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> ForgotPassword([FromBody] ForgotPwdDTO data)
@@ -121,7 +135,7 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("resetPwd")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 403)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDTO data)
@@ -143,7 +157,7 @@ public class AuthenticationController(
     /// <response code="500">If any other kind of server error occur</response>
     [HttpPost("refreshToken")]
     [ProducesResponseType(typeof(SessionDTO), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 403)]
     [ProducesResponseType(typeof(ErrorDTO), 406)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]

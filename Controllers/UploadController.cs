@@ -126,7 +126,7 @@ public partial class UploadController(
     /// <response code="500">If any other kind of server error occur.</response>
     [HttpPost("image")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostImage(UploadDTO upload)
     {
@@ -146,7 +146,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpPost("bank_statement")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostBankStatement(UploadDTO upload)
     {
@@ -166,7 +166,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpPost("receipt")]
     [ProducesResponseType(typeof(string), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> PostReceipt(UploadDTO upload)
     {
@@ -187,7 +187,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("image/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetImage(string name)
@@ -207,7 +207,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("bank_statement/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetBankStatement(string name)
@@ -227,7 +227,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpGet("receipt/{name}")]
     [ProducesResponseType(typeof(FileContentResult), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetReceipt(string name)
@@ -247,7 +247,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpDelete("image/{name}")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public ActionResult DeleteImage(string name)
@@ -268,7 +268,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpDelete("bank_statement/{name}")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public ActionResult DeleteBankStatement(string name)
@@ -289,7 +289,7 @@ public partial class UploadController(
     /// <response code="500">If any kind of server error occur.</response>
     [HttpDelete("receipt/{name}")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public ActionResult DeleteReceipt(string name)

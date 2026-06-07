@@ -40,7 +40,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> GetCategories([FromQuery] bool nested = false)
     {
@@ -71,7 +71,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(CategoryDTO), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 401)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
@@ -101,7 +101,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpPost]
     [ProducesResponseType(typeof(CategoryDTO), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 401)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
     public async Task<ActionResult> CreateCategory(CreateCategoryDTO category)
@@ -138,7 +138,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 401)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]
@@ -170,7 +170,7 @@ public class CategoryController(ICategoryService service, ILogger<CategoryContro
     /// <response code="500">If a server error occur</response>
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(CategoryDTO), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
     [ProducesResponseType(typeof(ErrorDTO), 401)]
     [ProducesResponseType(typeof(ErrorDTO), 404)]
     [ProducesResponseType(typeof(ErrorDTO), 500)]

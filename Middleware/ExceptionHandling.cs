@@ -83,7 +83,7 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
             }
             case IdentityResultException:
             {
-                var msg = body as BadRequestDTO;
+                var msg = body as BadRequestOldDTO;
                 var data = (IdentityResultException)exception;
                 var dict = new Dictionary<string, List<string>>();
                 foreach (var error in data.Errors)
