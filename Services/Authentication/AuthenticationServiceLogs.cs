@@ -19,6 +19,13 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogRegister(string email);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationLogout,
+        Level = LogLevel.Information,
+        Message = "Authentication: Logout user - {Id}"
+    )]
+    private partial void LogLogout(Guid id);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationLoginSuccess,
         Level = LogLevel.Information,
         Message = "Authentication: Successful login - {Email}"
@@ -45,6 +52,13 @@ public partial class AuthenticationService : IAuthenticationService
         Message = "Authentication: Account locked - {Email}"
     )]
     private partial void LogAccountLock(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidUserId,
+        Level = LogLevel.Error,
+        Message = "Authentication: Invalid user id - {Id}"
+    )]
+    private partial void LogInvalidUserId(Guid id);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationInternalError,

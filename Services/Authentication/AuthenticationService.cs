@@ -128,6 +128,27 @@ public partial class AuthenticationService(
         return Result.Ok(userDTO);
     }
 
+    public async Task<Result<bool>> LogoutAsync(Guid userId)
+    {
+        LogLogout(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogInvalidUserId(userId);
+            return Result.Forbidden<bool>(_localizer.GetString(RESOURCE_LOCKED));
+        }
+        var tokenResult = await _accountCollection.DeleteAccountRefreshTokenAsync(user);
+        if (!tokenResult.Succeeded)
+        {
+            var messages = tokenResult.Errors.Select(error => error.Description).ToList();
+            LogInternalError(messages);
+            return Result.InternalError<bool>(_localizer.GetString(INTERNAL_ERROR_KEY));
+        }
+        return Result.Ok(true);
+    }
+
     private AuthenticationToken GetAccessToken(IEnumerable<Claim> claims)
     {
         var expirationAccessToken = DateTime.UtcNow.AddSeconds(ACCESS_TOKEN_LIFETIME);

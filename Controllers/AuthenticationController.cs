@@ -1,3 +1,4 @@
+using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
 using FinBooKeAPI.Models.DTO.Authentication;
@@ -10,16 +11,18 @@ using Microsoft.AspNetCore.Mvc;
 namespace FinBookeAPI.Controllers;
 
 [ApiController]
-[AllowAnonymous]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class AuthenticationController(
     ILogger<AuthenticationController> logger,
-    IAuthenticationService service
+    IAuthenticationService service,
+    IClaimProvider claimProvider
 ) : ControllerBase
 {
     private readonly ILogger<AuthenticationController> _logger = logger;
     private readonly IAuthenticationService _service = service;
+    private readonly IClaimProvider _claimProvider = claimProvider;
 
+    [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(UserDTO), 200)]
     [ProducesResponseType(typeof(BadRequestDTO), 400)]
@@ -45,6 +48,7 @@ public class AuthenticationController(
         return StatusCode(error.Status, error);
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType(typeof(UserDTO), 201)]
     [ProducesResponseType(typeof(BadRequestDTO), 400)]
@@ -69,28 +73,25 @@ public class AuthenticationController(
         return StatusCode(error.Status, error);
     }
 
-    /*
-    /// <summary>
-    /// This method process a logout request by cancelling the current session.
-    /// </summary>
-    /// <param name="data">
-    /// The data to verify the user for its logout attempt.
-    /// </param>
-    /// <response code="200">If the logout request was successful</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="403">If one of the provided tokens is invalid</response>
-    /// <response code="500">If any other kind of server error occur</response>
+    [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 403)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
-    public async Task<ActionResult> Logout([FromBody] LogoutDTO data)
+    [ProducesResponseType(typeof(FailedRequestDTO), 403)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    public async Task<ActionResult> Logout()
     {
         _logger.LogInformation(LogEvents.AuthenticationRequest, "Logout request");
-        await _service.Logout(data.AccessToken, data.RefreshToken);
-        return Ok();
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.LogoutAsync(Guid.Parse(userId));
+
+        if (result.HasValue)
+            return Ok();
+
+        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        return StatusCode(error.Status, error);
     }
+
+    /*
 
     /// <summary>
     /// This method generates an access code that will be sent to the client's email address.

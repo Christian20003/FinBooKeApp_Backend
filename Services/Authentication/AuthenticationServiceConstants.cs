@@ -8,4 +8,5 @@ public partial class AuthenticationService : IAuthenticationService
     private static readonly string INVALID_CREDENTIALS_KEY = "InvalidCredentials";
     private static readonly string ACCOUNT_LOCKED_KEY = "AccountLocked";
     private static readonly string INTERNAL_ERROR_KEY = "InternalError";
+    private static readonly string RESOURCE_LOCKED = "ResourceLocked";
 }

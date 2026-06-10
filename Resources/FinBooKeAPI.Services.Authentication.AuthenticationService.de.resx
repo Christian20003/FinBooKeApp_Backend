@@ -121,9 +121,12 @@
     <value>Email oder Passwort is ungültig</value>
   </data>
   <data name="AccountLocked" xml:space="preserve">
-    <value>Dein Account ist aufgrund zu vieler Fehlversuche temporär gesperrt</value>
+    <value>Dein Account ist aufgrund zu vieler Fehlversuche temporär gesperrt.</value>
   </data>
   <data name="InternalError" xml:space="preserve">
     <value>Es ist ein unerwarteter Fehler eingetreten. Bitte versuche es später erneut.</value>
+  </data>
+  <data name="ResourceLocked" xml:space="preserve">
+    <value>Du bist für diese Aktion nicht berechtigt.</value>
   </data>
 </root>

@@ -126,4 +126,7 @@
   <data name="InternalError" xml:space="preserve">
     <value>Something went wrong during processing your request. Please try it again later.</value>
   </data>
+  <data name="ResourceLocked" xml:space="preserve">
+    <value>Your aren't allowed to use this acction.</value>
+  </data>
 </root>

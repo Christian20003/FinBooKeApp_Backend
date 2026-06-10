@@ -91,7 +91,7 @@ public class AuthenticationServiceUnitTest
     {
         return new UserAccount
         {
-            Id = "id",
+            Id = Guid.NewGuid().ToString(),
             UserName = "name",
             Email = "email",
             EmailHash = "email",
@@ -254,6 +254,29 @@ public class AuthenticationServiceUnitTest
                     return value;
                 }
             );
+    }
+
+    private void SetupLogout()
+    {
+        var account = GetUserAccount();
+        _userDatabase.Add(account);
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(
+                (Expression<Func<UserAccount, bool>> condition) =>
+                {
+                    return _userDatabase.FirstOrDefault(condition.Compile());
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.DeleteAccountRefreshTokenAsync(It.IsAny<UserAccount>()))
+            .Callback<UserAccount>(
+                (account) =>
+                {
+                    _refreshTokenDatabase.Clear();
+                }
+            )
+            .ReturnsAsync(IdentityResult.Success);
     }
 
     [Fact]
@@ -486,5 +509,42 @@ public class AuthenticationServiceUnitTest
 
         var token = _refreshTokenDatabase.First();
         Assert.Equal(token, result.Value!.Session.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Should_FailLogout_WhenUserAccountIsNotFound()
+    {
+        SetupLogout();
+
+        var result = await _service.LogoutAsync(Guid.Empty);
+
+        Assert.Equal(ErrorType.FORBIDDEN, result.ErrorType);
+    }
+
+    [Fact]
+    public async Task Should_FailLogout_WhenDeleteOperationOfRefreshTokenFailed()
+    {
+        SetupLogout();
+        _accountCollection
+            .Setup(obj => obj.DeleteAccountRefreshTokenAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var user = _userDatabase.First();
+        var result = await _service.LogoutAsync(Guid.Parse(user.Id));
+
+        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+    }
+
+    [Fact]
+    public async Task Should_DeleteRefreshToken_WhenLogoutWasSuccessfull()
+    {
+        SetupLogout();
+
+        var user = _userDatabase.First();
+        var result = await _service.LogoutAsync(Guid.Parse(user.Id));
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.True(result.Value);
+        Assert.Empty(_refreshTokenDatabase);
     }
 }
