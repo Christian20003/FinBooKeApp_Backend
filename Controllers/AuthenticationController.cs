@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
@@ -30,7 +31,11 @@ public class AuthenticationController(
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Login([FromBody] LoginDTO data)
     {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Login request");
+        _logger.LogInformation(
+            LogEvents.AuthenticationRequest,
+            "Login request - {Trace}",
+            Activity.Current?.Id
+        );
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -55,7 +60,11 @@ public class AuthenticationController(
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Register([FromBody] RegisterDTO data)
     {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Register request");
+        _logger.LogInformation(
+            LogEvents.AuthenticationRequest,
+            "Register request - {Trace}",
+            Activity.Current?.Id
+        );
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -76,11 +85,15 @@ public class AuthenticationController(
     [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 403)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 401)]
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Logout()
     {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Logout request");
+        _logger.LogInformation(
+            LogEvents.AuthenticationRequest,
+            "Logout request - {Trace}",
+            Activity.Current?.Id
+        );
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.LogoutAsync(Guid.Parse(userId));
 

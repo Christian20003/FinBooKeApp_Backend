@@ -518,7 +518,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LogoutAsync(Guid.Empty);
 
-        Assert.Equal(ErrorType.FORBIDDEN, result.ErrorType);
+        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
     }
 
     [Fact]

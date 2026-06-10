@@ -41,6 +41,18 @@ public static class ErrorMapper
         };
     }
 
+    public static FailedRequestDTO GetUnauthorizedDTO(string traceId)
+    {
+        return new FailedRequestDTO
+        {
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.2",
+            Title = "Access on this endpoint is forbidden.",
+            Status = 401,
+            Error = "",
+            TraceId = traceId,
+        };
+    }
+
     public static FailedRequestDTO GetInternalErrorDTO(List<string> errors, string traceId)
     {
         return new FailedRequestDTO

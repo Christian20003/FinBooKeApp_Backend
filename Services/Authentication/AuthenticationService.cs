@@ -137,7 +137,7 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidUserId(userId);
-            return Result.Forbidden<bool>(_localizer.GetString(RESOURCE_LOCKED));
+            return Result.Unauthorized<bool>("");
         }
         var tokenResult = await _accountCollection.DeleteAccountRefreshTokenAsync(user);
         if (!tokenResult.Succeeded)

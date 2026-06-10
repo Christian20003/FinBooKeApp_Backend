@@ -15,6 +15,9 @@ public static class Result
     public static Result<T> Forbidden<T>(string message) =>
         new(false, default, ErrorType.FORBIDDEN, [message]);
 
+    public static Result<T> Unauthorized<T>(string message) =>
+        new(false, default, ErrorType.UNAUTHORIZED, [message]);
+
     public static Result<T> InternalError<T>(List<string> messages) =>
         new(false, default, ErrorType.INTERNAL_ERROR, messages);
 
