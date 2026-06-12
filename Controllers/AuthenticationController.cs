@@ -13,7 +13,7 @@ namespace FinBookeAPI.Controllers;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class AuthenticationController(
+public partial class AuthenticationController(
     ILogger<AuthenticationController> logger,
     IAuthenticationService service,
     IClaimProvider claimProvider
@@ -31,11 +31,7 @@ public class AuthenticationController(
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Login([FromBody] LoginDTO data)
     {
-        _logger.LogInformation(
-            LogEvents.AuthenticationRequest,
-            "Login request - {Trace}",
-            Activity.Current?.Id
-        );
+        LogRequest(nameof(Login), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -60,11 +56,7 @@ public class AuthenticationController(
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Register([FromBody] RegisterDTO data)
     {
-        _logger.LogInformation(
-            LogEvents.AuthenticationRequest,
-            "Register request - {Trace}",
-            Activity.Current?.Id
-        );
+        LogRequest(nameof(Register), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -89,11 +81,7 @@ public class AuthenticationController(
     [ProducesResponseType(typeof(FailedRequestDTO), 500)]
     public async Task<ActionResult> Logout()
     {
-        _logger.LogInformation(
-            LogEvents.AuthenticationRequest,
-            "Logout request - {Trace}",
-            Activity.Current?.Id
-        );
+        LogRequest(nameof(Logout), Activity.Current?.Id);
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.LogoutAsync(Guid.Parse(userId));
 
@@ -182,4 +170,11 @@ public class AuthenticationController(
         };
         return Ok(new SessionDTO(token, refreshToken));
     } */
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationRequest,
+        Level = LogLevel.Information,
+        Message = "Received {Type} request - {TraceId}"
+    )]
+    private partial void LogRequest(string type, string? traceId);
 }

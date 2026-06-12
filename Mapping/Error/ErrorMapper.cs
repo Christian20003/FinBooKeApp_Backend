@@ -12,6 +12,7 @@ public static class ErrorMapper
         return errorType switch
         {
             ErrorType.FORBIDDEN => GetForbiddenDTO(errors, traceId),
+            ErrorType.UNAUTHORIZED => GetUnauthorizedDTO(traceId),
             _ => GetInternalErrorDTO(errors, traceId),
         };
     }
