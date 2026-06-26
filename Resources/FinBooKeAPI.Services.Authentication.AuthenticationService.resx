@@ -126,8 +126,10 @@
   <data name="InternalError" xml:space="preserve">
     <value>Something went wrong during processing your request. Please try it again later.</value>
   </data>
-  <data name="" xml:space="preserve">
-    <value>
-</value>
+  <data name="ResetPasswordEmailSubject" xml:space="preserve">
+    <value>Link to reset your password</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Email invalid</value>
   </data>
 </root>

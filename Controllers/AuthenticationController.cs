@@ -92,30 +92,32 @@ public partial class AuthenticationController(
         return StatusCode(error.Status, error);
     }
 
-    /*
-
-    /// <summary>
-    /// This method generates an access code that will be sent to the client's email address.
-    /// </summary>
-    /// <param name="data">
-    /// The data to be able of sending a access code to the client.
-    /// </param>
-    /// <response code="200">If the security code has been generated and send successfully</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="403">If the user provided an invalid email address (not assignable to any account)</response>
-    /// <response code="500">If any other kind of server error occur</response>
-    [HttpPost("forgotPwd")]
+    [AllowAnonymous]
+    [HttpPost("resetPasswordToken")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 403)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
-    public async Task<ActionResult> ForgotPassword([FromBody] ForgotPwdDTO data)
+    [ProducesResponseType(typeof(BadRequestDTO), 400)]
+    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    public async Task<ActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO data)
     {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Forgot password request");
-        await _service.SendAccessCode(data.Email);
-        return Ok();
+        LogRequest(nameof(ResetPasswordToken), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _service.SendResetPasswordTokenAsync(data.Email);
+
+        if (result.HasValue)
+            return Ok();
+
+        if (result.ErrorType == ErrorType.BAD_REQUEST)
+        {
+            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Email");
+            return StatusCode(badRequest.Status, badRequest);
+        }
+        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        return StatusCode(error.Status, error);
     }
 
+    /*
     /// <summary>
     /// This method resets a user account's password after validating the provided access code.
     /// The new password will be sent to the user via email.

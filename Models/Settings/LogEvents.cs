@@ -13,6 +13,7 @@ public static class LogEvents
     public const int AuthenticationCreateToken = 1003;
     public const int AuthenticationResetPassword = 1004;
     public const int AuthenticationSendAccessCode = 1005;
+    public const int AuthenticationSendResetPasswordToken = 1006;
 
     public const int EmailSend = 1021;
 

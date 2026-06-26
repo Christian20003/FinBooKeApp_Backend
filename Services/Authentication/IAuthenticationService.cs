@@ -32,6 +32,8 @@ public interface IAuthenticationService
     /// <returns>True if the user could be logged out</returns>
     public Task<Result<bool>> LogoutAsync(Guid userId);
 
+    public Task<Result<bool>> SendResetPasswordTokenAsync(string email);
+
     /// <summary>
     /// This method sends a new generated access code to the provided email through an SMTP-Server and stores the result.
     /// </summary>

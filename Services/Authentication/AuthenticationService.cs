@@ -4,6 +4,7 @@ using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
 using FinBooKeAPI.Logic.Security;
 using FinBooKeAPI.Mapping.Authentication;
+using FinBooKeAPI.Mapping.Email;
 using FinBookeAPI.Models.Database.Authentication;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBooKeAPI.Models.Logic.Authentication;
@@ -146,6 +147,29 @@ public partial class AuthenticationService(
             LogInternalError(messages);
             return Result.InternalError<bool>(_localizer.GetString(INTERNAL_ERROR_KEY));
         }
+        return Result.Ok(true);
+    }
+
+    public async Task<Result<bool>> SendResetPasswordTokenAsync(string email)
+    {
+        var emailHash = _hashProvider.Hash(email);
+        LogSendResetPwdToken(emailHash);
+
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.EmailHash! == emailHash
+        );
+        if (user is null)
+        {
+            LogInvalidCredentials(emailHash);
+            return Result.BadRequest<bool>(_localizer.GetString(INVALID_EMAIL_KEY));
+        }
+        var token = await _accountCollection.GeneratePasswordResetTokenAsync(user);
+        var link = _authenticationSettings.Value.ResetPasswordLink;
+        link += $"?token={token}&email={email}";
+        var template = _emailTemplateBuilder.GetResetPasswordTemplate(link);
+        var subject = _localizer.GetString(RESET_PASSWORD_EMAIL_SUBJECT_KEY);
+        var emailPayload = EmailMapper.GetEmailPayload(_smtpSettings, template, email, subject);
+        _emailProvider.Send(emailPayload);
         return Result.Ok(true);
     }
 

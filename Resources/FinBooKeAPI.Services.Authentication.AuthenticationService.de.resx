@@ -126,4 +126,10 @@
   <data name="InternalError" xml:space="preserve">
     <value>Es ist ein unerwarteter Fehler eingetreten. Bitte versuche es später erneut.</value>
   </data>
+  <data name="ResetPasswordEmailSubject" xml:space="preserve">
+    <value>Link um dein Passwort zurückzusetzten</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Email ungültig</value>
+  </data>
 </root>

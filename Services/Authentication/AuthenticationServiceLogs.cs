@@ -26,6 +26,13 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogLogout(Guid id);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationSendResetPasswordToken,
+        Level = LogLevel.Information,
+        Message = "Authentication: Request reset password token - {Email}"
+    )]
+    private partial void LogSendResetPwdToken(string email);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationLoginSuccess,
         Level = LogLevel.Information,
         Message = "Authentication: Successful login - {Email}"

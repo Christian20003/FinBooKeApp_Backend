@@ -6,6 +6,7 @@ using FinBooKeAPI.Logic.Security;
 using FinBookeAPI.Models.Database.Authentication;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBooKeAPI.Models.Logic.Authentication;
+using FinBooKeAPI.Models.Logic.Email;
 using FinBookeAPI.Models.Result;
 using FinBooKeAPI.Models.Settings;
 using FinBookeAPI.Services.Authentication;
@@ -108,6 +109,19 @@ public class AuthenticationServiceUnitTest
             Audience = "audience",
             AccessTokenSecret = "accessSecret",
             RefreshTokenSecret = "refreshSecret",
+            ResetPasswordLink = "link",
+        };
+    }
+
+    private static SmtpSettings GetSmtpSettings()
+    {
+        return new SmtpSettings
+        {
+            Host = "host",
+            Port = 1,
+            Username = "username",
+            Password = "password",
+            Address = "host-email",
         };
     }
 
@@ -119,6 +133,27 @@ public class AuthenticationServiceUnitTest
     private static AuthenticationToken GetRefreshToken()
     {
         return new AuthenticationToken { Value = "refresh", Expires = DateTime.UtcNow.Ticks };
+    }
+
+    private static EmailPayload GetEmptyEmailPayload()
+    {
+        return new()
+        {
+            Host = "",
+            Port = 0,
+            From = "",
+            To = [],
+            Subject = "",
+            Body = "",
+            IsHtml = false,
+            Username = "",
+            Password = "",
+        };
+    }
+
+    private static string GetResetPasswordToken()
+    {
+        return "resetPasswordToken";
     }
 
     private void SetupLogin()
@@ -277,6 +312,46 @@ public class AuthenticationServiceUnitTest
                 }
             )
             .ReturnsAsync(IdentityResult.Success);
+    }
+
+    private void SetupSendResetPasswordToken()
+    {
+        var account = GetUserAccount();
+        var smtpSettings = GetSmtpSettings();
+        var authSettings = GetAuthenticationSettings();
+        _userDatabase.Add(account);
+        _hashProvider
+            .Setup(obj => obj.Hash(It.IsAny<string>()))
+            .Returns(
+                (string value) =>
+                {
+                    return value;
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(
+                (Expression<Func<UserAccount, bool>> condition) =>
+                {
+                    return _userDatabase.FirstOrDefault(condition.Compile());
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.GeneratePasswordResetTokenAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(GetResetPasswordToken());
+        _authenticationSettings.Setup(obj => obj.Value).Returns(authSettings);
+        _smtpSettings.Setup(obj => obj.Value).Returns(smtpSettings);
+        _emailTemplateBuilder
+            .Setup(obj => obj.GetResetPasswordTemplate(It.IsAny<string>()))
+            .Returns(
+                (string value) =>
+                {
+                    return $"template-{value}";
+                }
+            );
+        _localizer
+            .Setup(obj => obj[It.IsAny<string>()])
+            .Returns(new LocalizedString("subject", "subject"));
     }
 
     [Fact]
@@ -536,7 +611,7 @@ public class AuthenticationServiceUnitTest
     }
 
     [Fact]
-    public async Task Should_DeleteRefreshToken_WhenLogoutWasSuccessfull()
+    public async Task Should_DeleteRefreshToken_WhenLogoutWasSuccessful()
     {
         SetupLogout();
 
@@ -546,5 +621,97 @@ public class AuthenticationServiceUnitTest
         Assert.Equal(ErrorType.NONE, result.ErrorType);
         Assert.True(result.Value);
         Assert.Empty(_refreshTokenDatabase);
+    }
+
+    [Fact]
+    public async Task Should_FailSendingResetPasswordToken_WhenAccountDoesNotExist()
+    {
+        SetupSendResetPasswordToken();
+
+        var result = await _service.SendResetPasswordTokenAsync("invalidEmail");
+
+        Assert.False(result.HasValue);
+        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+    }
+
+    [Fact]
+    public async Task Should_ReturnNothing_WhenSendResetPasswordTokenWasSuccessful()
+    {
+        var account = GetUserAccount();
+        SetupSendResetPasswordToken();
+
+        var result = await _service.SendResetPasswordTokenAsync(account.Email!);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+    }
+
+    [Fact]
+    public async Task Should_ContainLinkWithToken_WhenSendResetPasswordTokenWasSuccessful()
+    {
+        var account = GetUserAccount();
+        var expected = GetEmptyEmailPayload();
+        var token = GetResetPasswordToken();
+        SetupSendResetPasswordToken();
+        _emailProvider
+            .Setup(obj => obj.Send(It.IsAny<EmailPayload>()))
+            .Callback(
+                (EmailPayload payload) =>
+                {
+                    expected = payload;
+                }
+            );
+
+        var result = await _service.SendResetPasswordTokenAsync(account.Email!);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Contains(token, expected.Body);
+    }
+
+    [Fact]
+    public async Task Should_SendEmailToCorrectUser_WhenSendResetPasswordTokenWasSuccessful()
+    {
+        var account = GetUserAccount();
+        var expected = GetEmptyEmailPayload();
+        SetupSendResetPasswordToken();
+        _emailProvider
+            .Setup(obj => obj.Send(It.IsAny<EmailPayload>()))
+            .Callback(
+                (EmailPayload payload) =>
+                {
+                    expected = payload;
+                }
+            );
+
+        var result = await _service.SendResetPasswordTokenAsync(account.Email!);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(account.Email!, expected.To.First());
+    }
+
+    [Fact]
+    public async Task Should_UseSmtpSettings_WhenSendResetPasswordTokenWasSuccessful()
+    {
+        var account = GetUserAccount();
+        var expected = GetEmptyEmailPayload();
+        var settings = GetSmtpSettings();
+        var token = GetResetPasswordToken();
+        SetupSendResetPasswordToken();
+        _emailProvider
+            .Setup(obj => obj.Send(It.IsAny<EmailPayload>()))
+            .Callback(
+                (EmailPayload payload) =>
+                {
+                    expected = payload;
+                }
+            );
+
+        var result = await _service.SendResetPasswordTokenAsync(account.Email!);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(settings.Host, expected.Host);
+        Assert.Equal(settings.Port, expected.Port);
+        Assert.Equal(settings.Username, expected.Username);
+        Assert.Equal(settings.Password, expected.Password);
+        Assert.Equal(settings.Address, expected.From);
     }
 }
