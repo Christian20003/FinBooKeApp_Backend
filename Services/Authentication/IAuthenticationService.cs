@@ -32,6 +32,11 @@ public interface IAuthenticationService
     /// <returns>True if the user could be logged out</returns>
     public Task<Result<bool>> LogoutAsync(Guid userId);
 
+    /// <summary>
+    /// Sends a reset password token to the given email address.
+    /// </summary>
+    /// <param name="email">The email address where the token should be send</param>
+    /// <returns>True if the email could be send</returns>
     public Task<Result<bool>> SendResetPasswordTokenAsync(string email);
 
     /// <summary>
