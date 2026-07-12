@@ -39,6 +39,10 @@ public interface IAuthenticationService
     /// <returns>True if the email could be send</returns>
     public Task<Result<bool>> SendResetPasswordTokenAsync(string email);
 
+    public Task<Result<bool>> ResetPasswordAsync(ResetPasswordDTO resetData);
+
+    // TODO: DEPRECATED
+
     /// <summary>
     /// This method sends a new generated access code to the provided email through an SMTP-Server and stores the result.
     /// </summary>

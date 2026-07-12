@@ -147,6 +147,7 @@ public partial class AuthenticationService(
             LogInternalError(messages);
             return Result.InternalError<bool>(_localizer.GetString(INTERNAL_ERROR_KEY));
         }
+        LogLogoutSuccess(user.EmailHash);
         return Result.Ok(true);
     }
 
@@ -170,6 +171,38 @@ public partial class AuthenticationService(
         var subject = _localizer.GetString(RESET_PASSWORD_EMAIL_SUBJECT_KEY);
         var emailPayload = EmailMapper.GetEmailPayload(_smtpSettings, template, email, subject);
         _emailProvider.Send(emailPayload);
+        LogResetPasswordTokenSuccess(emailHash);
+        return Result.Ok(true);
+    }
+
+    public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordDTO resetData)
+    {
+        var emailHash = _hashProvider.Hash(resetData.Email);
+        LogResetPassword(emailHash);
+
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.EmailHash! == emailHash
+        );
+        if (user is null)
+        {
+            LogInvalidCredentials(emailHash);
+            return Result.BadRequest<bool>(_localizer.GetString(INVALID_EMAIL_KEY));
+        }
+        var resetResult = await _accountCollection.ResetPasswordAsync(
+            user,
+            resetData.Token,
+            resetData.NewPassword
+        );
+        if (!resetResult.Succeeded)
+        {
+            LogInvalidCredentials(resetData.Email);
+            var messages = resetResult.Errors.Select(error => error.Description).ToList();
+            var code = resetResult.Errors.First().Code;
+            if (code == "InvalidToken")
+                return Result.Forbidden<bool>(messages.First());
+            return Result.BadRequest<bool>(messages);
+        }
+        LogResetPasswordSuccess(emailHash);
         return Result.Ok(true);
     }
 

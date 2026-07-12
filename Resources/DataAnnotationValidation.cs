@@ -76,6 +76,15 @@ namespace FinBooKeAPI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Permission token is missing.
+        /// </summary>
+        internal static string Token {
+            get {
+                return ResourceManager.GetString("Token", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Username is missing.
         /// </summary>
         internal static string Username {

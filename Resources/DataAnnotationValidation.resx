@@ -126,4 +126,7 @@
   <data name="Username" xml:space="preserve">
     <value>Username is missing</value>
   </data>
+  <data name="Token" xml:space="preserve">
+    <value>Permission token is missing</value>
+  </data>
 </root>

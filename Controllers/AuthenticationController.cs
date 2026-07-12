@@ -110,33 +110,28 @@ public partial class AuthenticationController(
         return StatusCode(error.Status, error);
     }
 
-    /*
-    /// <summary>
-    /// This method resets a user account's password after validating the provided access code.
-    /// The new password will be sent to the user via email.
-    /// </summary>
-    /// <param name="data">
-    /// The data to generate a new password.
-    /// </param>
-    /// <response code="200">If the new password has been generated and send successfully</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="403">
-    /// If the user provided an invalid email address (not assignable to any account).
-    /// If the provided security code is invalid or has expired.
-    /// </response>
-    /// <response code="500">If any other kind of server error occur</response>
-    [HttpPost("resetPwd")]
+    [AllowAnonymous]
+    [HttpPost("resetPassword")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 403)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordDTO data)
     {
-        _logger.LogInformation(LogEvents.AuthenticationRequest, "Reset password request");
-        await _service.ResetPassword(data.Email, data.AccessCode);
-        return Ok();
+        LogRequest(nameof(ResetPassword), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _service.ResetPasswordAsync(data);
+
+        if (result.HasValue)
+            return Ok();
+
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "NewPassword");
+        return StatusCode(error.Status, error);
     }
 
+    /*
     /// <summary>
     /// This method generates a new access token after validating the provided refresh token.
     /// </summary>

@@ -51,7 +51,9 @@ public static class LogEvents
 
     public const int AuthenticationLoginSuccess = 2000;
     public const int AuthenticationRegisterSuccess = 2001;
-    public const int AuthenticationSucceededLogout = 2002;
+    public const int AuthenticationLogoutSuccess = 2002;
+    public const int AuthenticationResetPasswordTokenSuccess = 2003;
+    public const int AuthenticationResetPasswordSuccess = 2004;
     public const int AuthenticationTokenCreated = 2003;
     public const int AuthenticationSucceededResetPassword = 2004;
     public const int AuthenticationSucceededSendAccessCode = 2005;

@@ -43,7 +43,6 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogExpiredToken(string token);
 
     [LoggerMessage(
-        EventId = LogEvents.AuthenticationSucceededLogout,
         Level = LogLevel.Information,
         Message = "Authentication: Successful logout - {AccessToken}, {RefreshToken}"
     )]

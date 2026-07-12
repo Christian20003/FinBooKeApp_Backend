@@ -33,6 +33,13 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogSendResetPwdToken(string email);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationResetPassword,
+        Level = LogLevel.Information,
+        Message = "Authentication: Reset password of account - {Email}"
+    )]
+    private partial void LogResetPassword(string email);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationLoginSuccess,
         Level = LogLevel.Information,
         Message = "Authentication: Successful login - {Email}"
@@ -45,6 +52,27 @@ public partial class AuthenticationService : IAuthenticationService
         Message = "Authentication: Successful registration - {Email}"
     )]
     private partial void LogRegisterSuccess(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationLogoutSuccess,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful logout - {Email}"
+    )]
+    private partial void LogLogoutSuccess(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationResetPasswordTokenSuccess,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successfully send reset password token - {Email}"
+    )]
+    private partial void LogResetPasswordTokenSuccess(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationResetPasswordSuccess,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful reset password - {Email}"
+    )]
+    private partial void LogResetPasswordSuccess(string email);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationInvalidCredentials,
