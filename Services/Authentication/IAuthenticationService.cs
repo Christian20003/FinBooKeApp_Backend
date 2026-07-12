@@ -39,6 +39,11 @@ public interface IAuthenticationService
     /// <returns>True if the email could be send</returns>
     public Task<Result<bool>> SendResetPasswordTokenAsync(string email);
 
+    /// <summary>
+    /// Resets the password of a user account.
+    /// </summary>
+    /// <param name="resetData">The data to reset the password.</param>
+    /// <returns>True if the reset operation was successful</returns>
     public Task<Result<bool>> ResetPasswordAsync(ResetPasswordDTO resetData);
 
     // TODO: DEPRECATED

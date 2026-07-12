@@ -354,6 +354,44 @@ public class AuthenticationServiceUnitTest
             .Returns(new LocalizedString("subject", "subject"));
     }
 
+    private void SetupResetPasswordToken()
+    {
+        var account = GetUserAccount();
+        _userDatabase.Add(account);
+        _hashProvider
+            .Setup(obj => obj.Hash(It.IsAny<string>()))
+            .Returns(
+                (string value) =>
+                {
+                    return value;
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(
+                (Expression<Func<UserAccount, bool>> condition) =>
+                {
+                    return _userDatabase.FirstOrDefault(condition.Compile());
+                }
+            );
+        _accountCollection
+            .Setup(obj =>
+                obj.ResetPasswordAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                )
+            )
+            .ReturnsAsync(
+                (UserAccount user, string token, string password) =>
+                {
+                    var account = _userDatabase.First();
+                    account.PasswordHash = password;
+                    return IdentityResult.Success;
+                }
+            );
+    }
+
     [Fact]
     public async Task Should_FailLogin_WhenEmailIsInvalid()
     {
@@ -713,5 +751,115 @@ public class AuthenticationServiceUnitTest
         Assert.Equal(settings.Username, expected.Username);
         Assert.Equal(settings.Password, expected.Password);
         Assert.Equal(settings.Address, expected.From);
+    }
+
+    [Fact]
+    public async Task ResetPasswordAsync_WhenAccountDoesNotExist_ReturnBadRequestError()
+    {
+        SetupResetPasswordToken();
+        var dto = new ResetPasswordDTO
+        {
+            Email = "wrongEmail",
+            NewPassword = "1234",
+            Token = "token",
+        };
+
+        var result = await _service.ResetPasswordAsync(dto);
+
+        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task ResetPasswordAsync_WhenTokenIsInvalid_ReturnForbiddenError()
+    {
+        SetupResetPasswordToken();
+        var account = GetUserAccount();
+        var dto = new ResetPasswordDTO
+        {
+            Email = account.Email!,
+            NewPassword = "1234",
+            Token = "token",
+        };
+        var error = new IdentityError { Code = "InvalidToken", Description = "" };
+        _accountCollection
+            .Setup(obj =>
+                obj.ResetPasswordAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                )
+            )
+            .ReturnsAsync(IdentityResult.Failed([error]));
+
+        var result = await _service.ResetPasswordAsync(dto);
+
+        Assert.Equal(ErrorType.FORBIDDEN, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task ResetPasswordAsync_WhenPasswordDoesNotFulfillRequirements_ReturnBadRequestError()
+    {
+        SetupResetPasswordToken();
+        var account = GetUserAccount();
+        var dto = new ResetPasswordDTO
+        {
+            Email = account.Email!,
+            NewPassword = "1234",
+            Token = "token",
+        };
+        var error = new IdentityError { Code = "OtherCode", Description = "" };
+        _accountCollection
+            .Setup(obj =>
+                obj.ResetPasswordAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                )
+            )
+            .ReturnsAsync(IdentityResult.Failed([error]));
+
+        var result = await _service.ResetPasswordAsync(dto);
+
+        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task ResetPasswordAsync_WhenResetPasswordSucceeded_ReturnOk()
+    {
+        SetupResetPasswordToken();
+        var account = GetUserAccount();
+        var dto = new ResetPasswordDTO
+        {
+            Email = account.Email!,
+            NewPassword = "1234",
+            Token = "token",
+        };
+
+        var result = await _service.ResetPasswordAsync(dto);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.True(result.HasValue);
+    }
+
+    [Fact]
+    public async Task ResetPasswordAsync_WhenResetPasswordSucceeded_UpdateUserAccount()
+    {
+        SetupResetPasswordToken();
+        var account = GetUserAccount();
+        var dto = new ResetPasswordDTO
+        {
+            Email = account.Email!,
+            NewPassword = "1234",
+            Token = "token",
+        };
+
+        var result = await _service.ResetPasswordAsync(dto);
+        var item = _userDatabase.First();
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal("1234", item.PasswordHash);
     }
 }
