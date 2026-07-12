@@ -1,10 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using FinBooKeAPI;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBooKeAPI.Models.DTO.Error;
-using FinBookeAPI.Models.Result;
 using FinBookeAPI.Services.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,17 +84,24 @@ public partial class AuthenticationController(
     }
 
     [AllowAnonymous]
-    [HttpPost("resetPasswordToken")]
+    [HttpGet("resetPassword")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
     [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO data)
+    public async Task<ActionResult> ResetPasswordToken(
+        [FromQuery]
+        [EmailAddress(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Email),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string email
+    )
     {
         LogRequest(nameof(ResetPasswordToken), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _service.SendResetPasswordTokenAsync(data.Email);
+        var result = await _service.SendResetPasswordTokenAsync(email);
 
         if (result.HasValue)
             return Ok();

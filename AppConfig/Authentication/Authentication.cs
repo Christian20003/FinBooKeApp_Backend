@@ -41,6 +41,12 @@ public static class Authentication
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
         });
 
+        // Configure lifespan for tokens (email confirmation, password reset, etc.)
+        services.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromMinutes(10);
+        });
+
         // Add authentication provider
         var authBuilder = services.AddAuthentication(options =>
         {
