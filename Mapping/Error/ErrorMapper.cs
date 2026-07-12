@@ -6,21 +6,29 @@ namespace FinBooKeAPI.Mapping.Error;
 
 public static class ErrorMapper
 {
-    public static FailedRequestDTO GetFailedRequestDTO(List<string> errors, ErrorType errorType)
+    public static BaseErrorDTO GetErrorDTO(
+        List<string> errors,
+        ErrorType errorType,
+        string multipleErrorKey = ""
+    )
     {
         var traceId = Activity.Current?.Id ?? "";
         return errorType switch
         {
+            ErrorType.BAD_REQUEST => GetBadRequestDTO(errors, multipleErrorKey, traceId),
             ErrorType.FORBIDDEN => GetForbiddenDTO(errors, traceId),
             ErrorType.UNAUTHORIZED => GetUnauthorizedDTO(traceId),
             _ => GetInternalErrorDTO(errors, traceId),
         };
     }
 
-    public static BadRequestDTO GetBadRequestDTO(List<string> errors, string errorKey)
+    private static MultipleErrorDTO GetBadRequestDTO(
+        List<string> errors,
+        string errorKey,
+        string traceId
+    )
     {
-        var traceId = Activity.Current?.Id ?? "";
-        return new BadRequestDTO
+        return new MultipleErrorDTO
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
             Title = "One or more validation errors occurred.",
@@ -30,9 +38,9 @@ public static class ErrorMapper
         };
     }
 
-    public static FailedRequestDTO GetForbiddenDTO(List<string> errors, string traceId)
+    private static SingleErrorDTO GetForbiddenDTO(List<string> errors, string traceId)
     {
-        return new FailedRequestDTO
+        return new SingleErrorDTO
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.4",
             Title = "Access on this endpoint is forbidden.",
@@ -42,9 +50,9 @@ public static class ErrorMapper
         };
     }
 
-    public static FailedRequestDTO GetUnauthorizedDTO(string traceId)
+    private static SingleErrorDTO GetUnauthorizedDTO(string traceId)
     {
-        return new FailedRequestDTO
+        return new SingleErrorDTO
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.2",
             Title = "Access on this endpoint is forbidden.",
@@ -54,9 +62,9 @@ public static class ErrorMapper
         };
     }
 
-    public static FailedRequestDTO GetInternalErrorDTO(List<string> errors, string traceId)
+    private static SingleErrorDTO GetInternalErrorDTO(List<string> errors, string traceId)
     {
-        return new FailedRequestDTO
+        return new SingleErrorDTO
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
             Title = "An internal server error occurred.",

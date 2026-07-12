@@ -26,9 +26,9 @@ public partial class AuthenticationController(
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(UserDTO), 200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 403)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult> Login([FromBody] LoginDTO data)
     {
         LogRequest(nameof(Login), Activity.Current?.Id);
@@ -40,20 +40,15 @@ public partial class AuthenticationController(
         if (result.HasValue)
             return Ok(result.Value);
 
-        if (result.ErrorType == ErrorType.BAD_REQUEST)
-        {
-            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Password");
-            return StatusCode(badRequest.Status, badRequest);
-        }
-        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Password");
         return StatusCode(error.Status, error);
     }
 
     [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType(typeof(UserDTO), 201)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult> Register([FromBody] RegisterDTO data)
     {
         LogRequest(nameof(Register), Activity.Current?.Id);
@@ -65,20 +60,15 @@ public partial class AuthenticationController(
         if (result.HasValue)
             return Created(string.Empty, result.Value);
 
-        if (result.ErrorType == ErrorType.BAD_REQUEST)
-        {
-            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Password");
-            return StatusCode(badRequest.Status, badRequest);
-        }
-        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Password");
         return StatusCode(error.Status, error);
     }
 
     [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 401)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 401)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult> Logout()
     {
         LogRequest(nameof(Logout), Activity.Current?.Id);
@@ -88,15 +78,15 @@ public partial class AuthenticationController(
         if (result.HasValue)
             return Ok();
 
-        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType);
         return StatusCode(error.Status, error);
     }
 
     [AllowAnonymous]
     [HttpPost("resetPasswordToken")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(BadRequestDTO), 400)]
-    [ProducesResponseType(typeof(FailedRequestDTO), 500)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult> ResetPasswordToken([FromBody] ResetPasswordTokenDTO data)
     {
         LogRequest(nameof(ResetPasswordToken), Activity.Current?.Id);
@@ -108,12 +98,7 @@ public partial class AuthenticationController(
         if (result.HasValue)
             return Ok();
 
-        if (result.ErrorType == ErrorType.BAD_REQUEST)
-        {
-            var badRequest = ErrorMapper.GetBadRequestDTO(result.ErrorMessages, "Email");
-            return StatusCode(badRequest.Status, badRequest);
-        }
-        var error = ErrorMapper.GetFailedRequestDTO(result.ErrorMessages, result.ErrorType);
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Email");
         return StatusCode(error.Status, error);
     }
 
