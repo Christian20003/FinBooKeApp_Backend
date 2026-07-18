@@ -56,14 +56,6 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Status = (int)HttpStatusCode.NotFound;
                 break;
             }
-            case ResourceLockedException:
-            {
-                body.Type = "AuthenticationException";
-                body.Title = "Requested resource is locked";
-                body.Detail = exception.Message;
-                body.Status = (int)HttpStatusCode.Locked;
-                break;
-            }
             case AuthorizationException:
             {
                 body.Type = "AuthorizationException";
@@ -79,47 +71,6 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
                 body.Title = "Invalid token";
                 body.Detail = "Provided authentication token is not valid";
                 body.Status = (int)HttpStatusCode.Forbidden;
-                break;
-            }
-            case IdentityResultException:
-            {
-                var msg = body as BadRequestOldDTO;
-                var data = (IdentityResultException)exception;
-                var dict = new Dictionary<string, List<string>>();
-                foreach (var error in data.Errors)
-                {
-                    switch (error.Code)
-                    {
-                        case "DuplicateEmail":
-                        {
-                            dict.Add("Email", [error.Description]);
-                            break;
-                        }
-                        case "DuplicateUserName":
-                        {
-                            dict.Add("Name", [error.Description]);
-                            break;
-                        }
-                        case "PasswordRequiresDigit":
-                        case "PasswordRequiresLower":
-                        case "PasswordRequiresNonAlphanumeric":
-                        case "PasswordRequiresUniqueChars":
-                        case "PasswordRequiresUpper":
-                        case "PasswordTooShort":
-                        {
-                            if (!dict.ContainsKey("Password"))
-                                dict.Add("Password", []);
-                            dict["Password"].Add(error.Description);
-                            break;
-                        }
-                    }
-                }
-                msg!.Properties = dict;
-                msg.Type = "AuthenticationException";
-                msg.Title = "Insufficient credentials";
-                msg.Detail = "Provided credentials do not fulfill all requirements";
-                msg.Status = (int)HttpStatusCode.BadRequest;
-                body = msg;
                 break;
             }
             case FormatException:

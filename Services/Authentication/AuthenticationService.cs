@@ -236,6 +236,7 @@ public partial class AuthenticationService(
             return Result.Unauthorized<SessionDTO>("");
         }
         var accessToken = GetAccessToken(claim.Claims);
+        LogRefreshAccessTokenSuccess(emailHash);
         return Result.Ok(
             new SessionDTO
             {

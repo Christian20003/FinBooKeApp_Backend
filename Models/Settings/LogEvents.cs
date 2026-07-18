@@ -12,8 +12,7 @@ public static class LogEvents
     public const int AuthenticationLogout = 1002;
     public const int AuthenticationRefreshAccessToken = 1003;
     public const int AuthenticationResetPassword = 1004;
-    public const int AuthenticationSendAccessCode = 1005;
-    public const int AuthenticationSendResetPasswordToken = 1006;
+    public const int AuthenticationSendResetPasswordToken = 1005;
 
     public const int EmailSend = 1021;
 
@@ -54,9 +53,7 @@ public static class LogEvents
     public const int AuthenticationLogoutSuccess = 2002;
     public const int AuthenticationResetPasswordTokenSuccess = 2003;
     public const int AuthenticationResetPasswordSuccess = 2004;
-    public const int AuthenticationTokenCreated = 2003;
-    public const int AuthenticationSucceededResetPassword = 2004;
-    public const int AuthenticationSucceededSendAccessCode = 2005;
+    public const int AuthenticationRefreshAccessTokenSuccess = 2005;
 
     public const int EmailSendSuccess = 2021;
 
@@ -93,14 +90,10 @@ public static class LogEvents
     public const int AuthenticationInvalidCredentials = 4000;
     public const int AuthenticationInvalidUserId = 4001;
     public const int AuthenticationInvalidUsername = 4002;
-    public const int AuthenticationInvalidToken = 4003;
-    public const int AuthenticationInvalidAccessCode = 4004;
-    public const int AuthenticationLockedAccount = 4005;
-    public const int AuthenticationExpiredAccessCode = 4006;
-    public const int AuthenticationInternalError = 4007;
-    public const int AuthenticationMissingRefreshToken = 4008;
-    public const int AuthenticationExpiredRefreshToken = 4009;
-    public const int AuthenticationInvalidRefreshToken = 4010;
+    public const int AuthenticationLockedAccount = 4003;
+    public const int AuthenticationInternalError = 4004;
+    public const int AuthenticationMissingRefreshToken = 4005;
+    public const int AuthenticationInvalidRefreshToken = 4006;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;

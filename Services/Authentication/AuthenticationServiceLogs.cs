@@ -82,6 +82,13 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogResetPasswordSuccess(string email);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationRefreshAccessTokenSuccess,
+        Level = LogLevel.Information,
+        Message = "Authentication: Successful refresh access token - {Email}"
+    )]
+    private partial void LogRefreshAccessTokenSuccess(string email);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationInvalidCredentials,
         Level = LogLevel.Warning,
         Message = "Authentication: Invalid credentials - {Email}"
@@ -94,13 +101,6 @@ public partial class AuthenticationService : IAuthenticationService
         Message = "Authentication: Missing refresh token - {Email}"
     )]
     private partial void LogMissingRefreshToken(string email);
-
-    [LoggerMessage(
-        EventId = LogEvents.AuthenticationExpiredRefreshToken,
-        Level = LogLevel.Warning,
-        Message = "Authentication: Expired refresh token - {Email}"
-    )]
-    private partial void LogExpiredRefreshToken(string email);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationInvalidRefreshToken,
