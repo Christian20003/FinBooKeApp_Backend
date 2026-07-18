@@ -74,7 +74,7 @@ public partial class AuthenticationController(
     {
         LogRequest(nameof(Logout), Activity.Current?.Id);
         var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = await _service.LogoutAsync(Guid.Parse(userId));
+        var result = await _service.LogoutAsync(userId);
 
         if (result.HasValue)
             return Ok();
@@ -131,35 +131,28 @@ public partial class AuthenticationController(
         return StatusCode(error.Status, error);
     }
 
-    /*
-    /// <summary>
-    /// This method generates a new access token after validating the provided refresh token.
-    /// </summary>
-    /// <param name="data">
-    /// The data to be able of authenticate the user and generating a new access token.
-    /// </param>
-    /// <response code="200">If the new access token has been generated successfully</response>
-    /// <response code="400">If the received data does not fulfill the requirements</response>
-    /// <response code="403">If the provided refresh token is invalid or has expired.</response>
-    /// <response code="500">If any other kind of server error occur</response>
-    [HttpPost("refreshToken")]
+    [AllowAnonymous]
+    [HttpPost("accessToken")]
     [ProducesResponseType(typeof(SessionDTO), 200)]
-    [ProducesResponseType(typeof(BadRequestOldDTO), 400)]
-    [ProducesResponseType(typeof(ErrorDTO), 403)]
-    [ProducesResponseType(typeof(ErrorDTO), 406)]
-    [ProducesResponseType(typeof(ErrorDTO), 500)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
     public async Task<ActionResult<SessionDTO>> RefreshAccessToken(
         [FromBody] RefreshAccessTokenDTO data
     )
     {
-        var token = await _service.IssueJwtToken(data.RefreshToken);
-        var refreshToken = new JwtToken
-        {
-            Value = data.RefreshToken,
-            Expires = data.RefreshTokenExpires,
-        };
-        return Ok(new SessionDTO(token, refreshToken));
-    } */
+        LogRequest(nameof(RefreshAccessToken), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _service.RefreshAccessTokenAsync(data);
+
+        if (result.HasValue)
+            return Ok(result.Value);
+
+        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType);
+        return StatusCode(error.Status, error);
+    }
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationRequest,

@@ -10,7 +10,7 @@ public static class LogEvents
     public const int AuthenticationLogin = 1000;
     public const int AuthenticationRegister = 1001;
     public const int AuthenticationLogout = 1002;
-    public const int AuthenticationCreateToken = 1003;
+    public const int AuthenticationRefreshAccessToken = 1003;
     public const int AuthenticationResetPassword = 1004;
     public const int AuthenticationSendAccessCode = 1005;
     public const int AuthenticationSendResetPasswordToken = 1006;
@@ -98,6 +98,9 @@ public static class LogEvents
     public const int AuthenticationLockedAccount = 4005;
     public const int AuthenticationExpiredAccessCode = 4006;
     public const int AuthenticationInternalError = 4007;
+    public const int AuthenticationMissingRefreshToken = 4008;
+    public const int AuthenticationExpiredRefreshToken = 4009;
+    public const int AuthenticationInvalidRefreshToken = 4010;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;

@@ -76,6 +76,15 @@ namespace FinBooKeAPI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Refresh token is missing.
+        /// </summary>
+        internal static string RefreshToken {
+            get {
+                return ResourceManager.GetString("RefreshToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Permission token is missing.
         /// </summary>
         internal static string Token {

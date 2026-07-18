@@ -23,7 +23,7 @@ public partial class AuthenticationService : IAuthenticationService
         Level = LogLevel.Information,
         Message = "Authentication: Logout user - {Id}"
     )]
-    private partial void LogLogout(Guid id);
+    private partial void LogLogout(string id);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationSendResetPasswordToken,
@@ -38,6 +38,13 @@ public partial class AuthenticationService : IAuthenticationService
         Message = "Authentication: Reset password of account - {Email}"
     )]
     private partial void LogResetPassword(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationRefreshAccessToken,
+        Level = LogLevel.Information,
+        Message = "Authentication: Refresh access token - {Id}"
+    )]
+    private partial void LogRefreshAccessToken(string id);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationLoginSuccess,
@@ -82,6 +89,27 @@ public partial class AuthenticationService : IAuthenticationService
     private partial void LogInvalidCredentials(string email);
 
     [LoggerMessage(
+        EventId = LogEvents.AuthenticationMissingRefreshToken,
+        Level = LogLevel.Warning,
+        Message = "Authentication: Missing refresh token - {Email}"
+    )]
+    private partial void LogMissingRefreshToken(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationExpiredRefreshToken,
+        Level = LogLevel.Warning,
+        Message = "Authentication: Expired refresh token - {Email}"
+    )]
+    private partial void LogExpiredRefreshToken(string email);
+
+    [LoggerMessage(
+        EventId = LogEvents.AuthenticationInvalidRefreshToken,
+        Level = LogLevel.Warning,
+        Message = "Authentication: Invalid refresh token - {Email}"
+    )]
+    private partial void LogInvalidRefreshToken(string email);
+
+    [LoggerMessage(
         EventId = LogEvents.AuthenticationLockedAccount,
         Level = LogLevel.Warning,
         Message = "Authentication: Account locked - {Email}"
@@ -93,7 +121,7 @@ public partial class AuthenticationService : IAuthenticationService
         Level = LogLevel.Error,
         Message = "Authentication: Invalid user id - {Id}"
     )]
-    private partial void LogInvalidUserId(Guid id);
+    private partial void LogInvalidUserId(string id);
 
     [LoggerMessage(
         EventId = LogEvents.AuthenticationInternalError,

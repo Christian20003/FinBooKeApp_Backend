@@ -129,4 +129,7 @@
   <data name="Token" xml:space="preserve">
     <value>Permission token is missing</value>
   </data>
+  <data name="RefreshToken" xml:space="preserve">
+    <value>Refresh token is missing</value>
+  </data>
 </root>

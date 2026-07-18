@@ -129,12 +129,10 @@ public partial class AuthenticationService(
         return Result.Ok(userDTO);
     }
 
-    public async Task<Result<bool>> LogoutAsync(Guid userId)
+    public async Task<Result<bool>> LogoutAsync(string userId)
     {
         LogLogout(userId);
-        var user = await _accountCollection.GetAccountAsync(account =>
-            account.Id == userId.ToString()
-        );
+        var user = await _accountCollection.GetAccountAsync(account => account.Id == userId);
         if (user is null)
         {
             LogInvalidUserId(userId);
@@ -204,6 +202,49 @@ public partial class AuthenticationService(
         }
         LogResetPasswordSuccess(emailHash);
         return Result.Ok(true);
+    }
+
+    public async Task<Result<SessionDTO>> RefreshAccessTokenAsync(RefreshAccessTokenDTO refreshData)
+    {
+        var emailHash = _hashProvider.Hash(refreshData.Email);
+        LogRefreshAccessToken(emailHash);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.EmailHash == emailHash
+        );
+        if (user is null)
+        {
+            LogInvalidUserId(emailHash);
+            return Result.Unauthorized<SessionDTO>("");
+        }
+        var accountToken = await _accountCollection.GetAccountRefreshTokenAsync(user);
+        if (accountToken is null)
+        {
+            LogMissingRefreshToken(emailHash);
+            return Result.Unauthorized<SessionDTO>("");
+        }
+        var payload = new VerifyTokenPayload
+        {
+            Issuer = _authenticationSettings.Value.Issuer,
+            Audience = _authenticationSettings.Value.Audience,
+            Secret = _authenticationSettings.Value.RefreshTokenSecret,
+            Token = refreshData.RefreshToken,
+        };
+        var claim = _tokenProvider.VerifyToken(payload);
+        if (accountToken != refreshData.RefreshToken)
+        {
+            LogInvalidRefreshToken(emailHash);
+            return Result.Unauthorized<SessionDTO>("");
+        }
+        var accessToken = GetAccessToken(claim.Claims);
+        return Result.Ok(
+            new SessionDTO
+            {
+                AccessToken = accessToken.Value,
+                AccessTokenExpiresAt = accessToken.Expires,
+                RefreshToken = refreshData.RefreshToken,
+                RefreshTokenExpiresAt = _claimProvider.GetExpires(claim).Ticks,
+            }
+        );
     }
 
     private AuthenticationToken GetAccessToken(IEnumerable<Claim> claims)

@@ -30,7 +30,7 @@ public interface IAuthenticationService
     /// </summary>
     /// <param name="userId">The id of the user who is authenticated</param>
     /// <returns>True if the user could be logged out</returns>
-    public Task<Result<bool>> LogoutAsync(Guid userId);
+    public Task<Result<bool>> LogoutAsync(string userId);
 
     /// <summary>
     /// Sends a reset password token to the given email address.
@@ -45,6 +45,13 @@ public interface IAuthenticationService
     /// <param name="resetData">The data to reset the password.</param>
     /// <returns>True if the reset operation was successful</returns>
     public Task<Result<bool>> ResetPasswordAsync(ResetPasswordDTO resetData);
+
+    /// <summary>
+    /// Returns a new access token.
+    /// </summary>
+    /// <param name="refreshData">The data to generate a new access token</param>
+    /// <returns>The new access token</returns>
+    public Task<Result<SessionDTO>> RefreshAccessTokenAsync(RefreshAccessTokenDTO refreshData);
 
     // TODO: DEPRECATED
 

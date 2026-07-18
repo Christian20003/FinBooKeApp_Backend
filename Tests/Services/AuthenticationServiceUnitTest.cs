@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Security.Claims;
 using FinBooKeAPI.Collections.AccountCollection;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
@@ -13,6 +14,7 @@ using FinBookeAPI.Services.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 
 namespace FinBooKeAPI.Tests.Services;
@@ -92,7 +94,7 @@ public class AuthenticationServiceUnitTest
     {
         return new UserAccount
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = "123456789",
             UserName = "name",
             Email = "email",
             EmailHash = "email",
@@ -127,12 +129,12 @@ public class AuthenticationServiceUnitTest
 
     private static AuthenticationToken GetAccessToken()
     {
-        return new AuthenticationToken { Value = "access", Expires = DateTime.UtcNow.Ticks };
+        return new AuthenticationToken { Value = "access", Expires = 123456789 };
     }
 
     private static AuthenticationToken GetRefreshToken()
     {
-        return new AuthenticationToken { Value = "refresh", Expires = DateTime.UtcNow.Ticks };
+        return new AuthenticationToken { Value = "refresh", Expires = 123456789 };
     }
 
     private static EmailPayload GetEmptyEmailPayload()
@@ -392,6 +394,54 @@ public class AuthenticationServiceUnitTest
             );
     }
 
+    private void SetupRefreshAccessToken()
+    {
+        var account = GetUserAccount();
+        var settings = GetAuthenticationSettings();
+        var accessToken = GetAccessToken();
+        var refreshToken = GetRefreshToken();
+
+        _userDatabase.Add(account);
+        _hashProvider
+            .Setup(obj => obj.Hash(It.IsAny<string>()))
+            .Returns(
+                (string value) =>
+                {
+                    return value;
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.GetAccountAsync(It.IsAny<Expression<Func<UserAccount, bool>>>()))
+            .ReturnsAsync(
+                (Expression<Func<UserAccount, bool>> condition) =>
+                {
+                    return _userDatabase.FirstOrDefault(condition.Compile());
+                }
+            );
+        _accountCollection
+            .Setup(obj => obj.GetAccountRefreshTokenAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(refreshToken.Value);
+        _tokenProvider
+            .Setup(obj => obj.CreateToken(It.IsAny<CreateTokenPayload>()))
+            .Returns<CreateTokenPayload>(
+                (payload) =>
+                {
+                    if (payload.Secret == settings.AccessTokenSecret)
+                    {
+                        return accessToken;
+                    }
+                    return refreshToken;
+                }
+            );
+        _tokenProvider
+            .Setup(obj => obj.VerifyToken(It.IsAny<VerifyTokenPayload>()))
+            .Returns(new ClaimsPrincipal());
+        _claimProvider
+            .Setup(obj => obj.GetExpires(It.IsAny<ClaimsPrincipal>()))
+            .Returns(new DateTime(refreshToken.Expires));
+        _authenticationSettings.Setup(obj => obj.Value).Returns(settings);
+    }
+
     [Fact]
     public async Task Should_FailLogin_WhenEmailIsInvalid()
     {
@@ -629,7 +679,7 @@ public class AuthenticationServiceUnitTest
     {
         SetupLogout();
 
-        var result = await _service.LogoutAsync(Guid.Empty);
+        var result = await _service.LogoutAsync("");
 
         Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
     }
@@ -643,7 +693,7 @@ public class AuthenticationServiceUnitTest
             .ReturnsAsync(IdentityResult.Failed([]));
 
         var user = _userDatabase.First();
-        var result = await _service.LogoutAsync(Guid.Parse(user.Id));
+        var result = await _service.LogoutAsync(user.Id);
 
         Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
     }
@@ -654,7 +704,7 @@ public class AuthenticationServiceUnitTest
         SetupLogout();
 
         var user = _userDatabase.First();
-        var result = await _service.LogoutAsync(Guid.Parse(user.Id));
+        var result = await _service.LogoutAsync(user.Id);
 
         Assert.Equal(ErrorType.NONE, result.ErrorType);
         Assert.True(result.Value);
@@ -861,5 +911,109 @@ public class AuthenticationServiceUnitTest
 
         Assert.Equal(ErrorType.NONE, result.ErrorType);
         Assert.Equal("1234", item.PasswordHash);
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenAccountNotFound_ReturnUnauthorizedError()
+    {
+        SetupRefreshAccessToken();
+        var dto = new RefreshAccessTokenDTO { Email = "", RefreshToken = "" };
+
+        var result = await _service.RefreshAccessTokenAsync(dto);
+
+        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenAccountHasNotAToken_ReturnUnauthorizedError()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var dto = new RefreshAccessTokenDTO { Email = account.Email!, RefreshToken = "" };
+        _accountCollection
+            .Setup(obj => obj.GetAccountRefreshTokenAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync((string?)null);
+
+        var result = await _service.RefreshAccessTokenAsync(dto);
+
+        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenRefreshTokenIsMalformed_ThrowException()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var dto = new RefreshAccessTokenDTO { Email = account.Email!, RefreshToken = "" };
+        _tokenProvider
+            .Setup(obj => obj.VerifyToken(It.IsAny<VerifyTokenPayload>()))
+            .Throws(new SecurityTokenMalformedException());
+
+        await Assert.ThrowsAsync<SecurityTokenMalformedException>(
+            () => _service.RefreshAccessTokenAsync(dto)
+        );
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenRefreshTokenIsInvalid_ThrowException()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var dto = new RefreshAccessTokenDTO { Email = account.Email!, RefreshToken = "" };
+        _tokenProvider
+            .Setup(obj => obj.VerifyToken(It.IsAny<VerifyTokenPayload>()))
+            .Throws(new SecurityTokenException());
+
+        await Assert.ThrowsAsync<SecurityTokenException>(
+            () => _service.RefreshAccessTokenAsync(dto)
+        );
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenRefreshTokenIsUnequalToStoredOne_ReturnUnauthorizedError()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var dto = new RefreshAccessTokenDTO { Email = account.Email!, RefreshToken = "" };
+
+        var result = await _service.RefreshAccessTokenAsync(dto);
+
+        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
+        Assert.False(result.HasValue);
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenRefreshTokenIsValid_ReturnOk()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var token = GetRefreshToken();
+        var dto = new RefreshAccessTokenDTO { Email = account.Email!, RefreshToken = token.Value };
+
+        var result = await _service.RefreshAccessTokenAsync(dto);
+
+        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.True(result.HasValue);
+    }
+
+    [Fact]
+    public async Task RefreshAccessToken_WhenRefreshTokenIsValid_ReturnNewAccessToken()
+    {
+        SetupRefreshAccessToken();
+        var account = GetUserAccount();
+        var refreshToken = GetRefreshToken();
+        var accessToken = GetAccessToken();
+        var dto = new RefreshAccessTokenDTO
+        {
+            Email = account.Email!,
+            RefreshToken = refreshToken.Value,
+        };
+
+        var result = await _service.RefreshAccessTokenAsync(dto);
+
+        Assert.Equal(accessToken.Value, result.Value!.AccessToken);
+        Assert.Equal(accessToken.Expires, result.Value!.AccessTokenExpiresAt);
     }
 }
