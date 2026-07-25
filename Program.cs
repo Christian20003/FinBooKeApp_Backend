@@ -11,11 +11,14 @@ using FinBookeAPI.Collections.CategoryCollection;
 using FinBookeAPI.Collections.PaymentMethodCollection;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Logic.Email;
+using FinBooKeAPI.Logic.FileSystem;
+using FinBooKeAPI.Logic.Parsing;
 using FinBooKeAPI.Logic.Security;
 using FinBookeAPI.Middleware;
 using FinBookeAPI.Services.AmountManagement;
 using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.CategoryType;
+using FinBooKeAPI.Services.DataImport;
 using FinBookeAPI.Services.Payment;
 using FinBookeAPI.Services.Upload;
 using Microsoft.AspNetCore.Mvc;
@@ -58,16 +61,22 @@ builder.Services.AddScoped<IEmailProvider, EmailProvider>();
 builder.Services.AddScoped<IEmailTemplateBuilder, EmailTemplateBuilder>();
 builder.Services.AddScoped<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IHashProvider, HashProvider>();
+builder.Services.AddScoped<IFileSystem, FileSystem>();
+builder.Services.AddScoped<JsonParser>();
+builder.Services.AddScoped<XmlParser>();
+builder.Services.AddScoped<CsvParser>();
+builder.Services.AddScoped<IParserFactory, ParserFactory>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IDataImportService, DataImportService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
 builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
 builder.Services.AddScoped<IAmountManagementService, AmountManagementService>();
 builder.Services.AddTransient<ExceptionHandling>();
 
-// Import test data into database - deprecated
+// Import test data into database
 //await builder.Services.ImportUsers();
 //await builder.Services.ImportData();
 

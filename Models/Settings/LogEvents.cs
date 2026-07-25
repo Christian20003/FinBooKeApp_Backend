@@ -14,6 +14,8 @@ public static class LogEvents
     public const int AuthenticationResetPassword = 1004;
     public const int AuthenticationSendResetPasswordToken = 1005;
 
+    public const int DataImportUser = 1010;
+
     public const int EmailSend = 1021;
 
     public const int UploadFile = 1031;
@@ -55,6 +57,8 @@ public static class LogEvents
     public const int AuthenticationResetPasswordSuccess = 2004;
     public const int AuthenticationRefreshAccessTokenSuccess = 2005;
 
+    public const int DataImportUserSucess = 2010;
+
     public const int EmailSendSuccess = 2021;
 
     public const int UploadFileSuccess = 2031;
@@ -94,6 +98,9 @@ public static class LogEvents
     public const int AuthenticationInternalError = 4004;
     public const int AuthenticationMissingRefreshToken = 4005;
     public const int AuthenticationInvalidRefreshToken = 4006;
+
+    public const int DataImportMissingData = 4010;
+    public const int DataImportInsertFailed = 4011;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;

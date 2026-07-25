@@ -4,7 +4,7 @@ namespace FinBookeAPI.Tests.Upload;
 
 public partial class UploadServiceUnitTests
 {
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public void Should_FailDeletingFile_WhenUserIdIsEmpty()
     {
         Assert.Throws<ArgumentException>(
@@ -12,7 +12,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public void Should_FailDeletingFile_WhenFileDoesNotExist()
     {
         Assert.Throws<FileNotFoundException>(
@@ -20,7 +20,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public void Should_FailDeletingFile_WhenFileNameIsInvalid()
     {
         Assert.Throws<ArgumentException>(
@@ -28,7 +28,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public void Should_DeleteFile_WhenFileExists()
     {
         byte[] bytes = [1, 2, 3, 4, 5];

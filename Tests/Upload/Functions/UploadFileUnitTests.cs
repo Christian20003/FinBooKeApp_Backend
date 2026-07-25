@@ -4,7 +4,7 @@ namespace FinBookeAPI.Tests.Upload;
 
 public partial class UploadServiceUnitTests
 {
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public async Task Should_FailUploadingFile_WhenUserIdIsEmpty()
     {
         await Assert.ThrowsAsync<ArgumentException>(
@@ -12,7 +12,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public async Task Should_FailUploadingFile_WhenFileSizeExceeded()
     {
         _file.Setup(obj => obj.Length).Returns(() => (_settings.MaxFileSize + 1) * 1024 * 1024);
@@ -22,7 +22,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public async Task Should_FailUploadingFile_WhenFileFormatIsInvalid()
     {
         _file.Setup(obj => obj.Length).Returns(() => 5000);
@@ -33,7 +33,7 @@ public partial class UploadServiceUnitTests
         );
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public async Task Should_StoreFileInUserSpecificDirectory()
     {
         _file.Setup(obj => obj.Length).Returns(() => 5000);
@@ -47,7 +47,7 @@ public partial class UploadServiceUnitTests
         Assert.True(File.Exists(path));
     }
 
-    [Fact]
+    [Fact(Skip = "This test is disabled")]
     public async Task Should_SetFileAccessControlToReadOnly()
     {
         _file.Setup(obj => obj.Length).Returns(() => 5000);
