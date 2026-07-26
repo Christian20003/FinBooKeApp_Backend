@@ -10,7 +10,7 @@ public class XmlParser : IParser
     public IEnumerable<TYPE> Parse<TYPE>(string content)
         where TYPE : new()
     {
-        XDocument doc = XDocument.Load(content);
+        XDocument doc = XDocument.Parse(content);
         if (doc.Root is null)
             throw new XmlException("Invalid xml schema");
         var typename = typeof(TYPE).Name;
