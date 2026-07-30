@@ -32,12 +32,14 @@ public partial class DataImportService(
         var fullPath = _fileSystem.CombinePath(path, filename);
         if (!_fileSystem.FileExists(fullPath))
         {
-            // TODO
+            LogMissingFile(fullPath);
+            return Result.NotFound<bool>(_stringLocalizer.GetString(MISSING_FILE_KEY));
         }
         var extension = _fileSystem.GetFileExtension(filename);
         if (!SUPPORTED_FORMAT_TYPES.TryGetValue(extension, out var parserType))
         {
-            // TODO
+            LogUnsupportedFormat(fullPath);
+            return Result.BadRequest<bool>(_stringLocalizer.GetString(UNSUPPORTED_FILE_FORMAT_KEY));
         }
         var fileParser = _fileParserFactory.GetParser(parserType);
         var fileContent = _fileSystem.ReadAllText(fullPath);

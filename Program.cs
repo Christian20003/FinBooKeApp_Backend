@@ -77,8 +77,7 @@ builder.Services.AddScoped<IAmountManagementService, AmountManagementService>();
 builder.Services.AddTransient<ExceptionHandling>();
 
 // Import test data into database
-//await builder.Services.ImportUsers();
-//await builder.Services.ImportData();
+await builder.Services.ImportData();
 
 var app = builder.Build();
 

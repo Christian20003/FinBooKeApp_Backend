@@ -7,4 +7,5 @@ public enum ErrorType
     FORBIDDEN = 2,
     UNAUTHORIZED = 3,
     INTERNAL_ERROR = 4,
+    NOT_FOUND = 5,
 }

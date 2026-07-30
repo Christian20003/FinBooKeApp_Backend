@@ -19,6 +19,20 @@ public partial class DataImportService : IDataImportService
     private partial void LogMissingData(int entryNumber);
 
     [LoggerMessage(
+        EventId = LogEvents.DataImportMissingFile,
+        Level = LogLevel.Information,
+        Message = "DataImport: Missing file - {Filename}"
+    )]
+    private partial void LogMissingFile(string filename);
+
+    [LoggerMessage(
+        EventId = LogEvents.DataImportUnsupportedFormat,
+        Level = LogLevel.Information,
+        Message = "DataImport: Unsupported file type - {Filename}"
+    )]
+    private partial void LogUnsupportedFormat(string filename);
+
+    [LoggerMessage(
         EventId = LogEvents.DataImportInsertFailed,
         Level = LogLevel.Information,
         Message = "DataImport: Entry could not be inserted - {EntryNumber}"

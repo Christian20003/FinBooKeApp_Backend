@@ -101,6 +101,8 @@ public static class LogEvents
 
     public const int DataImportMissingData = 4010;
     public const int DataImportInsertFailed = 4011;
+    public const int DataImportMissingFile = 4012;
+    public const int DataImportUnsupportedFormat = 4013;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;

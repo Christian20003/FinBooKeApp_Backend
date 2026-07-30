@@ -18,6 +18,9 @@ public static class Result
     public static Result<T> Unauthorized<T>(string message) =>
         new(false, default, ErrorType.UNAUTHORIZED, [message]);
 
+    public static Result<T> NotFound<T>(string message) =>
+        new(false, default, ErrorType.NOT_FOUND, [message]);
+
     public static Result<T> InternalError<T>(List<string> messages) =>
         new(false, default, ErrorType.INTERNAL_ERROR, messages);
 
