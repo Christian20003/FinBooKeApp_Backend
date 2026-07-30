@@ -10,45 +10,57 @@ public class CsvParser : IParser
     const char LINE_DELIMITER = '\n';
     const char PROPERTY_DELIMITER = ',';
     const char LIST_DELIMITER = ';';
-    const int HEADER = 1;
 
     public IEnumerable<TYPE> Parse<TYPE>(string content)
         where TYPE : new()
     {
-        var lines = content.Split(LINE_DELIMITER).Skip(HEADER);
-        return lines.Select(SetObject<TYPE>);
+        if (content == string.Empty)
+            throw new CsvException("Invalid csv format");
+        var lines = content.Split(LINE_DELIMITER);
+        var header = lines.First();
+        var values = lines.Skip(1);
+
+        return [.. values.Select(line => SetObject<TYPE>(line, header))];
     }
 
-    private static OBJECT_TYPE SetObject<OBJECT_TYPE>(string line)
+    private static OBJECT_TYPE SetObject<OBJECT_TYPE>(string line, string header)
         where OBJECT_TYPE : new()
     {
         var result = new OBJECT_TYPE();
         var type = typeof(OBJECT_TYPE);
         var properties = type.GetProperties();
-        var csvProperties = GetCsvProperties(line);
-        if (properties.Length != csvProperties.Count)
-            throw new CsvException("Element has invalid number of properties");
+        var csvProperties = GetCsvProperties(line, header);
         for (var index = 0; index < properties.Length; index++)
         {
             var property = properties.ElementAt(index);
-            var csvProperty = csvProperties.ElementAt(index);
+            if (!csvProperties.TryGetValue(property.Name, out var csvProperty))
+                continue;
             if (IsListType(property))
-                SetProperty(csvProperty.Split(PROPERTY_DELIMITER), property, result);
+                SetProperty(csvProperty.Split(LIST_DELIMITER), property, result);
             else
                 SetProperty(csvProperty, property, result);
         }
         return result;
     }
 
-    private static List<string> GetCsvProperties(string line)
+    private static Dictionary<string, string> GetCsvProperties(string line, string header)
     {
         using var parser = new TextFieldParser(new StringReader(line));
-        parser.SetDelimiters($"{LIST_DELIMITER}");
+        parser.SetDelimiters($"{PROPERTY_DELIMITER}");
         parser.HasFieldsEnclosedInQuotes = true;
-        var fields = parser.ReadFields();
-        if (fields is null)
-            return [];
-        return [.. fields];
+
+        var values = parser.ReadFields();
+        var headers = header.Split(PROPERTY_DELIMITER);
+        var result = new Dictionary<string, string>();
+        if (values is null)
+            return result;
+        if (values.Length != headers.Length)
+            throw new CsvException("Number of values unequal to number of headers");
+
+        for (var index = 0; index < headers.Length; index++)
+            result.Add(headers.ElementAt(index), values.ElementAt(index));
+
+        return result;
     }
 
     private static bool IsListType(PropertyInfo property)

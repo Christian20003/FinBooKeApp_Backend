@@ -15,7 +15,7 @@ public class XmlParser : IParser
             throw new XmlException("Invalid xml schema");
         var typename = typeof(TYPE).Name;
         var xml = doc.Descendants(typename);
-        return xml.Select(SetObject<TYPE>);
+        return [.. xml.Select(SetObject<TYPE>)];
     }
 
     private static OBJECT_TYPE SetObject<OBJECT_TYPE>(XElement xml)
