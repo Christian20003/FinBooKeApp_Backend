@@ -8,7 +8,7 @@
     <AssemblyName>FinbooKeAPI</AssemblyName>
     <UserSecretsId>66631bc9-1452-4b8a-b080-e064f9ef9b0b</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591;NU1510;CS7022</NoWarn>
   </PropertyGroup> 
 
   <ItemGroup>
@@ -53,7 +53,6 @@
     <PackageReference Include="MongoDB.EntityFrameworkCore" />
     <PackageReference Include="Moq" />
     <PackageReference Include="Moq.EntityFrameworkCore" />
-    <PackageReference Include="Snappier"/>
     <PackageReference Include="NReco.Logging.File" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="System.Linq.Async" />
