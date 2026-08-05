@@ -1,5 +1,5 @@
 using FinBooKeAPI.Logic.Security;
-using FinBookeAPI.Models.Database.Authentication;
+using FinBooKeAPI.Models.Database.Account;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBooKeAPI.Models.Logic.Authentication;
 

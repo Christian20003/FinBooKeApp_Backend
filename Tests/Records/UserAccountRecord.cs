@@ -1,4 +1,4 @@
-using FinBookeAPI.Models.Database.Authentication;
+using FinBooKeAPI.Models.Database.Account;
 
 namespace FinBookeAPI.Tests.Records;
 

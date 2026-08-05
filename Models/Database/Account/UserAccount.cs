@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace FinBookeAPI.Models.Database.Authentication;
+namespace FinBooKeAPI.Models.Database.Account;
 
 public class UserAccount : IdentityUser
 {
@@ -8,5 +8,7 @@ public class UserAccount : IdentityUser
 
     public string EmailHash { get; set; } = "";
     public string ImagePath { get; set; } = "";
+    public ThemeType ThemeType { get; set; } = ThemeType.LIGHT;
+    public LanguageType FrontendLanguage { get; set; } = LanguageType.EN;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

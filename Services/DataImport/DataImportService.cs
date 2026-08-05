@@ -2,7 +2,7 @@ using FinBooKeAPI.Collections.AccountCollection;
 using FinBooKeAPI.Logic.FileSystem;
 using FinBooKeAPI.Logic.Parsing;
 using FinBooKeAPI.Logic.Security;
-using FinBookeAPI.Models.Database.Authentication;
+using FinBooKeAPI.Models.Database.Account;
 using FinBookeAPI.Models.Result;
 using Microsoft.Extensions.Localization;
 

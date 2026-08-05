@@ -5,7 +5,7 @@ using FinBooKeAPI.Logic.Email;
 using FinBooKeAPI.Logic.Security;
 using FinBooKeAPI.Mapping.Authentication;
 using FinBooKeAPI.Mapping.Email;
-using FinBookeAPI.Models.Database.Authentication;
+using FinBooKeAPI.Models.Database.Account;
 using FinBooKeAPI.Models.DTO.Authentication;
 using FinBooKeAPI.Models.Logic.Authentication;
 using FinBookeAPI.Models.Result;
