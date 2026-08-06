@@ -21,4 +21,16 @@ public interface IAccountCollection
     public Task<string?> GetAccountRefreshTokenAsync(UserAccount user);
 
     public Task<IdentityResult> DeleteAccountRefreshTokenAsync(UserAccount user);
+
+    public Task<string> GenerateChangeEmailToken(UserAccount user, string newEmail);
+
+    public Task<IdentityResult> ChangeEmailAddressAsync(
+        UserAccount user,
+        string token,
+        string newEmail
+    );
+
+    public Task<string> GenerateEmailVerificationToken(UserAccount user);
+
+    public Task<IdentityResult> VerifyEmailAddressAsync(UserAccount user, string token);
 }

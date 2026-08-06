@@ -60,4 +60,28 @@ public class AccountCollection(UserManager<UserAccount> userManager) : IAccountC
     {
         return _userManager.UpdateAsync(user);
     }
+
+    public Task<string> GenerateChangeEmailToken(UserAccount user, string newEmail)
+    {
+        return _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+    }
+
+    public Task<IdentityResult> ChangeEmailAddressAsync(
+        UserAccount user,
+        string token,
+        string newEmail
+    )
+    {
+        return _userManager.ChangeEmailAsync(user, newEmail, token);
+    }
+
+    public Task<string> GenerateEmailVerificationToken(UserAccount user)
+    {
+        return _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public Task<IdentityResult> VerifyEmailAddressAsync(UserAccount user, string token)
+    {
+        return _userManager.ConfirmEmailAsync(user, token);
+    }
 }
