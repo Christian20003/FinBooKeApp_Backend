@@ -10,18 +10,12 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
 
     public string UploadImage(Guid userId, IFormFile image)
     {
-        if (!IsImageFileFormatSupported(image))
+        if (!image.ContentType.Contains("image"))
             throw new FormatException("File format is not supported");
-        if (!IsFileSizeSupported(image))
-            throw new ArgumentOutOfRangeException(nameof(image), "File size is too large");
-        var fileName = CreateFileName(image);
-        var path = GetFilePath(userId);
-        var filePath = _fileSystem.CombinePath(path, fileName);
-        _fileSystem.WriteAllBytes(image, filePath);
-        return fileName;
+        return UploadFile(userId, image);
     }
 
-    private bool IsImageFileFormatSupported(IFormFile image)
+    private bool IsFileFormatSupported(IFormFile image)
     {
         var extension = _fileSystem.GetFileExtension(image.FileName);
         var formats = _options.Value.FileFormats;
@@ -37,6 +31,19 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
         return fileSize <= maxFileSize;
     }
 
+    private string UploadFile(Guid userId, IFormFile file, string subDir = "")
+    {
+        if (!IsFileFormatSupported(file))
+            throw new FormatException("File format is not supported");
+        if (!IsFileSizeSupported(file))
+            throw new ArgumentOutOfRangeException(nameof(file), "File size is too large");
+        var fileName = CreateFileName(file);
+        var path = GetFilePath(userId, subDir);
+        var filePath = _fileSystem.CombinePath(path, fileName);
+        _fileSystem.WriteAllBytes(file, filePath);
+        return fileName;
+    }
+
     private string CreateFileName(IFormFile file)
     {
         var fileId = Guid.NewGuid();
@@ -45,11 +52,13 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
         return $"{fileName}_{fileId}{extension}";
     }
 
-    private string GetFilePath(Guid userId)
+    private string GetFilePath(Guid userId, string subDir)
     {
         var root = _options.Value.Root;
         var userDir = userId.ToString();
         var path = _fileSystem.CombinePath(root, userDir);
+        if (subDir != string.Empty)
+            path = _fileSystem.CombinePath(path, subDir);
         if (_fileSystem.FileExists(path))
             return path;
         _fileSystem.CreateDirectory(path);
