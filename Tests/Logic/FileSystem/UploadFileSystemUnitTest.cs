@@ -135,4 +135,17 @@ public class UploadFileSystemUnitTest
             Times.Once()
         );
     }
+
+    [Fact]
+    public void GetImageContent_WhenImageExists_ReturnImageContent()
+    {
+        var userId = Guid.NewGuid();
+        var fileName = "image.jpg";
+        var optionValues = GetFileStorage();
+        var path = $"{optionValues.Root}/{userId}/{fileName}";
+
+        _upload.GetImageContent(userId, fileName);
+
+        _fileSystem.Verify(obj => obj.ReadAllBytes(path), Times.Once());
+    }
 }
