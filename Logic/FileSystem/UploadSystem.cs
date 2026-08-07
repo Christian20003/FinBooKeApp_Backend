@@ -15,6 +15,11 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
         return UploadFile(userId, image);
     }
 
+    public byte[] GetImageContent(Guid userId, string fileName)
+    {
+        return ReadFileContent(userId, fileName);
+    }
+
     private bool IsFileFormatSupported(IFormFile image)
     {
         var extension = _fileSystem.GetFileExtension(image.FileName);
@@ -63,5 +68,12 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
             return path;
         _fileSystem.CreateDirectory(path);
         return path;
+    }
+
+    private byte[] ReadFileContent(Guid userId, string fileName, string subDir = "")
+    {
+        var path = GetFilePath(userId, subDir);
+        var filePath = _fileSystem.CombinePath(path, fileName);
+        return _fileSystem.ReadAllBytes(filePath);
     }
 }

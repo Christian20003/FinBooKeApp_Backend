@@ -38,4 +38,9 @@ public class FileSystem : IFileSystem
         using var stream = new FileStream(path, FileMode.OpenOrCreate);
         file.CopyTo(stream);
     }
+
+    public byte[] ReadAllBytes(string file)
+    {
+        return File.ReadAllBytes(file);
+    }
 }
