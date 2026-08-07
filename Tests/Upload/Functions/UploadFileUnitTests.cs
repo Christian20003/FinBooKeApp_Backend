@@ -15,7 +15,7 @@ public partial class UploadServiceUnitTests
     [Fact(Skip = "This test is disabled")]
     public async Task Should_FailUploadingFile_WhenFileSizeExceeded()
     {
-        _file.Setup(obj => obj.Length).Returns(() => (_settings.MaxFileSize + 1) * 1024 * 1024);
+        _file.Setup(obj => obj.Length).Returns(() => (_settings.MaxFileSizeMb + 1) * 1024 * 1024);
 
         await Assert.ThrowsAsync<FormatException>(
             () => _service.UploadFile(_upload, Guid.NewGuid(), UploadType.IMAGE)

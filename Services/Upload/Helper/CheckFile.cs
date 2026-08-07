@@ -14,7 +14,7 @@ public partial class UploadService : IUploadService
     private bool HasValidSize(IFormFile file)
     {
         LogHasValidSize(file.FileName, file.Length);
-        return file.Length <= (_options.Value.MaxFileSize * 1024 * 1024);
+        return file.Length <= (_options.Value.MaxFileSizeMb * 1024 * 1024);
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public class FileStorage
     /// <summary>
     /// The maximum size of a file in MB.
     /// </summary>
-    public long MaxFileSize { get; set; }
+    public long MaxFileSizeMb { get; set; }
 
     /// <summary>
     /// A dictionary of all valid file formats. The key

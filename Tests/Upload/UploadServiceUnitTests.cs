@@ -14,7 +14,7 @@ public partial class UploadServiceUnitTests
     private readonly FileStorage _settings = new()
     {
         Root = "./uploads",
-        MaxFileSize = 20,
+        MaxFileSizeMb = 20,
         FileFormats = { { ".png", "image/png" }, { ".pdf", "application/pdf" } },
     };
 

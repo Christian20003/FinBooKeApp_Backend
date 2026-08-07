@@ -21,7 +21,7 @@ public partial class UploadService : IUploadService
         {
             LogInvalidFileSize(userId, file.FileName);
             throw new FormatException(
-                $"File can only have a size of {_options.Value.MaxFileSize} MB"
+                $"File can only have a size of {_options.Value.MaxFileSizeMb} MB"
             );
         }
         if (!HasValidFormat(file))
