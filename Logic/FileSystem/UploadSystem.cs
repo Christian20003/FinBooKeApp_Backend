@@ -46,6 +46,7 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
         var path = GetFilePath(userId, subDir);
         var filePath = _fileSystem.CombinePath(path, fileName);
         _fileSystem.WriteAllBytes(file, filePath);
+        _fileSystem.SetFilePermission(filePath, [FilePermission.READ]);
         return fileName;
     }
 

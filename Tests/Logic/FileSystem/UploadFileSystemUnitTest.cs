@@ -137,6 +137,21 @@ public class UploadFileSystemUnitTest
     }
 
     [Fact]
+    public void UploadImage_WhenImageIsValid_SetFilePermissionsToReadOnly()
+    {
+        var image = GetImageFile();
+        var userId = Guid.NewGuid();
+        List<FilePermission> permission = [FilePermission.READ];
+
+        _upload.UploadImage(userId, image.Object);
+
+        _fileSystem.Verify(
+            obj => obj.SetFilePermission(It.IsAny<string>(), permission),
+            Times.Once()
+        );
+    }
+
+    [Fact]
     public void GetImageContent_WhenImageExists_ReturnImageContent()
     {
         var userId = Guid.NewGuid();
