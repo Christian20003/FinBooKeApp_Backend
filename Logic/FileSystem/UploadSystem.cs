@@ -15,6 +15,11 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
         return UploadFile(userId, image);
     }
 
+    public void DeleteImage(string fileName)
+    {
+        _fileSystem.DeleteFile(fileName);
+    }
+
     public byte[] GetImageContent(Guid userId, string fileName)
     {
         return ReadFileContent(userId, fileName);

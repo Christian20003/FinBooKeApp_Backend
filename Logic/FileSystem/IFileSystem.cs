@@ -10,5 +10,6 @@ public interface IFileSystem
     public string GetFileExtension(string filename);
     public string GetFileName(string filename);
     public void CreateDirectory(string path);
+    public void DeleteFile(string filename);
     public void SetFilePermission(string path, IEnumerable<FilePermission> permissions);
 }

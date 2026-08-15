@@ -16,6 +16,11 @@ public class FileSystem : IFileSystem
             Directory.CreateDirectory(path);
     }
 
+    public void DeleteFile(string filename)
+    {
+        File.Delete(filename);
+    }
+
     public bool FileExists(string filename)
     {
         return Path.Exists(filename);

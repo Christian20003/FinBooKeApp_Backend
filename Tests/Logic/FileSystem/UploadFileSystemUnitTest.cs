@@ -163,4 +163,14 @@ public class UploadFileSystemUnitTest
 
         _fileSystem.Verify(obj => obj.ReadAllBytes(path), Times.Once());
     }
+
+    [Fact]
+    public void DeleteImage_WhenFileNameIsValid_DeleteFile()
+    {
+        var fileName = "image.jpg";
+
+        _upload.DeleteImage(fileName);
+
+        _fileSystem.Verify(obj => obj.DeleteFile(fileName), Times.Once());
+    }
 }
