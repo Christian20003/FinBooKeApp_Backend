@@ -20,7 +20,7 @@ public class EmailTemplateBuilderUnitTest
     }
 
     [Fact]
-    public void Should_RemoveAllTemplateParameters_InResetPasswordTemplate()
+    public void GetResetPasswordTemplate_RemoveAllTemplateParameters_InResetPasswordTemplate()
     {
         var result = _builder.GetResetPasswordTemplate("link");
 
@@ -29,10 +29,48 @@ public class EmailTemplateBuilderUnitTest
     }
 
     [Fact]
-    public void Should_AddLinkToResetPasswordTemplate()
+    public void GetResetPasswordTemplate_AddLinkToResetPasswordTemplate()
     {
         var link = "http://example.com";
         var result = _builder.GetResetPasswordTemplate(link);
+
+        var hasLink = result.Contains(link);
+        Assert.True(hasLink);
+    }
+
+    [Fact]
+    public void GetChangeEmailTemplate_RemoveAllTemplateParameters_InResetPasswordTemplate()
+    {
+        var result = _builder.GetChangeEmailTemplate("link");
+
+        var hasBrackets = result.Contains("{{") || result.Contains("}}");
+        Assert.False(hasBrackets);
+    }
+
+    [Fact]
+    public void GetChangeEmailTemplate_AddLinkToResetPasswordTemplate()
+    {
+        var link = "http://example.com";
+        var result = _builder.GetChangeEmailTemplate(link);
+
+        var hasLink = result.Contains(link);
+        Assert.True(hasLink);
+    }
+
+    [Fact]
+    public void GetVerifyEmailTemplate_RemoveAllTemplateParameters_InResetPasswordTemplate()
+    {
+        var result = _builder.GetVerifyEmailTemplate("link");
+
+        var hasBrackets = result.Contains("{{") || result.Contains("}}");
+        Assert.False(hasBrackets);
+    }
+
+    [Fact]
+    public void GetVerifyEmailTemplate_AddLinkToResetPasswordTemplate()
+    {
+        var link = "http://example.com";
+        var result = _builder.GetVerifyEmailTemplate(link);
 
         var hasLink = result.Contains(link);
         Assert.True(hasLink);

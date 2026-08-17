@@ -129,8 +129,8 @@
   <data name="PasswordResetWarning" xml:space="preserve">
     <value>&lt;strong&gt;Sicherheitshinweis:&lt;/strong&gt; Falls Sie diese Passwortzurücksetzung nicht angefordert haben, ignorieren Sie diese E-Mail bitte. Ihr Konto ist sicher und es wurden keine Änderungen vorgenommen.</value>
   </data>
-  <data name="PasswordResetAlternative" xml:space="preserve">
-    <value>Falls der Button oben nicht funktioniert, kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:</value>
+  <data name="ButtonAlternative" xml:space="preserve">
+    <value>Falls der Button nicht funktioniert, kopieren Sie diesen Link und fügen Sie ihn in Ihren Browser ein:</value>
   </data>
   <data name="Valediction" xml:space="preserve">
     <value>Mit freundlichen Grüßen, &lt;br&gt;Das Support-Team</value>
@@ -143,5 +143,35 @@
   </data>
   <data name="PasswordResetHeader" xml:space="preserve">
     <value>Anfrage zur Passwortzurücksetzung</value>
+  </data>
+  <data name="ChangeEmailIntroduction" xml:space="preserve">
+    <value>Wir haben eine Anfrage zum Ändern Ihrer E-Mail Adresse erhalten. Klicken Sie auf den Button, um diesen Prozess fortzufahren.</value>
+  </data>
+  <data name="ChangeEmailButton" xml:space="preserve">
+    <value>Neue E-Mail Adresse bestätigen</value>
+  </data>
+  <data name="ChangeEmailWarning" xml:space="preserve">
+    <value>&lt;strong&gt;Sicherheitshinweis:&lt;/strong&gt; Falls Sie diesen Schritt nicht angefordert haben, ignorieren Sie diese E-Mail. Ihr Konto ist sicher und es wurden keine Änderungen vorgenommen.</value>
+  </data>
+  <data name="ChangeEmailTitle" xml:space="preserve">
+    <value>Neue E-Mail Adresse bestätigen</value>
+  </data>
+  <data name="ChangeEmailHeader" xml:space="preserve">
+    <value>E-Mail Adresse ändern</value>
+  </data>
+  <data name="VerifyEmailIntroduction" xml:space="preserve">
+    <value>Klicken Sie auf den Button, um Ihre E-Mail Adresse erfolgreich zu verifizieren.</value>
+  </data>
+  <data name="VerifyEmailButton" xml:space="preserve">
+    <value>E-Mail Adresse verifizieren</value>
+  </data>
+  <data name="VerifyEmailWarning" xml:space="preserve">
+    <value>&lt;strong&gt;Sicherheitshinweis:&lt;/strong&gt; Falls Sie diesen Schritt nicht angefordert haben, ignorieren Sie diese E-Mail. Ihr Konto ist sicher und es wurden keine Änderungen vorgenommen.</value>
+  </data>
+  <data name="VerifyEmailTitle" xml:space="preserve">
+    <value>E-Mail Adresse verifizieren</value>
+  </data>
+  <data name="VerifyEmailHeader" xml:space="preserve">
+    <value>E-Mail Adresse verifizieren</value>
   </data>
 </root>

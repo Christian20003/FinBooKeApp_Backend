@@ -144,4 +144,34 @@
   <data name="PasswordResetHeader" xml:space="preserve">
     <value>Password Reset Request</value>
   </data>
+  <data name="ChangeEmailIntroduction" xml:space="preserve">
+    <value>We have received a request to change your email address. Please click the button to continue with this process.</value>
+  </data>
+  <data name="ChangeEmailButton" xml:space="preserve">
+    <value>Confirm new email address</value>
+  </data>
+  <data name="ChangeEmailWarning" xml:space="preserve">
+    <value>&lt;strong&gt;Security notice:&lt;/strong&gt; If you did not request this step, please ignore this email. Your account is secure and no changes have been made.</value>
+  </data>
+  <data name="ChangeEmailTitle" xml:space="preserve">
+    <value>Confirm new email address</value>
+  </data>
+  <data name="ChangeEmailHeader" xml:space="preserve">
+    <value>Change email address</value>
+  </data>
+  <data name="VerifyEmailIntroduction" xml:space="preserve">
+    <value>Click the button to successfully verify your email address</value>
+  </data>
+  <data name="VerifyEmailButton" xml:space="preserve">
+    <value>Verify email address</value>
+  </data>
+  <data name="VerifyEmailWarning" xml:space="preserve">
+    <value>&lt;strong&gt;Security notice:&lt;/strong&gt; If you did not request this step, please ignore this email. Your account is secure and no changes have been made.</value>
+  </data>
+  <data name="VerifyEmailTitle" xml:space="preserve">
+    <value>Verify email address</value>
+  </data>
+  <data name="VerifyEmailHeader" xml:space="preserve">
+    <value>Verify email address</value>
+  </data>
 </root>
