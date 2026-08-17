@@ -28,6 +28,12 @@ public static class Settings
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services
+            .AddOptions<AccountSettings>()
+            .Bind(configuration.GetSection(AccountSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.Configure<DataImport>(configuration.GetSection(DataImport.SectionName));
         services.Configure<FileStorage>(configuration.GetSection(FileStorage.SectionName));
 
