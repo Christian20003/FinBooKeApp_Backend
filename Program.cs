@@ -20,6 +20,7 @@ using FinBookeAPI.Services.Authentication;
 using FinBookeAPI.Services.CategoryType;
 using FinBooKeAPI.Services.DataImport;
 using FinBookeAPI.Services.Payment;
+using FinBookeAPI.Services.Profile;
 using FinBookeAPI.Services.Upload;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Compliance.Redaction;
@@ -62,6 +63,7 @@ builder.Services.AddScoped<IEmailTemplateBuilder, EmailTemplateBuilder>();
 builder.Services.AddScoped<IDataProtection, DataProtection>();
 builder.Services.AddScoped<IHashProvider, HashProvider>();
 builder.Services.AddScoped<IFileSystem, FileSystem>();
+builder.Services.AddScoped<IUploadSystem, UploadFileSystem>();
 builder.Services.AddScoped<JsonParser>();
 builder.Services.AddScoped<XmlParser>();
 builder.Services.AddScoped<CsvParser>();
@@ -69,6 +71,7 @@ builder.Services.AddScoped<IParserFactory, ParserFactory>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IDataImportService, DataImportService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUploadService, UploadService>();

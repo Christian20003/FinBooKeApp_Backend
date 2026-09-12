@@ -16,6 +16,8 @@ public static class LogEvents
 
     public const int DataImportUser = 1010;
 
+    public const int ProfileChangeEmailToken = 1020;
+
     public const int EmailSend = 1021;
 
     public const int UploadFile = 1031;
@@ -59,7 +61,7 @@ public static class LogEvents
 
     public const int DataImportUserSucess = 2010;
 
-    public const int EmailSendSuccess = 2021;
+    public const int ProfileChangeEmailTokenSuccess = 2020;
 
     public const int UploadFileSuccess = 2031;
     public const int UploadGetFileSuccess = 2032;
@@ -104,6 +106,9 @@ public static class LogEvents
     public const int DataImportMissingFile = 4012;
     public const int DataImportUnsupportedFormat = 4013;
 
+    public const int ProfileUserNotFound = 4020;
+    public const int ProfileUserUpdateFailed = 4021;
+
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;
     public const int EmailInvalidSender = 4023;
@@ -140,6 +145,8 @@ public static class LogEvents
 
     public const int AuthenticationRequest = 5000;
     public const int CategoryRequest = 5010;
+
+    public const int ProfileRequest = 5020;
 
     public const int UploadPostRequest = 5020;
     public const int UploadGetRequest = 5021;
