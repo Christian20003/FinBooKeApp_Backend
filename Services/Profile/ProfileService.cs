@@ -6,6 +6,7 @@ using FinBooKeAPI.Mapping.Email;
 using FinBooKeAPI.Models.Database.Account;
 using FinBookeAPI.Models.Result;
 using FinBooKeAPI.Models.Settings;
+using FinBooKeAPI.Services.Profile;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
@@ -24,6 +25,8 @@ public partial class ProfileService(
     ILogger<ProfileService> logger
 ) : IProfileService
 {
+    private static readonly string CHANGE_EMAIL_SUBJECT_KEY = "ChangeEmailSubject";
+
     private readonly IAccountCollection _accountCollection = accountCollection;
     private readonly IUploadSystem _upload = upload;
     private readonly IHashProvider _hashProvider = hashProvider;
@@ -35,17 +38,23 @@ public partial class ProfileService(
     private readonly IOptions<SmtpSettings> _smtpSettings = smtpSettings;
     private readonly ILogger<ProfileService> _logger = logger;
 
-    public Task<Result<bool>> ChangeEmailAsync(Guid userId, string token)
+    public Task<Result<bool, ServiceResultCode>> ChangeEmailAsync(Guid userId, string token)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<bool>> DeleteProfileImageAsync(Guid userId, string filename)
+    public Task<Result<bool, ServiceResultCode>> DeleteProfileImageAsync(
+        Guid userId,
+        string filename
+    )
     {
         throw new NotImplementedException();
     }
 
-    public async Task<Result<bool>> GetChangeEmailTokenAsync(Guid userId, string newEmail)
+    public async Task<Result<bool, ServiceResultCode>> GetChangeEmailTokenAsync(
+        Guid userId,
+        string newEmail
+    )
     {
         LogGetChangeEmailToken(userId);
         var user = await _accountCollection.GetAccountAsync(account =>
@@ -54,14 +63,19 @@ public partial class ProfileService(
         if (user is null)
         {
             LogUserNotFound(userId);
-            return Result.Forbidden<bool>("");
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
         }
         user.ChangeEmailHash = _hashProvider.Hash(newEmail);
+        if (user.EmailHash == user.ChangeEmailHash)
+        {
+            LogEmailIdentical(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.EMAIL_IDENTICAL);
+        }
         var identResult = await _accountCollection.UpdateAccountAsync(user);
         if (!identResult.Succeeded)
         {
             LogUserUpdateFailed(userId);
-            return Result.InternalError<bool>(_localizer.GetString(INTERNAL_ERROR_KEY));
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
         }
         var token = await _accountCollection.GenerateChangeEmailToken(user, newEmail);
         var link = $"{_accountSettings.Value.ChangeEmailLink}/?token={token}&email={newEmail}";
@@ -72,35 +86,44 @@ public partial class ProfileService(
         _emailProvider.Send(payload);
 
         LogGetChangeEmailTokenSuccess(userId);
-        return Result.Ok(true);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool>> GetVerifyEmailTokenAsync(Guid userId)
+    public Task<Result<bool, ServiceResultCode>> GetVerifyEmailTokenAsync(Guid userId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<string>> SetProfileImageAsync(Guid userId, IFormFile image)
+    public Task<Result<string, ServiceResultCode>> SetProfileImageAsync(
+        Guid userId,
+        IFormFile image
+    )
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<bool>> SetProfileLanguage(Guid userId, LanguageType languageType)
+    public Task<Result<bool, ServiceResultCode>> SetProfileLanguage(
+        Guid userId,
+        LanguageType languageType
+    )
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<bool>> SetProfileThemeAsync(Guid userId, ThemeType themeType)
+    public Task<Result<bool, ServiceResultCode>> SetProfileThemeAsync(
+        Guid userId,
+        ThemeType themeType
+    )
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<bool>> SetUsernameAsync(Guid userId, string newUsername)
+    public Task<Result<bool, ServiceResultCode>> SetUsernameAsync(Guid userId, string newUsername)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<bool>> VerifyEmailAsync(Guid userId, string token)
+    public Task<Result<bool, ServiceResultCode>> VerifyEmailAsync(Guid userId, string token)
     {
         throw new NotImplementedException();
     }

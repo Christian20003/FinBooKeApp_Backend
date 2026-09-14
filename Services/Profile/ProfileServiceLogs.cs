@@ -26,6 +26,13 @@ public partial class ProfileService : IProfileService
     private partial void LogUserNotFound(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileEmailIdentical,
+        Level = LogLevel.Warning,
+        Message = "Profile: New email is identical to old one - {UserId}"
+    )]
+    private partial void LogEmailIdentical(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileUserUpdateFailed,
         Level = LogLevel.Error,
         Message = "Profile: User account could not be updated - {UserId}"

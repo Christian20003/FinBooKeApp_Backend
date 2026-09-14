@@ -5,8 +5,10 @@ using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
 using FinBooKeAPI.Models.DTO.Error;
 using FinBookeAPI.Services.Profile;
+using FinBooKeAPI.Services.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace FinBooKeAPI.Controllers;
 
@@ -16,12 +18,17 @@ namespace FinBooKeAPI.Controllers;
 public partial class ProfileController(
     IProfileService service,
     IClaimProvider claimProvider,
+    IStringLocalizer<ProfileController> localizer,
     ILogger<ProfileController> logger
 ) : ControllerBase
 {
     private readonly IProfileService _service = service;
     private readonly IClaimProvider _claimProvider = claimProvider;
+    private readonly IStringLocalizer _localizer = localizer;
     private readonly ILogger<ProfileController> _logger = logger;
+
+    private static readonly string INTERNAL_ERROR_KEY = "InternalError";
+    private static readonly string EMAIL_IDENTICAL_KEY = "EmailIdentical";
 
     [HttpGet("changeEmail")]
     [ProducesResponseType(200)]
@@ -44,11 +51,30 @@ public partial class ProfileController(
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.GetChangeEmailTokenAsync(Guid.Parse(userId), newEmail);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok();
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType);
+        var error = GetErrorDTO(result.ErrorCode);
         return StatusCode(error.Status, error);
+    }
+
+    private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
+    {
+        return resultCode switch
+        {
+            ServiceResultCode.USER_NOT_FOUND => ErrorMapper.GetErrorDTO(
+                [""],
+                FinBookeAPI.Models.Result.ErrorType.FORBIDDEN
+            ),
+            ServiceResultCode.EMAIL_IDENTICAL => ErrorMapper.GetErrorDTO(
+                [_localizer.GetString(EMAIL_IDENTICAL_KEY)],
+                FinBookeAPI.Models.Result.ErrorType.BAD_REQUEST
+            ),
+            _ => ErrorMapper.GetErrorDTO(
+                [_localizer.GetString(INTERNAL_ERROR_KEY)],
+                FinBookeAPI.Models.Result.ErrorType.INTERNAL_ERROR
+            ),
+        };
     }
 
     [LoggerMessage(

@@ -2,6 +2,30 @@ namespace FinBookeAPI.Models.Result;
 
 public record Result<T>(bool HasValue, T? Value, ErrorType ErrorType, List<string> ErrorMessages);
 
+public record Result<T, E>
+    where E : Enum
+{
+    public T? Value { get; }
+    public E ErrorCode { get; }
+
+    public Result(T value)
+    {
+        Value = value;
+        ErrorCode = default!;
+    }
+
+    public Result(E errorCode)
+    {
+        Value = default;
+        ErrorCode = errorCode;
+    }
+
+    public bool HasValue()
+    {
+        return Value != null && EqualityComparer<E>.Default.Equals(ErrorCode, default);
+    }
+};
+
 public static class Result
 {
     public static Result<T> Ok<T>(T value) => new(true, value, ErrorType.NONE, [""]);
@@ -26,4 +50,10 @@ public static class Result
 
     public static Result<T> InternalError<T>(string message) =>
         new(false, default, ErrorType.INTERNAL_ERROR, [message]);
+
+    public static Result<T, E> Ok<T, E>(T value)
+        where E : Enum => new(value);
+
+    public static Result<T, E> Error<T, E>(E error)
+        where E : Enum => new(error);
 }
