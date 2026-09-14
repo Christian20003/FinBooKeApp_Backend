@@ -1,0 +1,129 @@
+using FinBooKeAPI.Collections.AccountCollection;
+using FinBooKeAPI.Logic.Email;
+using FinBooKeAPI.Logic.FileSystem;
+using FinBooKeAPI.Logic.Security;
+using FinBooKeAPI.Models.Database.Account;
+using FinBookeAPI.Models.Result;
+using FinBooKeAPI.Models.Settings;
+using FinBookeAPI.Services.Profile;
+using FinBooKeAPI.Services.Profile;
+using FinBooKeAPI.Test.Mocks.Collections;
+using FinBooKeAPI.Tests.Mocks.Dependencies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
+using Moq;
+
+namespace FinBooKeAPI.Tests.Services;
+
+public class ProfileServiceUnitTest
+{
+    private readonly Mock<IAccountCollection> _accountCollection;
+    private readonly Mock<IUploadSystem> _upload;
+    private readonly Mock<IHashProvider> _hashProvider;
+    private readonly Mock<IDataProtection> _protection;
+    private readonly Mock<IEmailProvider> _emailProvider;
+    private readonly Mock<IEmailTemplateBuilder> _emailBuilder;
+    private readonly Mock<IStringLocalizer<ProfileService>> _localizer;
+    private readonly Mock<IOptions<AccountSettings>> _accountSettings;
+    private readonly Mock<IOptions<SmtpSettings>> _smtpSettings;
+
+    private readonly ProfileService _service;
+
+    private readonly MockAccountCollection.InMemoryCollection _collection;
+    private readonly MockUploadSystem.InMemoryFileSystem _fileSystem;
+    private readonly MockEmailProvider.InMemorySmtpServer _smtp;
+    private UserAccount _user;
+
+    public ProfileServiceUnitTest()
+    {
+        _collection = MockAccountCollection.GetCollection();
+        _fileSystem = new MockUploadSystem.InMemoryFileSystem();
+        _smtp = new MockEmailProvider.InMemorySmtpServer();
+        _user = _collection.Accounts.First();
+
+        _accountCollection = MockAccountCollection.GetMock(_collection);
+        _upload = MockUploadSystem.GetMock(_fileSystem);
+        _hashProvider = MockHashProvider.GetMock();
+        _protection = MockDataProtection.GetMock();
+        _emailProvider = MockEmailProvider.GetMock(_smtp);
+        _emailBuilder = MockEmailTemplateBuilder.GetMock();
+        _localizer = MockStringLocalizer.GetMock<ProfileService>();
+        _accountSettings = MockAccountSettings.GetMock();
+        _smtpSettings = MockSmtpSettings.GetMock();
+        var logger = new Mock<ILogger<ProfileService>>();
+
+        _service = new ProfileService(
+            _accountCollection.Object,
+            _upload.Object,
+            _hashProvider.Object,
+            _protection.Object,
+            _emailProvider.Object,
+            _emailBuilder.Object,
+            _localizer.Object,
+            _accountSettings.Object,
+            _smtpSettings.Object,
+            logger.Object
+        );
+    }
+
+    [Fact]
+    public async Task GetChangeEmailTokenAsync_WhenInvalidGuid_ReturnsError()
+    {
+        var result = await _service.GetChangeEmailTokenAsync(Guid.NewGuid(), "newEmail");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task GetChangeEmailTokenAsync_WhenNewEmailIdentical_ReturnsError()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetChangeEmailTokenAsync(id, _user.Email!);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.EMAIL_IDENTICAL, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task GetChangeEmailTokenAsync_WhenUpdateFailed_ReturnsError()
+    {
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetChangeEmailTokenAsync(id, "newEmail");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task GetChangeEmailTokenAsync_WhenTokenCreated_SendEmail()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetChangeEmailTokenAsync(id, "newEmail");
+
+        Assert.True(result.HasValue());
+        Assert.NotEmpty(_smtp.Mails);
+    }
+
+    [Fact]
+    public async Task GetChangeEmailTokenAsync_WhenTokenCreated_SendValidEmailPayload()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetChangeEmailTokenAsync(id, "newEmail");
+
+        Assert.NotEmpty(_smtp.Mails);
+        var payload = _smtp.Mails.First();
+        Assert.NotEmpty(payload.Body);
+        Assert.NotEmpty(payload.From);
+        Assert.NotEmpty(payload.Host);
+        Assert.NotEmpty(payload.Password);
+        Assert.NotEqual(0, payload.Port);
+        Assert.NotEmpty(payload.Subject);
+        Assert.NotEmpty(payload.To);
+    }
+}

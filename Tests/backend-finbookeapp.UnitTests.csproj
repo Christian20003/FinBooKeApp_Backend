@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>FinbooKeAPI.UnitTests</RootNamespace>
+    <RootNamespace>FinBooKeAPI.UnitTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
