@@ -18,6 +18,7 @@ public static class LogEvents
 
     public const int ProfileChangeEmailToken = 1020;
     public const int ProfileChangeEmail = 1021;
+    public const int ProfileDeleteImage = 1022;
 
     public const int EmailSend = 1021;
 
@@ -63,6 +64,8 @@ public static class LogEvents
     public const int DataImportUserSucess = 2010;
 
     public const int ProfileChangeEmailTokenSuccess = 2020;
+    public const int ProfileChangeEmailSuccess = 2021;
+    public const int ProfileDeleteProfileImageSuccess = 2022;
 
     public const int UploadFileSuccess = 2031;
     public const int UploadGetFileSuccess = 2032;

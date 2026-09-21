@@ -181,4 +181,56 @@ public class ProfileServiceUnitTest
         Assert.NotEqual(oldEmail, _user.Email);
         Assert.Equal(_user.ChangeEmailHash, _user.Email);
     }
+
+    [Fact]
+    public async Task DeleteProfileImage_WhenInvalidUserId_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.DeleteProfileImageAsync(id, "");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task DeleteProfileImage_WhenAccountUpdateFailed_ReturnError()
+    {
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.DeleteProfileImageAsync(id, "");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task DeleteProfileImage_WhenDeleteSucceeded_ReturnSuccess()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.DeleteProfileImageAsync(id, "");
+
+        Assert.True(result.HasValue());
+    }
+
+    [Fact]
+    public async Task DeleteProfileImage_WhenDeleteSucceeded_RemovePathValueFromAccount()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.DeleteProfileImageAsync(id, "");
+
+        Assert.Equal(string.Empty, _user.ImagePath);
+    }
+
+    [Fact]
+    public async Task DeleteProfileImage_WhenDeleteSucceeded_RemoveImageFromFileSystem()
+    {
+        _fileSystem.Files.Add("myFile.jpg", "myFileContent");
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.DeleteProfileImageAsync(id, "myFile.jpg");
+
+        Assert.Empty(_fileSystem.Files);
+    }
 }

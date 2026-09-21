@@ -65,15 +65,34 @@ public partial class ProfileService(
             LogInvalidToken(userId);
             return Result.Error<bool, ServiceResultCode>(ServiceResultCode.TOKEN_INVALID);
         }
+        LogChangeEmailSuccess(userId);
         return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool, ServiceResultCode>> DeleteProfileImageAsync(
+    public async Task<Result<bool, ServiceResultCode>> DeleteProfileImageAsync(
         Guid userId,
         string filename
     )
     {
-        throw new NotImplementedException();
+        LogDeleteProfileImage(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        _upload.DeleteImage(filename);
+        user.ImagePath = string.Empty;
+        var result = await _accountCollection.UpdateAccountAsync(user);
+        if (!result.Succeeded)
+        {
+            LogUserUpdateFailed(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
+        }
+        LogDeleteProfileImageSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
     public async Task<Result<bool, ServiceResultCode>> GetChangeEmailTokenAsync(

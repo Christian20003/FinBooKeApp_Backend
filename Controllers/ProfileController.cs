@@ -89,6 +89,31 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
+    [HttpDelete("image")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> DeleteImage(
+        [FromQuery]
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Filename),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string filename
+    )
+    {
+        LogRequest(nameof(DeleteImage), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.DeleteProfileImageAsync(Guid.Parse(userId), filename);
+        if (result.HasValue())
+            return Ok();
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
     private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
     {
         return resultCode switch

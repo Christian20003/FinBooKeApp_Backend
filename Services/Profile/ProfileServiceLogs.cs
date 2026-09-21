@@ -19,11 +19,32 @@ public partial class ProfileService : IProfileService
     private partial void LogChangeEmail(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileDeleteImage,
+        Level = LogLevel.Information,
+        Message = "Profile: Delete profile image - {UserId}"
+    )]
+    private partial void LogDeleteProfileImage(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileChangeEmailTokenSuccess,
         Level = LogLevel.Information,
         Message = "Profile: Generated change email token successfully - {UserId}"
     )]
     private partial void LogGetChangeEmailTokenSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileChangeEmailSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Changes email successfully - {UserId}"
+    )]
+    private partial void LogChangeEmailSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileDeleteProfileImageSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Profile image deleted successfully - {UserId}"
+    )]
+    private partial void LogDeleteProfileImageSuccess(Guid userId);
 
     [LoggerMessage(
         EventId = LogEvents.ProfileUserNotFound,
