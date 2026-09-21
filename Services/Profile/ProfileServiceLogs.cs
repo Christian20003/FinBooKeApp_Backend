@@ -26,6 +26,13 @@ public partial class ProfileService : IProfileService
     private partial void LogDeleteProfileImage(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileVerifyEmailToken,
+        Level = LogLevel.Information,
+        Message = "Profile: Generate email verification token - {UserId}"
+    )]
+    private partial void LogVerifyEmailToken(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileChangeEmailTokenSuccess,
         Level = LogLevel.Information,
         Message = "Profile: Generated change email token successfully - {UserId}"
@@ -45,6 +52,13 @@ public partial class ProfileService : IProfileService
         Message = "Profile: Profile image deleted successfully - {UserId}"
     )]
     private partial void LogDeleteProfileImageSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileVerifyEmailTokenSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Generated email verification token successfully - {UserId}"
+    )]
+    private partial void LogVerifyEmailTokenSuccess(Guid userId);
 
     [LoggerMessage(
         EventId = LogEvents.ProfileUserNotFound,

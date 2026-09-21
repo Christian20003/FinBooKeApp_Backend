@@ -26,6 +26,7 @@ public partial class ProfileService(
 ) : IProfileService
 {
     private static readonly string CHANGE_EMAIL_SUBJECT_KEY = "ChangeEmailSubject";
+    private static readonly string VERIFY_EMAIL_SUBJECT_KEY = "VerifyEmailSubject";
 
     private readonly IAccountCollection _accountCollection = accountCollection;
     private readonly IUploadSystem _upload = upload;
@@ -133,9 +134,27 @@ public partial class ProfileService(
         return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool, ServiceResultCode>> GetVerifyEmailTokenAsync(Guid userId)
+    public async Task<Result<bool, ServiceResultCode>> GetVerifyEmailTokenAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        LogVerifyEmailToken(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        var token = await _accountCollection.GenerateEmailVerificationToken(user);
+        var link = $"{_accountSettings.Value.VerifyEmailLink}/?token={token}";
+        var body = _emailBuilder.GetVerifyEmailTemplate(link);
+        var email = _protection.UnprotectEmail(user.Email!);
+        var subject = _localizer.GetString(VERIFY_EMAIL_SUBJECT_KEY);
+        var payload = EmailMapper.GetEmailPayload(_smtpSettings, body, email, subject);
+        _emailProvider.Send(payload);
+
+        LogVerifyEmailTokenSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
     public Task<Result<string, ServiceResultCode>> SetProfileImageAsync(

@@ -120,4 +120,7 @@
   <data name="ChangeEmailSubject" xml:space="preserve">
     <value>Confirm new email address</value>
   </data>
+  <data name="VerifyEmailSubject" xml:space="preserve">
+    <value>Email address verification</value>
+  </data>
 </root>

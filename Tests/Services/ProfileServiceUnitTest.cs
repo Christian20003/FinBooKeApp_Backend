@@ -233,4 +233,41 @@ public class ProfileServiceUnitTest
 
         Assert.Empty(_fileSystem.Files);
     }
+
+    [Fact]
+    public async Task GetVerifyEmailTokenAsync_WhenInvalidUserId_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.GetVerifyEmailTokenAsync(id);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task GetVerifyEmailTokenAsync_WhenTokenCreated_SendEmail()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetVerifyEmailTokenAsync(id);
+
+        Assert.True(result.HasValue());
+        Assert.NotEmpty(_smtp.Mails);
+    }
+
+    [Fact]
+    public async Task GetVerifyEmailTokenAsync_WhenTokenCreated_SendValidEmailPayload()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.GetVerifyEmailTokenAsync(id);
+
+        Assert.NotEmpty(_smtp.Mails);
+        var payload = _smtp.Mails.First();
+        Assert.NotEmpty(payload.Body);
+        Assert.NotEmpty(payload.From);
+        Assert.NotEmpty(payload.Host);
+        Assert.NotEmpty(payload.Password);
+        Assert.NotEqual(0, payload.Port);
+        Assert.NotEmpty(payload.Subject);
+        Assert.NotEmpty(payload.To);
+    }
 }

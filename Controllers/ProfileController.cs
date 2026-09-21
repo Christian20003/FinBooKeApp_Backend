@@ -30,7 +30,7 @@ public partial class ProfileController(
     private static readonly string INTERNAL_ERROR_KEY = "InternalError";
     private static readonly string EMAIL_IDENTICAL_KEY = "EmailIdentical";
 
-    [HttpGet("changeEmail")]
+    [HttpGet("email/change")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
     [ProducesResponseType(typeof(SingleErrorDTO), 403)]
@@ -58,7 +58,7 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
-    [HttpPost("changeEmail")]
+    [HttpPost("email/change")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
     [ProducesResponseType(typeof(SingleErrorDTO), 403)]
@@ -108,6 +108,21 @@ public partial class ProfileController(
             return BadRequest(ModelState);
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.DeleteProfileImageAsync(Guid.Parse(userId), filename);
+        if (result.HasValue())
+            return Ok();
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpGet("email/verify")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> VerifyEmailToken()
+    {
+        LogRequest(nameof(DeleteImage), Activity.Current?.Id);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.GetVerifyEmailTokenAsync(Guid.Parse(userId));
         if (result.HasValue())
             return Ok();
         var error = GetErrorDTO(result.ErrorCode);
