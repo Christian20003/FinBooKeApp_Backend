@@ -11,7 +11,11 @@ public interface IProfileService
         string newEmail
     );
 
-    public Task<Result<bool, ServiceResultCode>> ChangeEmailAsync(Guid userId, string token);
+    public Task<Result<bool, ServiceResultCode>> ChangeEmailAsync(
+        Guid userId,
+        string token,
+        string email
+    );
 
     public Task<Result<bool, ServiceResultCode>> GetVerifyEmailTokenAsync(Guid userId);
 

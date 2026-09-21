@@ -35,7 +35,7 @@ public partial class ProfileController(
     [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
     [ProducesResponseType(typeof(SingleErrorDTO), 403)]
     [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> EmailChangeToken(
+    public async Task<ActionResult> ChangeEmailToken(
         [FromQuery]
         [EmailAddress(
             ErrorMessageResourceName = nameof(DataAnnotationValidation.Email),
@@ -44,7 +44,7 @@ public partial class ProfileController(
             string newEmail
     )
     {
-        LogRequest(nameof(EmailChangeToken), Activity.Current?.Id);
+        LogRequest(nameof(ChangeEmailToken), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -58,14 +58,43 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
+    [HttpPost("changeEmail")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> ChangeEmail(
+        [FromQuery]
+        [EmailAddress(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Email),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string newEmail,
+        [FromQuery]
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Token),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string token
+    )
+    {
+        LogRequest(nameof(ChangeEmailToken), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.ChangeEmailAsync(Guid.Parse(userId), token, newEmail);
+        if (result.HasValue())
+            return Ok();
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
     private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
     {
         return resultCode switch
         {
-            ServiceResultCode.USER_NOT_FOUND => ErrorMapper.GetErrorDTO(
-                [""],
-                FinBookeAPI.Models.Result.ErrorType.FORBIDDEN
-            ),
+            ServiceResultCode.TOKEN_INVALID or ServiceResultCode.USER_NOT_FOUND =>
+                ErrorMapper.GetErrorDTO([""], FinBookeAPI.Models.Result.ErrorType.FORBIDDEN),
             ServiceResultCode.EMAIL_IDENTICAL => ErrorMapper.GetErrorDTO(
                 [_localizer.GetString(EMAIL_IDENTICAL_KEY)],
                 FinBookeAPI.Models.Result.ErrorType.BAD_REQUEST

@@ -17,6 +17,7 @@ public static class LogEvents
     public const int DataImportUser = 1010;
 
     public const int ProfileChangeEmailToken = 1020;
+    public const int ProfileChangeEmail = 1021;
 
     public const int EmailSend = 1021;
 
@@ -109,6 +110,8 @@ public static class LogEvents
     public const int ProfileUserNotFound = 4020;
     public const int ProfileUserUpdateFailed = 4021;
     public const int ProfileEmailIdentical = 4022;
+    public const int ProfileEmailNotIdentical = 4023;
+    public const int ProfileInvalidToken = 4024;
 
     public const int EmailInvalidHost = 4021;
     public const int EmailInvalidPort = 4022;

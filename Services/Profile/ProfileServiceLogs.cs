@@ -12,6 +12,13 @@ public partial class ProfileService : IProfileService
     private partial void LogGetChangeEmailToken(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileChangeEmail,
+        Level = LogLevel.Information,
+        Message = "Profile: Change email address - {UserId}"
+    )]
+    private partial void LogChangeEmail(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileChangeEmailTokenSuccess,
         Level = LogLevel.Information,
         Message = "Profile: Generated change email token successfully - {UserId}"
@@ -31,6 +38,20 @@ public partial class ProfileService : IProfileService
         Message = "Profile: New email is identical to old one - {UserId}"
     )]
     private partial void LogEmailIdentical(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileEmailNotIdentical,
+        Level = LogLevel.Error,
+        Message = "Profile: previous email is different - {UserId}"
+    )]
+    private partial void LogEmailNotIdentical(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileInvalidToken,
+        Level = LogLevel.Error,
+        Message = "Profile: Token to verify email action is invalid - {UserId}"
+    )]
+    private partial void LogInvalidToken(Guid userId);
 
     [LoggerMessage(
         EventId = LogEvents.ProfileUserUpdateFailed,

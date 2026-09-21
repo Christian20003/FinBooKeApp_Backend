@@ -126,4 +126,59 @@ public class ProfileServiceUnitTest
         Assert.NotEmpty(payload.Subject);
         Assert.NotEmpty(payload.To);
     }
+
+    [Fact]
+    public async Task ChangeEmailAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.ChangeEmailAsync(id, "", "");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task ChangeEmailAsync_WhenEmailNotEqual_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.ChangeEmailAsync(id, "", "other@gmail.com");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.EMAIL_INVALID, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task ChangeEmailAsync_WhenTokenNotValid_ReturnError()
+    {
+        _user.ChangeEmailHash = "other@gmail.com";
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.ChangeEmailAsync(id, "invalidToken", _user.ChangeEmailHash);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.TOKEN_INVALID, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task ChangeEmailAsync_WhenTokenValid_ReturnSuccess()
+    {
+        _user.ChangeEmailHash = "other@gmail.com";
+        _collection.ChangeEmailTokens.Add(_user.ChangeEmailHash, "myToken");
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.ChangeEmailAsync(id, "myToken", _user.ChangeEmailHash);
+
+        Assert.True(result.HasValue());
+    }
+
+    [Fact]
+    public async Task ChangeEmailAsync_WhenTokenValid_UpdateEmailAddress()
+    {
+        var oldEmail = _user.Email;
+        _user.ChangeEmailHash = "other@gmail.com";
+        _collection.ChangeEmailTokens.Add(_user.ChangeEmailHash, "myToken");
+        var id = Guid.Parse(_user.Id);
+        var result = await _service.ChangeEmailAsync(id, "myToken", _user.ChangeEmailHash);
+
+        Assert.NotEqual(oldEmail, _user.Email);
+        Assert.Equal(_user.ChangeEmailHash, _user.Email);
+    }
 }

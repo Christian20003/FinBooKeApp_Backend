@@ -38,9 +38,34 @@ public partial class ProfileService(
     private readonly IOptions<SmtpSettings> _smtpSettings = smtpSettings;
     private readonly ILogger<ProfileService> _logger = logger;
 
-    public Task<Result<bool, ServiceResultCode>> ChangeEmailAsync(Guid userId, string token)
+    public async Task<Result<bool, ServiceResultCode>> ChangeEmailAsync(
+        Guid userId,
+        string token,
+        string email
+    )
     {
-        throw new NotImplementedException();
+        LogChangeEmail(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        var emailHash = _hashProvider.Hash(email);
+        if (user.ChangeEmailHash != emailHash)
+        {
+            LogEmailNotIdentical(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.EMAIL_INVALID);
+        }
+        var result = await _accountCollection.ChangeEmailAddressAsync(user, token, email);
+        if (!result.Succeeded)
+        {
+            LogInvalidToken(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.TOKEN_INVALID);
+        }
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
     public Task<Result<bool, ServiceResultCode>> DeleteProfileImageAsync(
