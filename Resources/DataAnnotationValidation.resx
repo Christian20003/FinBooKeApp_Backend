@@ -135,4 +135,10 @@
   <data name="Filename" xml:space="preserve">
     <value>Filename is missing</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>The given value is not a valid language</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>The given value is not a valid theme</value>
+  </data>
 </root>

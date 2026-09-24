@@ -1,9 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using FinBookeAPI.Attributes;
 using FinBooKeAPI.Logic.Authentication;
 using FinBooKeAPI.Mapping.Error;
 using FinBookeAPI.Models.Configuration;
+using FinBooKeAPI.Models.Database.Account;
 using FinBooKeAPI.Models.DTO.Error;
+using FinBooKeAPI.Models.DTO.Profile;
 using FinBookeAPI.Services.Profile;
 using FinBooKeAPI.Services.Profile;
 using Microsoft.AspNetCore.Authorization;
@@ -134,11 +137,65 @@ public partial class ProfileController(
     [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
     [ProducesResponseType(typeof(SingleErrorDTO), 403)]
     [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult<string>> SetProfileImage([FromBody] IFormFile file)
+    public async Task<ActionResult<string>> SetImage([FromBody] IFormFile file)
     {
-        LogRequest(nameof(SetProfileImage), Activity.Current?.Id);
+        LogRequest(nameof(SetImage), Activity.Current?.Id);
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.SetProfileImageAsync(Guid.Parse(userId), file);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("language")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> SetLanguage(SetLanguageDTO data)
+    {
+        LogRequest(nameof(SetLanguage), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetProfileLanguageAsync(Guid.Parse(userId), data.LanguageType);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("theme")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> SetTheme(SetThemeDTO data)
+    {
+        LogRequest(nameof(SetTheme), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetProfileThemeAsync(Guid.Parse(userId), data.ThemeType);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("name")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> SetUsername(SetUsernameDTO data)
+    {
+        LogRequest(nameof(SetUsername), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetUsernameAsync(Guid.Parse(userId), data.Username);
         if (result.HasValue())
             return Ok(result.Value);
         var error = GetErrorDTO(result.ErrorCode);

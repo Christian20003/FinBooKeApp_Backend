@@ -319,4 +319,109 @@ public class ProfileServiceUnitTest
 
         Assert.True(_fileSystem.Files.ContainsKey(file.Object.FileName));
     }
+
+    [Fact]
+    public async Task SetProfileLanguageAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.SetProfileLanguageAsync(id, LanguageType.DE);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileLanguageAsync_WhenUserUpdateFailed_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var result = await _service.SetProfileLanguageAsync(id, LanguageType.DE);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileLanguageAsync_WhenUserFound_UpdateProfileLanguage()
+    {
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.SetProfileLanguageAsync(id, LanguageType.DE);
+
+        Assert.True(result.HasValue());
+        Assert.Equal(LanguageType.DE, _user.FrontendLanguage);
+    }
+
+    [Fact]
+    public async Task SetProfileThemeAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.SetProfileThemeAsync(id, ThemeType.DARK);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileThemeAsync_WhenUserUpdateFailed_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var result = await _service.SetProfileThemeAsync(id, ThemeType.DARK);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileThemeAsync_WhenUserFound_UpdateProfileTheme()
+    {
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.SetProfileThemeAsync(id, ThemeType.DARK);
+
+        Assert.True(result.HasValue());
+        Assert.Equal(ThemeType.DARK, _user.ThemeType);
+    }
+
+    [Fact]
+    public async Task SetUsernameAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.SetUsernameAsync(id, "");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetUsernameAsync_WhenUserUpdateFailed_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var result = await _service.SetUsernameAsync(id, "");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetUsernameAsync_WhenUserFound_UpdateProfileLanguage()
+    {
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.SetUsernameAsync(id, "newUsername");
+
+        Assert.True(result.HasValue());
+        Assert.Equal("newUsername", _user.UserName);
+    }
 }

@@ -38,7 +38,7 @@ public interface IProfileService
         ThemeType themeType
     );
 
-    public Task<Result<bool, ServiceResultCode>> SetProfileLanguage(
+    public Task<Result<bool, ServiceResultCode>> SetProfileLanguageAsync(
         Guid userId,
         LanguageType languageType
     );

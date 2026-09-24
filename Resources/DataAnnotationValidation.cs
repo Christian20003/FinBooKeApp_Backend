@@ -76,6 +76,15 @@ namespace FinBooKeAPI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given value is not a valid language.
+        /// </summary>
+        internal static string Language {
+            get {
+                return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password is missing.
         /// </summary>
         internal static string Password {
@@ -90,6 +99,15 @@ namespace FinBooKeAPI {
         internal static string RefreshToken {
             get {
                 return ResourceManager.GetString("RefreshToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given value is not a valid theme.
+        /// </summary>
+        internal static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
             }
         }
         

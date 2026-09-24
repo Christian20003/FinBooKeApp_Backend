@@ -40,6 +40,41 @@ public partial class ProfileService : IProfileService
     private partial void LogSetProfileImage(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileLanguage,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile language - {UserId}"
+    )]
+    private partial void LogSetProfileLanguage(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileTheme,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile theme - {UserId}"
+    )]
+    private partial void LogSetProfileTheme(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetUsername,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile username - {UserId}"
+    )]
+    private partial void LogSetUsername(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileVerifyEmail,
+        Level = LogLevel.Information,
+        Message = "Profile: verify email - {UserId}"
+    )]
+    private partial void LogVerifyEmail(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileGetProfileImage,
+        Level = LogLevel.Information,
+        Message = "Profile: Get profile image - {UserId}"
+    )]
+    private partial void LogGetProfileImage(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileChangeEmailTokenSuccess,
         Level = LogLevel.Information,
         Message = "Profile: Generated change email token successfully - {UserId}"
@@ -73,6 +108,41 @@ public partial class ProfileService : IProfileService
         Message = "Profile: Set profile image successfully - {UserId}"
     )]
     private partial void LogSetProfileImageSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileLanguageSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile language successfully - {UserId}"
+    )]
+    private partial void LogSetProfileLanguageSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileThemeSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile theme successfully - {UserId}"
+    )]
+    private partial void LogSetProfileThemeSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetUsernameSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile username successfully - {UserId}"
+    )]
+    private partial void LogSetUsernameSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileVerifyEmailSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: verify email successfully - {UserId}"
+    )]
+    private partial void LogVerifyEmailSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileGetProfileImageSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Get profile image successfully - {UserId}"
+    )]
+    private partial void LogGetProfileImageSuccess(Guid userId);
 
     [LoggerMessage(
         EventId = LogEvents.ProfileUserNotFound,

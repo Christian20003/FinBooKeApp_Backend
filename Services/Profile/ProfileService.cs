@@ -182,25 +182,79 @@ public partial class ProfileService(
         return Result.Ok<string, ServiceResultCode>(user.ImagePath);
     }
 
-    public Task<Result<bool, ServiceResultCode>> SetProfileLanguage(
+    public async Task<Result<bool, ServiceResultCode>> SetProfileLanguageAsync(
         Guid userId,
         LanguageType languageType
     )
     {
-        throw new NotImplementedException();
+        LogSetProfileLanguage(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        user.FrontendLanguage = languageType;
+        var result = await _accountCollection.UpdateAccountAsync(user);
+        if (!result.Succeeded)
+        {
+            LogUserUpdateFailed(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
+        }
+        LogSetProfileLanguageSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool, ServiceResultCode>> SetProfileThemeAsync(
+    public async Task<Result<bool, ServiceResultCode>> SetProfileThemeAsync(
         Guid userId,
         ThemeType themeType
     )
     {
-        throw new NotImplementedException();
+        LogSetProfileTheme(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        user.ThemeType = themeType;
+        var result = await _accountCollection.UpdateAccountAsync(user);
+        if (!result.Succeeded)
+        {
+            LogUserUpdateFailed(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
+        }
+        LogSetProfileThemeSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool, ServiceResultCode>> SetUsernameAsync(Guid userId, string newUsername)
+    public async Task<Result<bool, ServiceResultCode>> SetUsernameAsync(
+        Guid userId,
+        string newUsername
+    )
     {
-        throw new NotImplementedException();
+        LogSetUsername(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        user.UserName = newUsername;
+        var result = await _accountCollection.UpdateAccountAsync(user);
+        if (!result.Succeeded)
+        {
+            LogUserUpdateFailed(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
+        }
+        LogSetUsernameSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
     }
 
     public Task<Result<bool, ServiceResultCode>> VerifyEmailAsync(Guid userId, string token)

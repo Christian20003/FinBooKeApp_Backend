@@ -135,4 +135,10 @@
   <data name="Filename" xml:space="preserve">
     <value>Fehlender Dateiname</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>Der angegebene Wert ist keine gültige Sprache</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Der angegebene Wert ist kein gültiges Theme</value>
+  </data>
 </root>
