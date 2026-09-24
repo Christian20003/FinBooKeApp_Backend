@@ -270,4 +270,53 @@ public class ProfileServiceUnitTest
         Assert.NotEmpty(payload.Subject);
         Assert.NotEmpty(payload.To);
     }
+
+    [Fact]
+    public async Task SetProfileImageAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var file = MockUploadSystem.GetMockFile();
+        var result = await _service.SetProfileImageAsync(id, file.Object);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileImageAsync_WhenUserUpdateFailed_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+        var file = MockUploadSystem.GetMockFile();
+        _accountCollection
+            .Setup(obj => obj.UpdateAccountAsync(It.IsAny<UserAccount>()))
+            .ReturnsAsync(IdentityResult.Failed([]));
+
+        var result = await _service.SetProfileImageAsync(id, file.Object);
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_UPDATE_FAILED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task SetProfileImageAsync_WhenFileIsValid_ReturnFileName()
+    {
+        var id = Guid.Parse(_user.Id);
+        var file = MockUploadSystem.GetMockFile();
+
+        var result = await _service.SetProfileImageAsync(id, file.Object);
+
+        Assert.True(result.HasValue());
+        Assert.Contains(file.Object.FileName, result.Value!);
+    }
+
+    [Fact]
+    public async Task SetProfileImageAsync_WhenFileIsValid_StoreFileOnFileSystem()
+    {
+        var id = Guid.Parse(_user.Id);
+        var file = MockUploadSystem.GetMockFile();
+
+        var result = await _service.SetProfileImageAsync(id, file.Object);
+
+        Assert.True(_fileSystem.Files.ContainsKey(file.Object.FileName));
+    }
 }

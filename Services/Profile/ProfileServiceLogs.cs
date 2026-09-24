@@ -33,6 +33,13 @@ public partial class ProfileService : IProfileService
     private partial void LogVerifyEmailToken(Guid userId);
 
     [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileImage,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile image - {UserId}"
+    )]
+    private partial void LogSetProfileImage(Guid userId);
+
+    [LoggerMessage(
         EventId = LogEvents.ProfileChangeEmailTokenSuccess,
         Level = LogLevel.Information,
         Message = "Profile: Generated change email token successfully - {UserId}"
@@ -59,6 +66,13 @@ public partial class ProfileService : IProfileService
         Message = "Profile: Generated email verification token successfully - {UserId}"
     )]
     private partial void LogVerifyEmailTokenSuccess(Guid userId);
+
+    [LoggerMessage(
+        EventId = LogEvents.ProfileSetProfileImageSuccess,
+        Level = LogLevel.Information,
+        Message = "Profile: Set profile image successfully - {UserId}"
+    )]
+    private partial void LogSetProfileImageSuccess(Guid userId);
 
     [LoggerMessage(
         EventId = LogEvents.ProfileUserNotFound,

@@ -129,6 +129,22 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
+    [HttpPost("image")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult<string>> SetProfileImage([FromBody] IFormFile file)
+    {
+        LogRequest(nameof(SetProfileImage), Activity.Current?.Id);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetProfileImageAsync(Guid.Parse(userId), file);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
     private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
     {
         return resultCode switch

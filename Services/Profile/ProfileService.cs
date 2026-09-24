@@ -157,12 +157,29 @@ public partial class ProfileService(
         return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<string, ServiceResultCode>> SetProfileImageAsync(
+    public async Task<Result<string, ServiceResultCode>> SetProfileImageAsync(
         Guid userId,
         IFormFile image
     )
     {
-        throw new NotImplementedException();
+        LogSetProfileImage(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<string, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        user.ImagePath = _upload.UploadImage(userId, image);
+        var result = await _accountCollection.UpdateAccountAsync(user);
+        if (!result.Succeeded)
+        {
+            LogUserUpdateFailed(userId);
+            return Result.Error<string, ServiceResultCode>(ServiceResultCode.USER_UPDATE_FAILED);
+        }
+        LogSetProfileImageSuccess(userId);
+        return Result.Ok<string, ServiceResultCode>(user.ImagePath);
     }
 
     public Task<Result<bool, ServiceResultCode>> SetProfileLanguage(
