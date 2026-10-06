@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #cc4d3d;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content p {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .reset-button {
+            display: inline-block;
+            padding: 14px 40px;
+            background-color: #cc4d3d;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .reset-button:hover {
+            background-color: #9a281d;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{header}}</h1>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <p>{{greeting}}</p>
+            
+            <p>{{introduction}}</p>
+
+            <!-- Reset Button -->
+            <div class="button-container">
+                <a href="{{link}}" class="reset-button">{{linkButton}}</a>
+            </div>
+
+            <!-- Warning -->
+            <div class="warning">
+                {{warning}}
+            </div>
+
+            <p>{{alternative}}</p>
+            <p style="word-break: break-all; background-color: #f5f5f5; padding: 10px; border-radius: 4px;">
+                {{link}}
+            </p>
+
+            <p>{{valediction}}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; {{year}} FinBooKe. All rights reserved.</p>
+            <p>{{qa}} <a href="mailto:{{qaMail}}" style="color: #007bff;">{{qaMail}}</a></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -505,4 +505,4 @@ $RECYCLE.BIN/
 .ionide
 
 # C# Dev Kit
-backend-finbookeapp.csproj.lscache
+*.lscache

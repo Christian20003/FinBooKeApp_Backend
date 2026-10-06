@@ -1,0 +1,17 @@
+using FinBooKeApp.Core.Shared.FileSystem.Models;
+
+namespace FinBooKeApp.Core.Shared.FileSystem.Interfaces;
+
+public interface IFileSystem
+{
+    public string ReadAllText(string file);
+    public byte[] ReadAllBytes(string file);
+    public void WriteAllBytes(IFile file, string path);
+    public string CombinePath(string path, string filename);
+    public bool FileExists(string filename);
+    public string GetFileExtension(string filename);
+    public string GetFileName(string filename);
+    public void CreateDirectory(string path);
+    public void DeleteFile(string filename);
+    public void SetFilePermission(string path, IEnumerable<FilePermission> permissions);
+}

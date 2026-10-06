@@ -1,0 +1,11 @@
+namespace FinBookeApp.Core.Shared.Result;
+
+public enum ErrorType
+{
+    NONE = 0,
+    BAD_REQUEST = 1,
+    FORBIDDEN = 2,
+    UNAUTHORIZED = 3,
+    INTERNAL_ERROR = 4,
+    NOT_FOUND = 5,
+}

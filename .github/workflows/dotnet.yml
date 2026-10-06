@@ -23,6 +23,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build FinBooKeApp.Tests/FinBooKeApp.Tests.csproj --no-restore
     - name: Test
-      run: dotnet test backend-finbookeapp.csproj --no-build --verbosity normal
+      run: dotnet test FinBooKeApp.Tests/FinBooKeApp.Tests.csproj --no-build --verbosity normal

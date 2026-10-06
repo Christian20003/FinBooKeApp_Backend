@@ -9,7 +9,7 @@
       {
          "name": "test",
          "command": "dotnet",
-         "args": ["test", "backend-finbookeapp.csproj"]
+         "args": ["test"]
       }
    ]
 }
