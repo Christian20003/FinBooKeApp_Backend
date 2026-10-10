@@ -6,7 +6,6 @@ using FinBookeApp.Core.Shared.Result;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -252,9 +251,31 @@ public partial class ProfileService(
         return Result.Ok<bool, ServiceResultCode>(true);
     }
 
-    public Task<Result<bool, ServiceResultCode>> VerifyEmailAsync(Guid userId, string token)
+    public async Task<Result<bool, ServiceResultCode>> VerifyEmailAsync(Guid userId, string token)
     {
-        throw new NotImplementedException();
+        LogVerifyEmail(userId);
+        var user = await _accountCollection.GetAccountAsync(account =>
+            account.Id == userId.ToString()
+        );
+        if (user is null)
+        {
+            LogUserNotFound(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.USER_NOT_FOUND);
+        }
+        var result = await _accountCollection.VerifyEmailAddressAsync(user, token);
+        if (!result.Succeeded)
+        {
+            LogInvalidToken(userId);
+            return Result.Error<bool, ServiceResultCode>(ServiceResultCode.TOKEN_INVALID);
+        }
+        LogVerifyEmailSuccess(userId);
+        return Result.Ok<bool, ServiceResultCode>(true);
+    }
+
+    public byte[] GetProfileImage(Guid userId, string filename)
+    {
+        LogGetProfileImage(userId);
+        return _upload.GetImageContent(userId, filename);
     }
 
     private EmailPayload GetEmailPayload(string body, string email, string subject)

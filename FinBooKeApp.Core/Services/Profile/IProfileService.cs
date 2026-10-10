@@ -30,6 +30,8 @@ public interface IProfileService
         string filename
     );
 
+    public byte[] GetProfileImage(Guid userId, string filename);
+
     public Task<Result<bool, ServiceResultCode>> SetProfileThemeAsync(
         Guid userId,
         ThemeType themeType

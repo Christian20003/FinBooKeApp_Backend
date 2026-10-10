@@ -44,7 +44,6 @@ public static class LogEvents
     public const int ProfileSetProfileThemeSuccess = 2026;
     public const int ProfileSetUsernameSuccess = 2027;
     public const int ProfileVerifyEmailSuccess = 2028;
-    public const int ProfileGetProfileImageSuccess = 2029;
 
     // 4000 - 4999
 

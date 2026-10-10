@@ -422,4 +422,60 @@ public class ProfileServiceUnitTest
         Assert.True(result.HasValue());
         Assert.Equal("newUsername", _user.UserName);
     }
+
+    [Fact]
+    public async Task VerifyEmailAsync_WhenUserNotFound_ReturnError()
+    {
+        var id = Guid.NewGuid();
+        var result = await _service.VerifyEmailAsync(id, "token");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task VerifyEmailAsync_WhenTokenInvalid_ReturnError()
+    {
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.VerifyEmailAsync(id, "token");
+
+        Assert.False(result.HasValue());
+        Assert.Equal(ServiceResultCode.TOKEN_INVALID, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task VerifyEmailAsync_WhenTokenIsValid_ReturnSuccess()
+    {
+        _collection.VerifyEmailTokens.Add(_user.Email!, "token");
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.VerifyEmailAsync(id, "token");
+
+        Assert.True(result.HasValue());
+    }
+
+    [Fact]
+    public async Task VerifyEmailAsync_WhenTokenIsValid_UpdateAccount()
+    {
+        _collection.VerifyEmailTokens.Add(_user.Email!, "token");
+        var id = Guid.Parse(_user.Id);
+
+        var result = await _service.VerifyEmailAsync(id, "token");
+
+        Assert.True(_user.EmailConfirmed);
+    }
+
+    [Fact]
+    public void GetProfileImageAsync_ReturnFileContent()
+    {
+        var id = Guid.Parse(_user.Id);
+        var file = MockUploadSystem.GetMockFile();
+        _fileSystem.Files.Add(file.Object.FileName, "The file content");
+
+        var result = _service.GetProfileImage(id, file.Object.FileName);
+        var text = System.Text.Encoding.UTF8.GetString(result);
+
+        Assert.Equal("The file content", text);
+    }
 }

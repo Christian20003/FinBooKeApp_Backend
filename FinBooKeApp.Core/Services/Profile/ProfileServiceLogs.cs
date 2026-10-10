@@ -139,13 +139,6 @@ public partial class ProfileService : IProfileService
     private partial void LogVerifyEmailSuccess(Guid userId);
 
     [LoggerMessage(
-        EventId = LogEvents.ProfileGetProfileImageSuccess,
-        Level = LogLevel.Information,
-        Message = "Profile: Get profile image successfully - {UserId}"
-    )]
-    private partial void LogGetProfileImageSuccess(Guid userId);
-
-    [LoggerMessage(
         EventId = LogEvents.ProfileUserNotFound,
         Level = LogLevel.Error,
         Message = "Profile: User account could not be found - {UserId}"

@@ -201,6 +201,53 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
+    [HttpPost("email/verify")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult> VerifyEmail(
+        [FromQuery]
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Token),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string token
+    )
+    {
+        LogRequest(nameof(VerifyEmail), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.VerifyEmailAsync(Guid.Parse(userId), token);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpGet("image/{filename}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
+    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    public async Task<ActionResult<byte[]>> GetImage(
+        [FromRoute]
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Filename),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string filename
+    )
+    {
+        LogRequest(nameof(GetImage), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = _service.GetProfileImage(Guid.Parse(userId), filename);
+        return Ok(result);
+    }
+
     private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
     {
         return resultCode switch
