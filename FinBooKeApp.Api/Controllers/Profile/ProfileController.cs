@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using FinBooKeApp.Api;
 using FinBooKeApp.Api.Controllers.Profile.Models;
 using FinBooKeApp.Api.Shared.Error;
 using FinBooKeApp.Api.Shared.Logging;
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
-namespace FinBooKeAPI.Controllers;
+namespace FinBooKeApp.Api.Controllers.Profile;
 
 [ApiController]
 [Authorize]
@@ -33,10 +32,11 @@ public partial class ProfileController(
     private static readonly string EMAIL_IDENTICAL_KEY = "EmailIdentical";
 
     [HttpGet("email/change")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> ChangeEmailToken(
         [FromQuery]
         [EmailAddress(
@@ -61,10 +61,11 @@ public partial class ProfileController(
     }
 
     [HttpPost("email/change")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> ChangeEmail(
         [FromQuery]
         [EmailAddress(
@@ -91,13 +92,14 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
-    [HttpDelete("image")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    [HttpDelete("image/{filename}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteImage(
-        [FromQuery]
+        [FromRoute]
         [Required(
             ErrorMessageResourceName = nameof(DataAnnotationValidation.Filename),
             ErrorMessageResourceType = typeof(DataAnnotationValidation)
@@ -116,26 +118,12 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
-    [HttpGet("email/verify")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> VerifyEmailToken()
-    {
-        LogRequest(nameof(DeleteImage), Activity.Current?.Id);
-        var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = await _service.GetVerifyEmailTokenAsync(Guid.Parse(userId));
-        if (result.HasValue())
-            return Ok();
-        var error = GetErrorDTO(result.ErrorCode);
-        return StatusCode(error.Status, error);
-    }
-
     [HttpPost("image")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<string>> SetImage([FromBody] IFormFile file)
     {
         LogRequest(nameof(SetImage), Activity.Current?.Id);
@@ -147,65 +135,52 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
-    [HttpPost("language")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> SetLanguage(SetLanguageDTO data)
+    [HttpGet("image/{filename}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<byte[]>> GetImage(
+        [FromRoute]
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.Filename),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            string filename
+    )
     {
-        LogRequest(nameof(SetLanguage), Activity.Current?.Id);
+        LogRequest(nameof(GetImage), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
         var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = await _service.SetProfileLanguageAsync(Guid.Parse(userId), data.LanguageType);
-        if (result.HasValue())
-            return Ok(result.Value);
-        var error = GetErrorDTO(result.ErrorCode);
-        return StatusCode(error.Status, error);
+        var result = _service.GetProfileImage(Guid.Parse(userId), filename);
+        return Ok(result);
     }
 
-    [HttpPost("theme")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> SetTheme(SetThemeDTO data)
+    [HttpGet("email/verify")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> VerifyEmailToken()
     {
-        LogRequest(nameof(SetTheme), Activity.Current?.Id);
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        LogRequest(nameof(DeleteImage), Activity.Current?.Id);
         var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = await _service.SetProfileThemeAsync(Guid.Parse(userId), data.ThemeType);
+        var result = await _service.GetVerifyEmailTokenAsync(Guid.Parse(userId));
         if (result.HasValue())
-            return Ok(result.Value);
-        var error = GetErrorDTO(result.ErrorCode);
-        return StatusCode(error.Status, error);
-    }
-
-    [HttpPost("name")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult> SetUsername(SetUsernameDTO data)
-    {
-        LogRequest(nameof(SetUsername), Activity.Current?.Id);
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-        var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = await _service.SetUsernameAsync(Guid.Parse(userId), data.Username);
-        if (result.HasValue())
-            return Ok(result.Value);
+            return Ok();
         var error = GetErrorDTO(result.ErrorCode);
         return StatusCode(error.Status, error);
     }
 
     [HttpPost("email/verify")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> VerifyEmail(
         [FromQuery]
         [Required(
@@ -226,26 +201,61 @@ public partial class ProfileController(
         return StatusCode(error.Status, error);
     }
 
-    [HttpGet("image/{filename}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(MultipleErrorDTO), 400)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 403)]
-    [ProducesResponseType(typeof(SingleErrorDTO), 500)]
-    public async Task<ActionResult<byte[]>> GetImage(
-        [FromRoute]
-        [Required(
-            ErrorMessageResourceName = nameof(DataAnnotationValidation.Filename),
-            ErrorMessageResourceType = typeof(DataAnnotationValidation)
-        )]
-            string filename
-    )
+    [HttpPost("language")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> SetLanguage(SetLanguageDTO data)
     {
-        LogRequest(nameof(GetImage), Activity.Current?.Id);
+        LogRequest(nameof(SetLanguage), Activity.Current?.Id);
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
         var userId = _claimProvider.GetUserId(HttpContext.User);
-        var result = _service.GetProfileImage(Guid.Parse(userId), filename);
-        return Ok(result);
+        var result = await _service.SetProfileLanguageAsync(Guid.Parse(userId), data.LanguageType);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("theme")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> SetTheme(SetThemeDTO data)
+    {
+        LogRequest(nameof(SetTheme), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetProfileThemeAsync(Guid.Parse(userId), data.ThemeType);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
+    }
+
+    [HttpPost("name")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MultipleErrorDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> SetUsername(SetUsernameDTO data)
+    {
+        LogRequest(nameof(SetUsername), Activity.Current?.Id);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        var userId = _claimProvider.GetUserId(HttpContext.User);
+        var result = await _service.SetUsernameAsync(Guid.Parse(userId), data.Username);
+        if (result.HasValue())
+            return Ok(result.Value);
+        var error = GetErrorDTO(result.ErrorCode);
+        return StatusCode(error.Status, error);
     }
 
     private BaseErrorDTO GetErrorDTO(ServiceResultCode resultCode)
