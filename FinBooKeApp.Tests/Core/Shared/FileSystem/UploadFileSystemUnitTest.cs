@@ -83,7 +83,7 @@ public class UploadFileSystemUnitTest
         var userId = Guid.NewGuid();
         image.Setup(obj => obj.FileName).Returns("image.pdf");
 
-        Assert.Throws<FormatException>(() => _upload.UploadImage(userId, image.Object));
+        Assert.Throws<FileFormatException>(() => _upload.UploadImage(userId, image.Object));
     }
 
     [Fact]
@@ -92,9 +92,9 @@ public class UploadFileSystemUnitTest
         var image = GetImageFile();
         var userId = Guid.NewGuid();
         var optionValues = GetFileStorage();
-        image.Setup(obj => obj.Length).Returns(optionValues.MaxFileSizeMb * (1024 ^ 3));
+        image.Setup(obj => obj.Length).Returns(optionValues.MaxFileSizeMb * (1024 * 1024 * 1024));
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => _upload.UploadImage(userId, image.Object));
+        Assert.Throws<FileSizeException>(() => _upload.UploadImage(userId, image.Object));
     }
 
     [Fact]

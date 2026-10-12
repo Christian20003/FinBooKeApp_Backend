@@ -1,19 +1,13 @@
-using System.Net;
 using FinBooKeApp.Api.Shared.Error;
+using FinBooKeApp.Core.Shared.Authentication.Models;
+using FinBooKeApp.Core.Shared.FileSystem.Models;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace FinBooKeApp.Api.Middleware;
 
-/// <summary>
-/// This middleware processes all kinds of exception that can
-/// occur in this application. Thereby it creates corresponding
-/// error message which are sent to the client.
-/// </summary>
-public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
+public class ExceptionHandling : IMiddleware
 {
-    private readonly ILogger<ExceptionHandling> _logger = logger;
-
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
@@ -22,60 +16,87 @@ public class ExceptionHandling(ILogger<ExceptionHandling> logger) : IMiddleware
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Exception has been processed");
             await HandleException(context, exception);
         }
     }
 
-    private Task HandleException(HttpContext context, Exception exception)
+    private static Task HandleException(HttpContext context, Exception exception)
     {
-        var body = new SingleErrorDTO
-        {
-            Type = "",
-            Title = "",
-            Error = "",
-            Status = context.Response.StatusCode,
-            TraceId = context.TraceIdentifier,
-        };
         switch (exception)
         {
             case FileNotFoundException:
             {
-                body.Type = "EntityNotFoundException";
-                body.Title = "Requested entity not found";
-                body.Error = "The requested resource could not be found in the database";
-                body.Status = (int)HttpStatusCode.NotFound;
-                break;
+                var body = new SingleErrorDTO
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                    Title = "Requested entity not found",
+                    Error = ExceptionResponse.FileNotFound,
+                    Status = StatusCodes.Status404NotFound,
+                    TraceId = context.TraceIdentifier,
+                };
+                return WriteResponse(context, body);
+            }
+            case FileFormatException:
+            {
+                var body = new MultipleErrorDTO
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    Title = "Invalid file format",
+                    Errors = new() { { "filename", [ExceptionResponse.InvalidFileFormat] } },
+                    Status = StatusCodes.Status400BadRequest,
+                    TraceId = context.TraceIdentifier,
+                };
+                return WriteResponse(context, body);
+            }
+            case FileSizeException:
+            {
+                var body = new MultipleErrorDTO
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    Title = "Invalid file size",
+                    Errors = new() { { "filename", [ExceptionResponse.InvalidFileSize] } },
+                    Status = StatusCodes.Status400BadRequest,
+                    TraceId = context.TraceIdentifier,
+                };
+                return WriteResponse(context, body);
             }
             case SecurityTokenException:
             case SecurityTokenMalformedException:
             {
-                body.Type = "AuthenticationException";
-                body.Title = "Invalid token";
-                body.Error = "Provided authentication token is not valid";
-                body.Status = (int)HttpStatusCode.Forbidden;
-                break;
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return context.Response.WriteAsync("");
             }
-            case FormatException:
-            case ArgumentException:
+            case ClaimException:
             {
-                body.Type = "ArgumentException";
-                body.Title = "Invalid argument";
-                body.Error = exception.Message;
-                body.Status = (int)HttpStatusCode.BadRequest;
-                break;
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return context.Response.WriteAsync("");
             }
             default:
             {
-                body.Type = "UnexpectedException";
-                body.Title = "Unexpected failure";
-                body.Error = "Requested operation failed due to an unexpected server failure";
-                body.Status = (int)HttpStatusCode.InternalServerError;
-                break;
+                var body = new SingleErrorDTO
+                {
+                    Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                    Title = "Internal server error",
+                    Error = ExceptionResponse.DefaultError,
+                    Status = StatusCodes.Status500InternalServerError,
+                    TraceId = context.TraceIdentifier,
+                };
+                return WriteResponse(context, body);
             }
         }
+    }
+
+    private static Task WriteResponse(HttpContext context, SingleErrorDTO errorDTO)
+    {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = body.Status;
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(body));
+        context.Response.StatusCode = errorDTO.Status;
+        return context.Response.WriteAsync(JsonConvert.SerializeObject(errorDTO));
+    }
+
+    private static Task WriteResponse(HttpContext context, MultipleErrorDTO errorDTO)
+    {
+        context.Response.ContentType = "application/json";
+        context.Response.StatusCode = errorDTO.Status;
+        return context.Response.WriteAsync(JsonConvert.SerializeObject(errorDTO));
     }
 }

@@ -12,7 +12,7 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
     public string UploadImage(Guid userId, IFile image)
     {
         if (!image.ContentType.Contains("image"))
-            throw new FormatException("File format is not supported");
+            throw new FileFormatException("File format is not supported");
         return UploadFile(userId, image);
     }
 
@@ -38,16 +38,16 @@ public class UploadFileSystem(IFileSystem fileSystem, IOptions<FileStorage> opti
     private bool IsFileSizeSupported(IFile file)
     {
         var fileSize = file.Length;
-        var maxFileSize = _options.Value.MaxFileSizeMb * (1024 ^ 2);
+        var maxFileSize = _options.Value.MaxFileSizeMb * (1024 * 1024);
         return fileSize <= maxFileSize;
     }
 
     private string UploadFile(Guid userId, IFile file, string subDir = "")
     {
         if (!IsFileFormatSupported(file))
-            throw new FormatException("File format is not supported");
+            throw new FileFormatException("File format is not supported");
         if (!IsFileSizeSupported(file))
-            throw new ArgumentOutOfRangeException(nameof(file), "File size is too large");
+            throw new FileSizeException("File size is too large");
         var fileName = CreateFileName(file);
         var path = GetFilePath(userId, subDir);
         var filePath = _fileSystem.CombinePath(path, fileName);

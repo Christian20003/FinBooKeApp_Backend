@@ -141,4 +141,7 @@
   <data name="Theme" xml:space="preserve">
     <value>The given value is not a valid theme</value>
   </data>
+  <data name="File" xml:space="preserve">
+    <value>Missing file</value>
+  </data>
 </root>

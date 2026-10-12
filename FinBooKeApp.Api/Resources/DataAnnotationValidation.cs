@@ -67,6 +67,15 @@ namespace FinBooKeApp.Api {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Missing file.
+        /// </summary>
+        internal static string File {
+            get {
+                return ResourceManager.GetString("File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filename is missing.
         /// </summary>
         internal static string Filename {

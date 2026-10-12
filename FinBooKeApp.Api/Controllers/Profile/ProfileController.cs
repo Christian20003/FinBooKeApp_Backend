@@ -124,7 +124,13 @@ public partial class ProfileController(
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(SingleErrorDTO), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<string>> SetImage([FromBody] IFormFile file)
+    public async Task<ActionResult<string>> SetImage(
+        [Required(
+            ErrorMessageResourceName = nameof(DataAnnotationValidation.File),
+            ErrorMessageResourceType = typeof(DataAnnotationValidation)
+        )]
+            IFormFile file
+    )
     {
         LogRequest(nameof(SetImage), Activity.Current?.Id);
         var userId = _claimProvider.GetUserId(HttpContext.User);

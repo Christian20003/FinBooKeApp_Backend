@@ -81,9 +81,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseCustomSwagger();
 }
+app.UseRequestLocalization();
 app.UseMiddleware<ExceptionHandling>();
 app.UseHttpsRedirection();
-app.UseRequestLocalization();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
