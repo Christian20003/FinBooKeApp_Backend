@@ -21,6 +21,7 @@ public class TokenProvider : ITokenProvider
         {
             Subject = subject,
             Expires = payload.Expires,
+            NotBefore = payload.NotBefore,
             Issuer = payload.Issuer,
             Audience = payload.Audience,
             SigningCredentials = credentials,

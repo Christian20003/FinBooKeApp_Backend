@@ -8,5 +8,6 @@ public record CreateTokenPayload
     public required string Audience { get; set; }
     public required string Secret { get; set; }
     public required DateTime Expires { get; set; }
+    public DateTime NotBefore { get; set; } = DateTime.UtcNow;
     public required IEnumerable<Claim> Claims { get; set; }
 }

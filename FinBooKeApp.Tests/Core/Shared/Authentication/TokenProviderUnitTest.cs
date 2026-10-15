@@ -115,7 +115,8 @@ public partial class TokenProviderUnitTest
     [Fact]
     public void Should_ThrowException_WhenTokenHasExpired()
     {
-        _createTokenPayload.Expires = DateTime.Now.AddMinutes(-10.0);
+        _createTokenPayload.Expires = DateTime.UtcNow.AddMinutes(-10);
+        _createTokenPayload.NotBefore = DateTime.UtcNow.AddMinutes(-30);
         var token = _provider.CreateToken(_createTokenPayload);
         _verifyTokenPayload.Token = token.Value;
 
