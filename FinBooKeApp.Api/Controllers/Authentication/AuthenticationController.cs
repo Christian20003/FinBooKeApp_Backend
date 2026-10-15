@@ -1,28 +1,31 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using FinBooKeApp.Api;
 using FinBooKeApp.Api.Controllers.Authentication.Models;
 using FinBooKeApp.Api.Shared.Error;
 using FinBooKeApp.Api.Shared.Logging;
 using FinBooKeApp.Core.Services.Authentication;
 using FinBooKeApp.Core.Services.Authentication.Models;
 using FinBooKeApp.Core.Shared.Authentication.Interfaces;
+using FinBookeApp.Core.Shared.Result;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
-namespace FinBookeAPI.Controllers;
+namespace FinBooKeApp.Api.Controllers.Authentication;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 public partial class AuthenticationController(
     ILogger<AuthenticationController> logger,
     IAuthenticationService service,
-    IClaimProvider claimProvider
+    IClaimProvider claimProvider,
+    IStringLocalizer<AuthenticationController> localizer
 ) : ControllerBase
 {
     private readonly ILogger<AuthenticationController> _logger = logger;
     private readonly IAuthenticationService _service = service;
     private readonly IClaimProvider _claimProvider = claimProvider;
+    private readonly IStringLocalizer<AuthenticationController> _localizer = localizer;
 
     [AllowAnonymous]
     [HttpPost("login")]
@@ -38,10 +41,10 @@ public partial class AuthenticationController(
 
         var result = await _service.LoginAsync(data.Email, data.Password);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok(GetUserDTO(result.Value!));
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Password");
+        var error = GetErrorDTO(result.ErrorCode, "Password");
         return StatusCode(error.Status, error);
     }
 
@@ -58,10 +61,10 @@ public partial class AuthenticationController(
 
         var result = await _service.RegisterAsync(data.Email, data.Username, data.Password);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Created(string.Empty, GetUserDTO(result.Value!));
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Password");
+        var error = GetErrorDTO(result.ErrorCode, "Password");
         return StatusCode(error.Status, error);
     }
 
@@ -76,10 +79,10 @@ public partial class AuthenticationController(
         var userId = _claimProvider.GetUserId(HttpContext.User);
         var result = await _service.LogoutAsync(userId);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok();
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType);
+        var error = GetErrorDTO(result.ErrorCode);
         return StatusCode(error.Status, error);
     }
 
@@ -103,10 +106,10 @@ public partial class AuthenticationController(
 
         var result = await _service.SendResetPasswordTokenAsync(email);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok();
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "Email");
+        var error = GetErrorDTO(result.ErrorCode, "Email");
         return StatusCode(error.Status, error);
     }
 
@@ -124,10 +127,10 @@ public partial class AuthenticationController(
 
         var result = await _service.ResetPasswordAsync(data.Email, data.NewPassword, data.Token);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok();
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType, "NewPassword");
+        var error = GetErrorDTO(result.ErrorCode, "NewPassword");
         return StatusCode(error.Status, error);
     }
 
@@ -147,11 +150,71 @@ public partial class AuthenticationController(
 
         var result = await _service.RefreshAccessTokenAsync(data.Email, data.RefreshToken);
 
-        if (result.HasValue)
+        if (result.HasValue())
             return Ok(GetSessionDTO(result.Value!));
 
-        var error = ErrorMapper.GetErrorDTO(result.ErrorMessages, result.ErrorType);
+        var error = GetErrorDTO(result.ErrorCode);
         return StatusCode(error.Status, error);
+    }
+
+    private BaseErrorDTO GetErrorDTO(
+        AuthenticationServiceResultCode resultCode,
+        string multipleErrorKey = ""
+    )
+    {
+        return resultCode switch
+        {
+            AuthenticationServiceResultCode.INVALID_CREDENTIALS
+            or AuthenticationServiceResultCode.INVALID_EMAIL
+            or AuthenticationServiceResultCode.ACCOUNT_CREATION_FAILED
+            or AuthenticationServiceResultCode.PASSWORD_POLICY_FAILED => ErrorMapper.GetErrorDTO(
+                [
+                    _localizer.GetString(
+                        resultCode switch
+                        {
+                            AuthenticationServiceResultCode.INVALID_CREDENTIALS =>
+                                "InvalidCredentials",
+                            AuthenticationServiceResultCode.INVALID_EMAIL => "InvalidEmail",
+                            AuthenticationServiceResultCode.ACCOUNT_CREATION_FAILED =>
+                                "AccountCreationFailed",
+                            _ => "PasswordPolicyFailed",
+                        }
+                    ),
+                ],
+                ErrorType.BAD_REQUEST,
+                multipleErrorKey
+            ),
+            AuthenticationServiceResultCode.ACCOUNT_LOCKED
+            or AuthenticationServiceResultCode.SIGN_IN_NOT_ALLOWED
+            or AuthenticationServiceResultCode.TWO_FACTOR_REQUIRED
+            or AuthenticationServiceResultCode.PASSWORD_RESET_TOKEN_INVALID =>
+                ErrorMapper.GetErrorDTO(
+                    [
+                        _localizer.GetString(
+                            resultCode switch
+                            {
+                                AuthenticationServiceResultCode.ACCOUNT_LOCKED => "AccountLocked",
+                                AuthenticationServiceResultCode.SIGN_IN_NOT_ALLOWED =>
+                                    "SignInNotAllowed",
+                                AuthenticationServiceResultCode.TWO_FACTOR_REQUIRED =>
+                                    "TwoFactorRequired",
+                                _ => "PasswordResetTokenInvalid",
+                            }
+                        ),
+                    ],
+                    ErrorType.FORBIDDEN
+                ),
+            AuthenticationServiceResultCode.USER_NOT_FOUND
+            or AuthenticationServiceResultCode.REFRESH_TOKEN_NOT_FOUND
+            or AuthenticationServiceResultCode.REFRESH_TOKEN_INVALID => ErrorMapper.GetErrorDTO(
+                [],
+                ErrorType.UNAUTHORIZED
+            ),
+            _ => ErrorMapper.GetErrorDTO(
+                [_localizer.GetString("InternalError")],
+                ErrorType.INTERNAL_ERROR
+            ),
+        };
     }
 
     private static UserDTO GetUserDTO(User user)

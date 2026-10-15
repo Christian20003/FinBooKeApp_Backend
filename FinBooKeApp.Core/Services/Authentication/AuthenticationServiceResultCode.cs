@@ -1,0 +1,18 @@
+namespace FinBooKeApp.Core.Services.Authentication;
+
+public enum AuthenticationServiceResultCode
+{
+    OK = 0,
+    INVALID_CREDENTIALS = 1,
+    ACCOUNT_LOCKED = 2,
+    SIGN_IN_NOT_ALLOWED = 3,
+    TWO_FACTOR_REQUIRED = 4,
+    ACCOUNT_CREATION_FAILED = 5,
+    USER_NOT_FOUND = 6,
+    INTERNAL_ERROR = 7,
+    INVALID_EMAIL = 8,
+    PASSWORD_RESET_TOKEN_INVALID = 9,
+    PASSWORD_POLICY_FAILED = 10,
+    REFRESH_TOKEN_NOT_FOUND = 11,
+    REFRESH_TOKEN_INVALID = 12,
+}

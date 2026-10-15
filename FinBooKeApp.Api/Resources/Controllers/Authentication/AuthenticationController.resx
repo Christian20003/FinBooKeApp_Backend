@@ -118,18 +118,33 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="InvalidCredentials" xml:space="preserve">
-    <value>Email oder Passwort is ungültig</value>
+    <value>Email or password is invalid</value>
   </data>
   <data name="AccountLocked" xml:space="preserve">
-    <value>Dein Account ist aufgrund zu vieler Fehlversuche temporär gesperrt.</value>
+    <value>Your account has been temporarily suspended due to too many failed login attempts</value>
   </data>
   <data name="InternalError" xml:space="preserve">
-    <value>Es ist ein unerwarteter Fehler eingetreten. Bitte versuche es später erneut.</value>
+    <value>Something went wrong during processing your request. Please try it again later.</value>
   </data>
   <data name="ResetPasswordEmailSubject" xml:space="preserve">
-    <value>Link um dein Passwort zurückzusetzten</value>
+    <value>Link to reset your password</value>
   </data>
   <data name="InvalidEmail" xml:space="preserve">
-    <value>Email ungültig</value>
+    <value>Email invalid</value>
+  </data>
+  <data name="SignInNotAllowed" xml:space="preserve">
+    <value>Sign-in is currently not allowed for this account.</value>
+  </data>
+  <data name="TwoFactorRequired" xml:space="preserve">
+    <value>Two-factor authentication is required.</value>
+  </data>
+  <data name="AccountCreationFailed" xml:space="preserve">
+    <value>Could not create the account. Please check the submitted details.</value>
+  </data>
+  <data name="PasswordResetTokenInvalid" xml:space="preserve">
+    <value>The password reset token is invalid.</value>
+  </data>
+  <data name="PasswordPolicyFailed" xml:space="preserve">
+    <value>The password does not meet the requirements.</value>
   </data>
 </root>

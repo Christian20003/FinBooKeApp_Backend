@@ -9,7 +9,6 @@ using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +25,6 @@ public partial class AuthenticationService(
     IEmailTemplateBuilder emailTemplateBuilder,
     IOptions<AuthenticationSettings> authenticationSettings,
     IOptions<SmtpSettings> smtpSettings,
-    IStringLocalizer<AuthenticationService> localizer,
     ILogger<AuthenticationService> logger
 ) : IAuthenticationService
 {
@@ -41,10 +39,12 @@ public partial class AuthenticationService(
     private readonly IOptions<AuthenticationSettings> _authenticationSettings =
         authenticationSettings;
     private readonly IOptions<SmtpSettings> _smtpSettings = smtpSettings;
-    private readonly IStringLocalizer<AuthenticationService> _localizer = localizer;
     private readonly ILogger<AuthenticationService> _logger = logger;
 
-    public async Task<Result<User>> LoginAsync(string email, string password)
+    public async Task<Result<User, AuthenticationServiceResultCode>> LoginAsync(
+        string email,
+        string password
+    )
     {
         LogLogin(email);
         var hashedEmail = _hashProvider.Hash(email);
@@ -54,19 +54,13 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidCredentials(email);
-            return Result.BadRequest<User>(_localizer.GetString(INVALID_CREDENTIALS_KEY));
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INVALID_CREDENTIALS
+            );
         }
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, password, true);
-        if (signInResult.IsLockedOut)
-        {
-            LogAccountLock(email);
-            return Result.Forbidden<User>(_localizer.GetString(ACCOUNT_LOCKED_KEY));
-        }
         if (!signInResult.Succeeded)
-        {
-            LogInvalidCredentials(email);
-            return Result.BadRequest<User>(_localizer.GetString(INVALID_CREDENTIALS_KEY));
-        }
+            return GetSignInFailureResult(signInResult, email);
 
         var claims = _claimProvider.CreateClaims(user.Id, _protection.UnprotectEmail(user.Email!));
         var accessToken = GetAccessToken(claims);
@@ -79,15 +73,21 @@ public partial class AuthenticationService(
         {
             var messages = tokenResult.Errors.Select(error => error.Description).ToList();
             LogInternalError(messages);
-            return Result.InternalError<User>(_localizer.GetString(INTERNAL_ERROR_KEY));
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INTERNAL_ERROR
+            );
         }
 
         var result = GetUser(user, accessToken, refreshToken);
         LogLoginSuccess(email);
-        return Result.Ok(result);
+        return Result.Ok<User, AuthenticationServiceResultCode>(result);
     }
 
-    public async Task<Result<User>> RegisterAsync(string email, string username, string password)
+    public async Task<Result<User, AuthenticationServiceResultCode>> RegisterAsync(
+        string email,
+        string username,
+        string password
+    )
     {
         LogRegister(email);
         var user = new UserAccount
@@ -99,9 +99,10 @@ public partial class AuthenticationService(
         var registerResult = await _accountCollection.CreateAccountAsync(user, password);
         if (!registerResult.Succeeded)
         {
-            var messages = registerResult.Errors.Select(error => error.Description).ToList();
             LogInvalidCredentials(email);
-            return Result.BadRequest<User>(messages);
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.ACCOUNT_CREATION_FAILED
+            );
         }
         var claims = _claimProvider.CreateClaims(user.Id, _protection.UnprotectEmail(user.Email!));
         var accessToken = GetAccessToken(claims);
@@ -114,34 +115,42 @@ public partial class AuthenticationService(
         {
             var messages = tokenResult.Errors.Select(error => error.Description).ToList();
             LogInternalError(messages);
-            return Result.InternalError<User>(_localizer.GetString(INTERNAL_ERROR_KEY));
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INTERNAL_ERROR
+            );
         }
         var userDTO = GetUser(user, accessToken, refreshToken);
         LogRegisterSuccess(email);
-        return Result.Ok(userDTO);
+        return Result.Ok<User, AuthenticationServiceResultCode>(userDTO);
     }
 
-    public async Task<Result<bool>> LogoutAsync(string userId)
+    public async Task<Result<bool, AuthenticationServiceResultCode>> LogoutAsync(string userId)
     {
         LogLogout(userId);
         var user = await _accountCollection.GetAccountAsync(account => account.Id == userId);
         if (user is null)
         {
             LogInvalidUserId(userId);
-            return Result.Unauthorized<bool>("");
+            return Result.Error<bool, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.USER_NOT_FOUND
+            );
         }
         var tokenResult = await _accountCollection.DeleteAccountRefreshTokenAsync(user);
         if (!tokenResult.Succeeded)
         {
             var messages = tokenResult.Errors.Select(error => error.Description).ToList();
             LogInternalError(messages);
-            return Result.InternalError<bool>(_localizer.GetString(INTERNAL_ERROR_KEY));
+            return Result.Error<bool, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INTERNAL_ERROR
+            );
         }
         LogLogoutSuccess(user.EmailHash);
-        return Result.Ok(true);
+        return Result.Ok<bool, AuthenticationServiceResultCode>(true);
     }
 
-    public async Task<Result<bool>> SendResetPasswordTokenAsync(string email)
+    public async Task<Result<bool, AuthenticationServiceResultCode>> SendResetPasswordTokenAsync(
+        string email
+    )
     {
         var emailHash = _hashProvider.Hash(email);
         LogSendResetPwdToken(emailHash);
@@ -152,20 +161,22 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidCredentials(emailHash);
-            return Result.BadRequest<bool>(_localizer.GetString(INVALID_EMAIL_KEY));
+            return Result.Error<bool, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INVALID_EMAIL
+            );
         }
         var token = await _accountCollection.GeneratePasswordResetTokenAsync(user);
         var link = _authenticationSettings.Value.ResetPasswordLink;
         link += $"?token={token}&email={email}";
         var template = _emailTemplateBuilder.GetResetPasswordTemplate(link);
-        var subject = _localizer.GetString(RESET_PASSWORD_EMAIL_SUBJECT_KEY);
+        var subject = EmailText.ResetPasswordEmailSubject;
         var emailPayload = GetEmailPayload(template, email, subject);
         _emailProvider.Send(emailPayload);
         LogResetPasswordTokenSuccess(emailHash);
-        return Result.Ok(true);
+        return Result.Ok<bool, AuthenticationServiceResultCode>(true);
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(
+    public async Task<Result<bool, AuthenticationServiceResultCode>> ResetPasswordAsync(
         string email,
         string newPassword,
         string token
@@ -180,23 +191,28 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidCredentials(emailHash);
-            return Result.BadRequest<bool>(_localizer.GetString(INVALID_EMAIL_KEY));
+            return Result.Error<bool, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.INVALID_EMAIL
+            );
         }
         var resetResult = await _accountCollection.ResetPasswordAsync(user, token, newPassword);
         if (!resetResult.Succeeded)
         {
             LogInvalidCredentials(email);
-            var messages = resetResult.Errors.Select(error => error.Description).ToList();
-            var code = resetResult.Errors.First().Code;
-            if (code == "InvalidToken")
-                return Result.Forbidden<bool>(messages.First());
-            return Result.BadRequest<bool>(messages);
+            var errorCode =
+                resetResult.Errors.FirstOrDefault()?.Code == "InvalidToken"
+                    ? AuthenticationServiceResultCode.PASSWORD_RESET_TOKEN_INVALID
+                    : AuthenticationServiceResultCode.PASSWORD_POLICY_FAILED;
+            return Result.Error<bool, AuthenticationServiceResultCode>(errorCode);
         }
         LogResetPasswordSuccess(emailHash);
-        return Result.Ok(true);
+        return Result.Ok<bool, AuthenticationServiceResultCode>(true);
     }
 
-    public async Task<Result<Session>> RefreshAccessTokenAsync(string email, string refreshToken)
+    public async Task<Result<Session, AuthenticationServiceResultCode>> RefreshAccessTokenAsync(
+        string email,
+        string refreshToken
+    )
     {
         var emailHash = _hashProvider.Hash(email);
         LogRefreshAccessToken(emailHash);
@@ -206,13 +222,17 @@ public partial class AuthenticationService(
         if (user is null)
         {
             LogInvalidUserId(emailHash);
-            return Result.Unauthorized<Session>("");
+            return Result.Error<Session, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.USER_NOT_FOUND
+            );
         }
         var accountToken = await _accountCollection.GetAccountRefreshTokenAsync(user);
         if (accountToken is null)
         {
             LogMissingRefreshToken(emailHash);
-            return Result.Unauthorized<Session>("");
+            return Result.Error<Session, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.REFRESH_TOKEN_NOT_FOUND
+            );
         }
         var payload = new VerifyTokenPayload
         {
@@ -225,11 +245,13 @@ public partial class AuthenticationService(
         if (accountToken != refreshToken)
         {
             LogInvalidRefreshToken(emailHash);
-            return Result.Unauthorized<Session>("");
+            return Result.Error<Session, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.REFRESH_TOKEN_INVALID
+            );
         }
         var accessToken = GetAccessToken(claim.Claims);
         LogRefreshAccessTokenSuccess(emailHash);
-        return Result.Ok(
+        return Result.Ok<Session, AuthenticationServiceResultCode>(
             new Session
             {
                 AccessToken = accessToken.Value,
@@ -237,6 +259,33 @@ public partial class AuthenticationService(
                 RefreshToken = refreshToken,
                 RefreshTokenExpire = _claimProvider.GetExpires(claim).Ticks,
             }
+        );
+    }
+
+    private Result<User, AuthenticationServiceResultCode> GetSignInFailureResult(
+        SignInResult signInResult,
+        string email
+    )
+    {
+        if (signInResult.IsLockedOut)
+        {
+            LogAccountLock(email);
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.ACCOUNT_LOCKED
+            );
+        }
+
+        LogInvalidCredentials(email);
+        if (signInResult.IsNotAllowed)
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.SIGN_IN_NOT_ALLOWED
+            );
+        if (signInResult.RequiresTwoFactor)
+            return Result.Error<User, AuthenticationServiceResultCode>(
+                AuthenticationServiceResultCode.TWO_FACTOR_REQUIRED
+            );
+        return Result.Error<User, AuthenticationServiceResultCode>(
+            AuthenticationServiceResultCode.INVALID_CREDENTIALS
         );
     }
 

@@ -6,13 +6,11 @@ using FinBooKeApp.Core.Shared.Authentication.Interfaces;
 using FinBooKeApp.Core.Shared.Authentication.Models;
 using FinBooKeApp.Core.Shared.Email.Interfaces;
 using FinBooKeApp.Core.Shared.Email.Models;
-using FinBookeApp.Core.Shared.Result;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -32,7 +30,6 @@ public class AuthenticationServiceUnitTest
     private readonly Mock<IEmailTemplateBuilder> _emailTemplateBuilder;
     private readonly Mock<IOptions<AuthenticationSettings>> _authenticationSettings;
     private readonly Mock<IOptions<SmtpSettings>> _smtpSettings;
-    private readonly Mock<IStringLocalizer<AuthenticationService>> _localizer;
     private readonly Mock<ILogger<AuthenticationService>> _logger;
 
     private readonly AuthenticationService _service;
@@ -72,7 +69,6 @@ public class AuthenticationServiceUnitTest
         _emailTemplateBuilder = new Mock<IEmailTemplateBuilder>();
         _authenticationSettings = new Mock<IOptions<AuthenticationSettings>>();
         _smtpSettings = new Mock<IOptions<SmtpSettings>>();
-        _localizer = new Mock<IStringLocalizer<AuthenticationService>>();
         _logger = new Mock<ILogger<AuthenticationService>>();
 
         _service = new AuthenticationService(
@@ -86,7 +82,6 @@ public class AuthenticationServiceUnitTest
             _emailTemplateBuilder.Object,
             _authenticationSettings.Object,
             _smtpSettings.Object,
-            _localizer.Object,
             _logger.Object
         );
     }
@@ -352,9 +347,6 @@ public class AuthenticationServiceUnitTest
                     return $"template-{value}";
                 }
             );
-        _localizer
-            .Setup(obj => obj[It.IsAny<string>()])
-            .Returns(new LocalizedString("subject", "subject"));
     }
 
     private void SetupResetPasswordToken()
@@ -450,7 +442,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LoginAsync("invalidEmail", "password");
 
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.INVALID_CREDENTIALS, result.ErrorCode);
     }
 
     [Fact]
@@ -470,7 +462,45 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LoginAsync("email", "password");
 
-        Assert.Equal(ErrorType.FORBIDDEN, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.ACCOUNT_LOCKED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Should_FailLogin_WhenSignInIsNotAllowed()
+    {
+        SetupLogin();
+        _signInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.NotAllowed);
+
+        var result = await _service.LoginAsync("email", "password");
+
+        Assert.Equal(AuthenticationServiceResultCode.SIGN_IN_NOT_ALLOWED, result.ErrorCode);
+    }
+
+    [Fact]
+    public async Task Should_FailLogin_WhenTwoFactorIsRequired()
+    {
+        SetupLogin();
+        _signInManager
+            .Setup(obj =>
+                obj.CheckPasswordSignInAsync(
+                    It.IsAny<UserAccount>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()
+                )
+            )
+            .ReturnsAsync(SignInResult.TwoFactorRequired);
+
+        var result = await _service.LoginAsync("email", "password");
+
+        Assert.Equal(AuthenticationServiceResultCode.TWO_FACTOR_REQUIRED, result.ErrorCode);
     }
 
     [Fact]
@@ -480,7 +510,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LoginAsync("email", "invalidPassword");
 
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.INVALID_CREDENTIALS, result.ErrorCode);
     }
 
     [Fact]
@@ -495,7 +525,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LoginAsync("email", "password");
 
-        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.INTERNAL_ERROR, result.ErrorCode);
     }
 
     [Fact]
@@ -505,8 +535,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LoginAsync("email", "password");
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
-        Assert.True(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
+        Assert.True(result.HasValue());
     }
 
     [Fact]
@@ -551,7 +581,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RegisterAsync("email", "username", "password");
 
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.ACCOUNT_CREATION_FAILED, result.ErrorCode);
         Assert.Empty(_userDatabase);
     }
 
@@ -567,7 +597,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RegisterAsync("email", "username", "password");
 
-        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.INTERNAL_ERROR, result.ErrorCode);
         Assert.Empty(_refreshTokenDatabase);
     }
 
@@ -578,7 +608,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RegisterAsync("email", "username", "password");
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
     }
 
     [Fact]
@@ -632,7 +662,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.LogoutAsync("");
 
-        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
     }
 
     [Fact]
@@ -646,7 +676,7 @@ public class AuthenticationServiceUnitTest
         var user = _userDatabase.First();
         var result = await _service.LogoutAsync(user.Id);
 
-        Assert.Equal(ErrorType.INTERNAL_ERROR, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.INTERNAL_ERROR, result.ErrorCode);
     }
 
     [Fact]
@@ -657,7 +687,7 @@ public class AuthenticationServiceUnitTest
         var user = _userDatabase.First();
         var result = await _service.LogoutAsync(user.Id);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
         Assert.True(result.Value);
         Assert.Empty(_refreshTokenDatabase);
     }
@@ -669,8 +699,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.SendResetPasswordTokenAsync("invalidEmail");
 
-        Assert.False(result.HasValue);
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
+        Assert.False(result.HasValue());
+        Assert.Equal(AuthenticationServiceResultCode.INVALID_EMAIL, result.ErrorCode);
     }
 
     [Fact]
@@ -681,7 +711,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.SendResetPasswordTokenAsync(account.Email!);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
     }
 
     [Fact]
@@ -702,7 +732,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.SendResetPasswordTokenAsync(account.Email!);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
         Assert.Contains(token, expected.Body);
     }
 
@@ -723,7 +753,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.SendResetPasswordTokenAsync(account.Email!);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
         Assert.Equal(account.Email!, expected.To.First());
     }
 
@@ -746,7 +776,7 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.SendResetPasswordTokenAsync(account.Email!);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
         Assert.Equal(settings.Host, expected.Host);
         Assert.Equal(settings.Port, expected.Port);
         Assert.Equal(settings.Username, expected.Username);
@@ -761,8 +791,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.ResetPasswordAsync("wrongEmail", "1234", "token");
 
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.INVALID_EMAIL, result.ErrorCode);
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -783,8 +813,11 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.ResetPasswordAsync(account.Email!, "1234", "token");
 
-        Assert.Equal(ErrorType.FORBIDDEN, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(
+            AuthenticationServiceResultCode.PASSWORD_RESET_TOKEN_INVALID,
+            result.ErrorCode
+        );
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -805,8 +838,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.ResetPasswordAsync(account.Email!, "1234", "token");
 
-        Assert.Equal(ErrorType.BAD_REQUEST, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.PASSWORD_POLICY_FAILED, result.ErrorCode);
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -817,8 +850,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.ResetPasswordAsync(account.Email!, "1234", "token");
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
-        Assert.True(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
+        Assert.True(result.HasValue());
     }
 
     [Fact]
@@ -830,7 +863,7 @@ public class AuthenticationServiceUnitTest
         var result = await _service.ResetPasswordAsync(account.Email!, "1234", "token");
         var item = _userDatabase.First();
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
         Assert.Equal("1234", item.PasswordHash);
     }
 
@@ -841,8 +874,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RefreshAccessTokenAsync("", "");
 
-        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.USER_NOT_FOUND, result.ErrorCode);
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -856,8 +889,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RefreshAccessTokenAsync(account.Email!, "");
 
-        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.REFRESH_TOKEN_NOT_FOUND, result.ErrorCode);
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -896,8 +929,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RefreshAccessTokenAsync(account.Email!, "");
 
-        Assert.Equal(ErrorType.UNAUTHORIZED, result.ErrorType);
-        Assert.False(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.REFRESH_TOKEN_INVALID, result.ErrorCode);
+        Assert.False(result.HasValue());
     }
 
     [Fact]
@@ -909,8 +942,8 @@ public class AuthenticationServiceUnitTest
 
         var result = await _service.RefreshAccessTokenAsync(account.Email!, token.Value);
 
-        Assert.Equal(ErrorType.NONE, result.ErrorType);
-        Assert.True(result.HasValue);
+        Assert.Equal(AuthenticationServiceResultCode.OK, result.ErrorCode);
+        Assert.True(result.HasValue());
     }
 
     [Fact]

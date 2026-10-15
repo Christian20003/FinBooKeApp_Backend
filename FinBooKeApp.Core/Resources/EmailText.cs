@@ -184,6 +184,15 @@ namespace FinBooKeApp.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Link to reset your password.
+        /// </summary>
+        internal static string ResetPasswordEmailSubject {
+            get {
+                return ResourceManager.GetString("ResetPasswordEmailSubject", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Best regards,&lt;br&gt;The Support Team.
         /// </summary>
         internal static string Valediction {

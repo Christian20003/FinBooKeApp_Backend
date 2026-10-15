@@ -150,6 +150,9 @@
   <data name="PasswordResetHeader" xml:space="preserve">
     <value>Anfrage zur Passwortzurücksetzung</value>
   </data>
+  <data name="ResetPasswordEmailSubject" xml:space="preserve">
+    <value>Link um dein Passwort zurückzusetzten</value>
+  </data>
   <data name="ChangeEmailIntroduction" xml:space="preserve">
     <value>Wir haben eine Anfrage zum Ändern Ihrer E-Mail Adresse erhalten. Klicken Sie auf den Button, um diesen Prozess fortzufahren.</value>
   </data>
