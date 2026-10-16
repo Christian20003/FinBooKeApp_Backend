@@ -1,15 +1,13 @@
-using FinBooKeApp.Data.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace FinBooKeApp.Api.Configuration.Database;
+namespace FinBooKeApp.Data.Configuration;
 
-public class AuthDbContext(
-    DbContextOptions<AuthDbContext> options,
-    IOptions<AuthDatabaseSettings> _settings
-) : IdentityDbContext<UserAccount>(options)
+public class DataDbContext(
+    DbContextOptions<DataDbContext> options,
+    IOptions<FinanceDatabaseSettings> _settings
+) : DbContext(options)
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

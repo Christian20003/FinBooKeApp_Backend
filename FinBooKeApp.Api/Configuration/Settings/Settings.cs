@@ -3,6 +3,7 @@ using FinBooKeApp.Core.Services.Authentication.Models;
 using FinBooKeApp.Core.Services.Profile.Models;
 using FinBooKeApp.Core.Shared.Email.Models;
 using FinBooKeApp.Core.Shared.FileSystem.Models;
+using FinBooKeApp.Data.Configuration;
 
 namespace FinBooKeApp.Api.Configuration.Settings;
 

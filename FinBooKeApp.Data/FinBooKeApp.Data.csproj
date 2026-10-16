@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="MongoDB.EntityFrameworkCore" />
   </ItemGroup>
 
 </Project>

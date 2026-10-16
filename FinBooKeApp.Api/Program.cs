@@ -20,6 +20,7 @@ using FinBooKeApp.Core.Shared.Parsing.Interfaces;
 using FinBooKeApp.Core.Shared.Parsing.Providers;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Core.Shared.Security.Providers;
+using FinBooKeApp.Data.Configuration;
 using FinBooKeApp.Data.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Compliance.Redaction;

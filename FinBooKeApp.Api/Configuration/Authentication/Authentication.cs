@@ -1,5 +1,5 @@
 using System.Text;
-using FinBooKeApp.Api.Configuration.Database;
+using FinBooKeApp.Data.Configuration;
 using FinBooKeApp.Data.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

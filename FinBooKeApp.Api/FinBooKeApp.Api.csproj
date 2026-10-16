@@ -36,7 +36,6 @@
     <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="MongoDB.EntityFrameworkCore" />
     <PackageReference Include="NReco.Logging.File" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>

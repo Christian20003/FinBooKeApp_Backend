@@ -1,4 +1,4 @@
-namespace FinBooKeApp.Api.Configuration.Database;
+namespace FinBooKeApp.Data.Configuration;
 
 public class AuthDatabaseSettings
 {
