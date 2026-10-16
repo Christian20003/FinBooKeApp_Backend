@@ -191,7 +191,7 @@ namespace FinBooKeApp.Core {
                 return ResourceManager.GetString("ResetPasswordEmailSubject", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Best regards,&lt;br&gt;The Support Team.
         /// </summary>
