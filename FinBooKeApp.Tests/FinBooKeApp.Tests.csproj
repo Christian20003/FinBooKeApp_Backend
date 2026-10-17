@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FinBooKeApp.Core\FinBooKeApp.Core.csproj" />
+    <ProjectReference Include="..\FinBooKeApp.Api\FinBooKeApp.Api.csproj" />
   </ItemGroup>
 
 </Project>

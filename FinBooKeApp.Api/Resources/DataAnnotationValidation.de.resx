@@ -144,4 +144,31 @@
   <data name="File" xml:space="preserve">
     <value>Fehlende Datei</value>
   </data>
+  <data name="MissingCategoryName" xml:space="preserve">
+    <value>Es muss ein Name für die Kategorie angegeben werden.</value>
+  </data>
+  <data name="MissingCategoryColor" xml:space="preserve">
+    <value>Es muss ein Farbwert für die Kategorie angegeben werden.</value>
+  </data>
+  <data name="InvalidCategoryColor" xml:space="preserve">
+    <value>Der übergebene Farbwert wird nicht unterstützt.</value>
+  </data>
+  <data name="InvalidCategoryChildren" xml:space="preserve">
+    <value>Eine übergebene Id einer Sub-Kategorie ist ungültig.</value>
+  </data>
+  <data name="MissingCategoryLimitAmount" xml:space="preserve">
+    <value>Es muss ein Wert für ein Kategorie-Limit übergeben werden.</value>
+  </data>
+  <data name="MissingCategoryLimitTimePeriod" xml:space="preserve">
+    <value>Es muss ein Zeitraum für ein Kategorie-Limit übergeben werden.</value>
+  </data>
+  <data name="MissingCategoryLimitStartDate" xml:space="preserve">
+    <value>Es muss ein Startzeitpunkt für ein Kategorie-Limit übergeben werden.</value>
+  </data>
+  <data name="InvalidCategoryLimitAmount" xml:space="preserve">
+    <value>Der erhaltene Wert für ein Kategorie-Limit ist ungültig.</value>
+  </data>
+  <data name="InvalidCategoryLimitTimePeriod" xml:space="preserve">
+    <value>Der erhaltene Zeitraum für ein Kategorie-Limit is ungültig.</value>
+  </data>
 </root>

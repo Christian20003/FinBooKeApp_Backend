@@ -144,4 +144,31 @@
   <data name="File" xml:space="preserve">
     <value>Missing file</value>
   </data>
+  <data name="MissingCategoryName" xml:space="preserve">
+    <value>A category name is required.</value>
+  </data>
+  <data name="MissingCategoryColor" xml:space="preserve">
+    <value>A category color is required.</value>
+  </data>
+  <data name="InvalidCategoryColor" xml:space="preserve">
+    <value>The given color format is not supported.</value>
+  </data>
+  <data name="InvalidCategoryChildren" xml:space="preserve">
+    <value>The given category children id is not valid.</value>
+  </data>
+  <data name="MissingCategoryLimitAmount" xml:space="preserve">
+    <value>A category limit amount is missing.</value>
+  </data>
+  <data name="MissingCategoryLimitTimePeriod" xml:space="preserve">
+    <value>A category limit time period is missing.</value>
+  </data>
+  <data name="MissingCategoryLimitStartDate" xml:space="preserve">
+    <value>A startdate for the category limit is missing.</value>
+  </data>
+  <data name="InvalidCategoryLimitAmount" xml:space="preserve">
+    <value>The given category limit amount is invalid.</value>
+  </data>
+  <data name="InvalidCategoryLimitTimePeriod" xml:space="preserve">
+    <value>The given category limit time period is invalid.</value>
+  </data>
 </root>

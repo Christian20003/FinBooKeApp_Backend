@@ -85,11 +85,92 @@ namespace FinBooKeApp.Api {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given category children id is not valid..
+        /// </summary>
+        internal static string InvalidCategoryChildren {
+            get {
+                return ResourceManager.GetString("InvalidCategoryChildren", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given color format is not supported..
+        /// </summary>
+        internal static string InvalidCategoryColor {
+            get {
+                return ResourceManager.GetString("InvalidCategoryColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given category limit amount is invalid..
+        /// </summary>
+        internal static string InvalidCategoryLimitAmount {
+            get {
+                return ResourceManager.GetString("InvalidCategoryLimitAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given category limit time period is invalid..
+        /// </summary>
+        internal static string InvalidCategoryLimitTimePeriod {
+            get {
+                return ResourceManager.GetString("InvalidCategoryLimitTimePeriod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The given value is not a valid language.
         /// </summary>
         internal static string Language {
             get {
                 return ResourceManager.GetString("Language", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A category color is required..
+        /// </summary>
+        internal static string MissingCategoryColor {
+            get {
+                return ResourceManager.GetString("MissingCategoryColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A category limit amount is missing..
+        /// </summary>
+        internal static string MissingCategoryLimitAmount {
+            get {
+                return ResourceManager.GetString("MissingCategoryLimitAmount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A startdate for the category limit is missing..
+        /// </summary>
+        internal static string MissingCategoryLimitStartDate {
+            get {
+                return ResourceManager.GetString("MissingCategoryLimitStartDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A category limit time period is missing..
+        /// </summary>
+        internal static string MissingCategoryLimitTimePeriod {
+            get {
+                return ResourceManager.GetString("MissingCategoryLimitTimePeriod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A category name is required..
+        /// </summary>
+        internal static string MissingCategoryName {
+            get {
+                return ResourceManager.GetString("MissingCategoryName", resourceCulture);
             }
         }
         
