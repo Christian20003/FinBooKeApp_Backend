@@ -24,16 +24,16 @@ public class CategoryLimit
 
 public enum TimePeriod
 {
-    ONE_MONTH,
-    TWO_MONTHS,
-    THREE_MONTHS,
-    FOUR_MONTHS,
-    FIVE_MONTHS,
-    SIX_MONTHS,
-    SEVEN_MONTHS,
-    EIGHT_MONTHS,
-    NINE_MONTHS,
-    TEN_MONTHS,
-    ELEVEN_MONTHS,
-    TWELVE_MONTHS,
+    ONE_MONTH = 1,
+    TWO_MONTHS = 2,
+    THREE_MONTHS = 3,
+    FOUR_MONTHS = 4,
+    FIVE_MONTHS = 5,
+    SIX_MONTHS = 6,
+    SEVEN_MONTHS = 7,
+    EIGHT_MONTHS = 8,
+    NINE_MONTHS = 9,
+    TEN_MONTHS = 10,
+    ELEVEN_MONTHS = 11,
+    TWELVE_MONTHS = 12,
 }

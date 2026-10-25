@@ -24,6 +24,8 @@ public static class LogEvents
     public const int ProfileVerifyEmail = 1028;
     public const int ProfileGetProfileImage = 1029;
 
+    public const int CategoryCreateCategory = 1040;
+
     // 2000 - 2999
 
     public const int AuthenticationLoginSuccess = 2000;
@@ -45,6 +47,8 @@ public static class LogEvents
     public const int ProfileSetUsernameSuccess = 2027;
     public const int ProfileVerifyEmailSuccess = 2028;
 
+    public const int CategoryCreateCategorySuccess = 2040;
+
     // 4000 - 4999
 
     public const int AuthenticationInvalidCredentials = 4000;
@@ -65,4 +69,6 @@ public static class LogEvents
     public const int ProfileEmailIdentical = 4022;
     public const int ProfileEmailNotIdentical = 4023;
     public const int ProfileInvalidToken = 4024;
+
+    public const int CategoryCreateCategoryFailure = 4040;
 }
