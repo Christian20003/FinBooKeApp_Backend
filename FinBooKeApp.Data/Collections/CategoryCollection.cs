@@ -1,14 +1,13 @@
 using FinBooKeApp.Data.Configuration;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
-using MongoDB.Driver.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinBooKeApp.Data.Collections;
 
 public class CategoryCollection(DataDbContext context) : ICategoryCollection
 {
     private readonly DataDbContext _context = context;
-    private readonly List<Category> _tracked = [];
 
     public async Task DeleteAsync(Category category, CancellationToken cancellationToken)
     {
@@ -26,18 +25,24 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
     public void Insert(Category category)
     {
         _context.Categories.Add(category);
-        _tracked.Add(category);
     }
 
     public List<Category> GetModifiedItems()
     {
-        return [.. _tracked];
+        return
+        [
+            .. _context
+                .ChangeTracker.Entries<Category>()
+                .Where(item =>
+                    item.State != EntityState.Detached && item.State != EntityState.Unchanged
+                )
+                .Select(item => item.Entity),
+        ];
     }
 
     public async Task SaveAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
-        _tracked.Clear();
     }
 
     public async Task<Category?> SelectAsync(
@@ -52,7 +57,7 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         );
     }
 
-    public async Task<IEnumerable<Category>> SelectByChildIds(
+    public async Task<IEnumerable<Category>> SelectByChildIdsAsync(
         IEnumerable<Guid> childrenIds,
         Guid userId,
         CancellationToken cancellationToken

@@ -8,7 +8,7 @@ public interface ICategoryCollection
     public List<Category> GetModifiedItems();
     public Task SaveAsync(CancellationToken cancellationToken);
     public Task<Category?> SelectAsync(Guid id, Guid userId, CancellationToken cancellationToken);
-    public Task<IEnumerable<Category>> SelectByChildIds(
+    public Task<IEnumerable<Category>> SelectByChildIdsAsync(
         IEnumerable<Guid> childrenIds,
         Guid userId,
         CancellationToken cancellationToken

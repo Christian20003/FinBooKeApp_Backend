@@ -28,7 +28,7 @@ public partial class CategoryService(
             Color = parameters.Color,
         };
         if (
-            !await _categoryCollection.ExistEntryAsync(
+            await _categoryCollection.ExistEntryAsync(
                 parameters.Name,
                 parameters.UserId,
                 cancellationToken
@@ -112,11 +112,10 @@ public partial class CategoryService(
             _categoryLimitCollection.Insert(newLimit);
             limitId = newLimit.Id;
         }
+        _categoryCollection.Insert(newCategory);
         var result = GetCreateCategoryResult(newCategory.Id, limitId);
 
         await _categoryCollection.SaveAsync(cancellationToken);
-        await _categoryLimitCollection.SaveAsync(cancellationToken);
-
         LogCreateCategorySuccess(parameters.UserId, parameters.Name);
         return new Result<CreateCategoryResult, CategoryServiceResultCode>(result);
     }
@@ -130,7 +129,7 @@ public partial class CategoryService(
     {
         if (!await _categoryCollection.ExistsEntriesAsync(childrenIds, userId, cancellationToken))
             return CategoryServiceResultCode.CHILD_CATEGORY_DOES_NOT_EXIST;
-        var oldParents = await _categoryCollection.SelectByChildIds(
+        var oldParents = await _categoryCollection.SelectByChildIdsAsync(
             childrenIds,
             userId,
             cancellationToken
@@ -138,7 +137,7 @@ public partial class CategoryService(
         RemoveChildIdFromParent([.. oldParents], childrenIds);
         if (parentLimitAmount is null)
             return CategoryServiceResultCode.OK;
-        var childLimits = await _categoryLimitCollection.SelectCurrentLimitByCategoryId(
+        var childLimits = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(
             childrenIds,
             cancellationToken
         );
@@ -161,7 +160,7 @@ public partial class CategoryService(
         parent.Children = parent.Children.Append(newChildId);
         if (childLimitAmount is null)
             return CategoryServiceResultCode.OK;
-        var parentLimit = await _categoryLimitCollection.SelectCurrentLimitByCategoryId(
+        var parentLimit = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(
             parentId,
             cancellationToken
         );
@@ -193,8 +192,9 @@ public partial class CategoryService(
         var visited = new HashSet<Guid> { startNode };
         var toVisit = new List<Guid>(nextNodes);
 
-        foreach (var id in toVisit)
+        for (var index = 0; index < toVisit.Count; index++)
         {
+            var id = toVisit[index];
             if (visited.Contains(id))
                 return true;
             var category = await _categoryCollection.SelectAsync(id, userId, cancellationToken);

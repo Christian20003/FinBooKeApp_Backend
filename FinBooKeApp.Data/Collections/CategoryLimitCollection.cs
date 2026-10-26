@@ -8,9 +8,8 @@ namespace FinBooKeApp.Data.Collections;
 public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitCollection
 {
     private readonly DataDbContext _context = context;
-    private readonly List<CategoryLimit> _tracked = [];
 
-    public async Task<IEnumerable<CategoryLimit>> SelectCurrentLimitByCategoryId(
+    public async Task<IEnumerable<CategoryLimit>> SelectCurrentLimitByCategoryIdAsync(
         List<Guid> categoryIds,
         CancellationToken cancellationToken
     )
@@ -23,7 +22,7 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<CategoryLimit?> SelectCurrentLimitByCategoryId(
+    public async Task<CategoryLimit?> SelectCurrentLimitByCategoryIdAsync(
         Guid categoryId,
         CancellationToken cancellationToken
     )
@@ -37,18 +36,24 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
     public void Insert(CategoryLimit limit)
     {
         _context.CategoryLimits.Add(limit);
-        _tracked.Add(limit);
     }
 
     public List<CategoryLimit> GetModifiedItems()
     {
-        return [.. _tracked];
+        return
+        [
+            .. _context
+                .ChangeTracker.Entries<CategoryLimit>()
+                .Where(item =>
+                    item.State != EntityState.Detached && item.State != EntityState.Unchanged
+                )
+                .Select(item => item.Entity),
+        ];
     }
 
     public async Task SaveAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
-        _tracked.Clear();
     }
 
     public async Task InsertAsync(CategoryLimit limit, CancellationToken cancellationToken)
