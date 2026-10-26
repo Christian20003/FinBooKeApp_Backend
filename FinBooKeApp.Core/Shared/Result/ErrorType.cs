@@ -1,4 +1,4 @@
-namespace FinBookeApp.Core.Shared.Result;
+namespace FinBooKeApp.Core.Shared.Result;
 
 public enum ErrorType
 {

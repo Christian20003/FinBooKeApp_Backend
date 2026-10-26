@@ -1,5 +1,5 @@
 using FinBooKeApp.Core.Services.Categories.Models;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
 using Microsoft.Extensions.Logging;

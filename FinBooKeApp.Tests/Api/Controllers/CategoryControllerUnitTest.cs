@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace FinBookeApp.Tests.Api.Controllers;
+namespace FinBooKeApp.Tests.Api.Controllers;
 
 public class CategoryControllerUnitTest
 {

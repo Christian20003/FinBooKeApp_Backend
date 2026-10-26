@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 
 namespace FinBooKeApp.Api.Shared.Error;
 

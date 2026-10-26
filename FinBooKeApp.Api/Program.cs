@@ -1,7 +1,7 @@
 using FinBooKeAPI.Collections.AccountCollection;
 using FinBooKeApp.Api.Configuration.Authentication;
 using FinBooKeApp.Api.Configuration.Database;
-using FinBookeApp.Api.Configuration.Documentation;
+using FinBooKeApp.Api.Configuration.Documentation;
 using FinBooKeApp.Api.Configuration.Localization;
 using FinBooKeApp.Api.Configuration.Redaction;
 using FinBooKeApp.Api.Configuration.Settings;

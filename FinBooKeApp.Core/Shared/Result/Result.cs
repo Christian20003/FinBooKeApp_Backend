@@ -1,4 +1,4 @@
-namespace FinBookeApp.Core.Shared.Result;
+namespace FinBooKeApp.Core.Shared.Result;
 
 public record Result<T>(bool HasValue, T? Value, ErrorType ErrorType, List<string> ErrorMessages);
 

@@ -1,5 +1,5 @@
 using FinBooKeApp.Core.Shared.FileSystem.Interfaces;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using FinBooKeApp.Data.Models;
 
 namespace FinBooKeApp.Core.Services.Profile;

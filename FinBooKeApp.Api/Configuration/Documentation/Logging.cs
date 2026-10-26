@@ -1,6 +1,6 @@
 using NReco.Logging.File;
 
-namespace FinBookeApp.Api.Configuration.Documentation;
+namespace FinBooKeApp.Api.Configuration.Documentation;
 
 public static class Logging
 {

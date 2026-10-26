@@ -1,6 +1,6 @@
 using FinBooKeApp.Core.Shared.FileSystem.Interfaces;
 using FinBooKeApp.Core.Shared.Parsing.Interfaces;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;

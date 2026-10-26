@@ -1,6 +1,6 @@
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
-using FinBookeApp.Tests.Mocks.Collections.Categories;
+using FinBooKeApp.Tests.Mocks.Collections.Categories;
 using Moq;
 
 namespace FinBooKeApp.Tests.Mocks.Collections.Categories;

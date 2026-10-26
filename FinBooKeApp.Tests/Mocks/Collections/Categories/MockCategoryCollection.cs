@@ -2,7 +2,7 @@ using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;
 using Moq;
 
-namespace FinBookeApp.Tests.Mocks.Collections.Categories;
+namespace FinBooKeApp.Tests.Mocks.Collections.Categories;
 
 public static class MockCategoryCollection
 {

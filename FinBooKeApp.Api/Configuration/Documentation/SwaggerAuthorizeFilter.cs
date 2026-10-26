@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace FinBookeApp.Api.Configuration.Documentation;
+namespace FinBooKeApp.Api.Configuration.Documentation;
 
 public class SwaggerAuthorizeFilter : IOperationFilter
 {

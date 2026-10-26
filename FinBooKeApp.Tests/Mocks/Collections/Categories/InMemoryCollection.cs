@@ -1,6 +1,6 @@
 using FinBooKeApp.Data.Models;
 
-namespace FinBookeApp.Tests.Mocks.Collections.Categories;
+namespace FinBooKeApp.Tests.Mocks.Collections.Categories;
 
 public class InMemoryCollection
 {

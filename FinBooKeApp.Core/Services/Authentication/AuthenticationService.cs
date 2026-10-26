@@ -4,7 +4,7 @@ using FinBooKeApp.Core.Shared.Authentication.Interfaces;
 using FinBooKeApp.Core.Shared.Authentication.Models;
 using FinBooKeApp.Core.Shared.Email.Interfaces;
 using FinBooKeApp.Core.Shared.Email.Models;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;

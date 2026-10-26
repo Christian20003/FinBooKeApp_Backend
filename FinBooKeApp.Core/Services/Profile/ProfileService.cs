@@ -2,7 +2,7 @@ using FinBooKeApp.Core.Services.Profile.Models;
 using FinBooKeApp.Core.Shared.Email.Interfaces;
 using FinBooKeApp.Core.Shared.Email.Models;
 using FinBooKeApp.Core.Shared.FileSystem.Interfaces;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Data.Interfaces;
 using FinBooKeApp.Data.Models;

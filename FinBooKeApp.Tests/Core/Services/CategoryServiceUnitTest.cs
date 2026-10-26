@@ -1,7 +1,6 @@
 using FinBooKeApp.Core.Services.Categories;
 using FinBooKeApp.Core.Services.Categories.Models;
 using FinBooKeApp.Data.Interfaces;
-using FinBookeApp.Tests.Mocks.Collections.Categories;
 using FinBooKeApp.Tests.Mocks.Collections.Categories;
 using Microsoft.Extensions.Logging;
 using Moq;

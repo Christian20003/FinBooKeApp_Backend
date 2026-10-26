@@ -6,7 +6,7 @@ using FinBooKeApp.Api.Shared.Logging;
 using FinBooKeApp.Core.Services.Authentication;
 using FinBooKeApp.Core.Services.Authentication.Models;
 using FinBooKeApp.Core.Shared.Authentication.Interfaces;
-using FinBookeApp.Core.Shared.Result;
+using FinBooKeApp.Core.Shared.Result;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
