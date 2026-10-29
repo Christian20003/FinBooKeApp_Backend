@@ -157,7 +157,7 @@ public partial class CategoryService(
         var parent = await _categoryCollection.SelectAsync(parentId, userId, cancellationToken);
         if (parent is null)
             return CategoryServiceResultCode.PARENT_CATEGORY_DOES_NOT_EXIST;
-        parent.Children = parent.Children.Append(newChildId);
+        parent.Children = [.. parent.Children, newChildId];
         if (childLimitAmount is null)
             return CategoryServiceResultCode.OK;
         var parentLimit = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(

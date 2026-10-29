@@ -14,12 +14,12 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
         CancellationToken cancellationToken
     )
     {
-        return await _context
-            .CategoryLimits.OrderByDescending(limit => limit.CreatedAt)
-            .GroupBy(limit => limit.CategoryId)
-            .Select(item => item.First())
-            .Where(limit => categoryIds.Contains(limit.CategoryId))
+        var latestLimits = await _context
+            .CategoryLimits.Where(limit => categoryIds.Contains(limit.CategoryId))
+            .OrderByDescending(limit => limit.CreatedAt)
             .ToListAsync(cancellationToken);
+
+        return [.. latestLimits.GroupBy(limit => limit.CategoryId).Select(item => item.First())];
     }
 
     public async Task<CategoryLimit?> SelectCurrentLimitByCategoryIdAsync(
