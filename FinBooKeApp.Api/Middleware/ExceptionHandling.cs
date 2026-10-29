@@ -73,6 +73,7 @@ public class ExceptionHandling : IMiddleware
             }
             default:
             {
+                Console.WriteLine(exception);
                 var body = new SingleErrorDTO
                 {
                     Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",

@@ -171,4 +171,7 @@
   <data name="InvalidCategoryLimitTimePeriod" xml:space="preserve">
     <value>Der erhaltene Zeitraum für ein Kategorie-Limit is ungültig.</value>
   </data>
+  <data name="InvalidCategoryParent" xml:space="preserve">
+    <value>Die Id der übergebenen Haupt-Kategorie ist ungültig.</value>
+  </data>
 </root>

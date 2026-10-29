@@ -121,6 +121,15 @@ namespace FinBooKeApp.Api {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given category parent is not valid..
+        /// </summary>
+        internal static string InvalidCategoryParent {
+            get {
+                return ResourceManager.GetString("InvalidCategoryParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The given value is not a valid language.
         /// </summary>
         internal static string Language {

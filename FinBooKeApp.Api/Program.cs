@@ -8,6 +8,7 @@ using FinBooKeApp.Api.Configuration.Settings;
 using FinBooKeApp.Api.Configuration.Version;
 using FinBooKeApp.Api.Middleware;
 using FinBooKeApp.Core.Services.Authentication;
+using FinBooKeApp.Core.Services.Categories;
 using FinBooKeApp.Core.Services.DataImport;
 using FinBooKeApp.Core.Services.Profile;
 using FinBooKeApp.Core.Shared.Authentication.Interfaces;
@@ -20,6 +21,7 @@ using FinBooKeApp.Core.Shared.Parsing.Interfaces;
 using FinBooKeApp.Core.Shared.Parsing.Providers;
 using FinBooKeApp.Core.Shared.Security.Interfaces;
 using FinBooKeApp.Core.Shared.Security.Providers;
+using FinBooKeApp.Data.Collections;
 using FinBooKeApp.Data.Configuration;
 using FinBooKeApp.Data.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +53,8 @@ builder.Services.AddSingleton<IRedactorProvider, StarRedactorProvider>();
 
 // Collections
 builder.Services.AddScoped<IAccountCollection, AccountCollection>();
+builder.Services.AddScoped<ICategoryCollection, CategoryCollection>();
+builder.Services.AddScoped<ICategoryLimitCollection, CategoryLimitCollection>();
 
 // Logic
 builder.Services.AddScoped<ITokenProvider, TokenProvider>();
@@ -68,6 +72,7 @@ builder.Services.AddScoped<IParserFactory, ParserFactory>();
 
 // Services that provides key functionality
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IDataImportService, DataImportService>();
 builder.Services.AddTransient<ExceptionHandling>();

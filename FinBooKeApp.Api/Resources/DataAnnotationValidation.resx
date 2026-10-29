@@ -171,4 +171,7 @@
   <data name="InvalidCategoryLimitTimePeriod" xml:space="preserve">
     <value>The given category limit time period is invalid.</value>
   </data>
+  <data name="InvalidCategoryParent" xml:space="preserve">
+    <value>The given category parent is not valid.</value>
+  </data>
 </root>
