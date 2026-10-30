@@ -15,6 +15,7 @@ public static class ErrorMapper
         return errorType switch
         {
             ErrorType.BAD_REQUEST => GetBadRequestDTO(errors, multipleErrorKey, traceId),
+            ErrorType.NOT_FOUND => GetNotFoundDTO(errors.First(), traceId),
             ErrorType.FORBIDDEN => GetForbiddenDTO(errors, traceId),
             ErrorType.UNAUTHORIZED => GetUnauthorizedDTO(traceId),
             _ => GetInternalErrorDTO(errors, traceId),
@@ -57,6 +58,18 @@ public static class ErrorMapper
             Title = "Access on this endpoint is forbidden.",
             Status = 401,
             Error = "",
+            TraceId = traceId,
+        };
+    }
+
+    private static SingleErrorDTO GetNotFoundDTO(string error, string traceId)
+    {
+        return new SingleErrorDTO
+        {
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+            Title = "Resource not found.",
+            Status = 404,
+            Error = error,
             TraceId = traceId,
         };
     }
