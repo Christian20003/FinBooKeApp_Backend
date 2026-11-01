@@ -21,233 +21,366 @@ public partial class CategoryService(
         CancellationToken cancellationToken
     )
     {
-        var newCategory = new Category
+        LogCreateCategory(parameters.UserId, parameters.Name);
+        var (categories, limits) = await LoadDataAsync(parameters, cancellationToken);
+        var validation = await ValidateCreateCategoryAsync(
+            parameters,
+            categories,
+            limits,
+            cancellationToken
+        );
+        if (validation != CategoryServiceResultCode.OK)
         {
-            UserId = parameters.UserId,
-            Name = parameters.Name,
-            Color = parameters.Color,
-        };
-        if (
-            await _categoryCollection.ExistEntryAsync(
-                parameters.Name,
-                parameters.UserId,
-                cancellationToken
-            )
-        )
-        {
-            LogCreateCategoryFailure(
-                parameters.UserId,
-                parameters.Name,
-                CategoryServiceResultCode.CATEGORY_ALREADY_EXIST
-            );
-            return new Result<CreateCategoryResult, CategoryServiceResultCode>(
-                CategoryServiceResultCode.CATEGORY_ALREADY_EXIST
-            );
+            LogCreateCategoryFailure(parameters.UserId, parameters.Name, validation);
+            return new Result<CreateCategoryResult, CategoryServiceResultCode>(validation);
         }
-        if (parameters.ParentId is not null && parameters.ChildrenIds is not null)
-        {
-            if (
-                await ExistCycle(
-                    parameters.ParentId.Value,
-                    parameters.UserId,
-                    parameters.ChildrenIds,
-                    cancellationToken
-                )
-            )
-            {
-                LogCreateCategoryFailure(
-                    parameters.UserId,
-                    parameters.Name,
-                    CategoryServiceResultCode.INVALID_CATEGORY_DEPENDENCY
-                );
-                return new Result<CreateCategoryResult, CategoryServiceResultCode>(
-                    CategoryServiceResultCode.INVALID_CATEGORY_DEPENDENCY
-                );
-            }
-        }
-        if (parameters.ParentId is not null)
-        {
-            var code = await UpdateParentCategoryAsync(
-                parameters.ParentId.Value,
-                newCategory.Id,
-                parameters.UserId,
-                parameters.LimitAmount,
-                cancellationToken
-            );
-            if (code != CategoryServiceResultCode.OK)
-            {
-                LogCreateCategoryFailure(parameters.UserId, parameters.Name, code);
-                return new Result<CreateCategoryResult, CategoryServiceResultCode>(code);
-            }
-        }
-        if (parameters.ChildrenIds is not null)
-        {
-            var code = await UpdateChildCategoriesAsync(
-                parameters.ChildrenIds,
-                parameters.UserId,
-                parameters.LimitAmount,
-                cancellationToken
-            );
-            if (code != CategoryServiceResultCode.OK)
-            {
-                LogCreateCategoryFailure(parameters.UserId, parameters.Name, code);
-                return new Result<CreateCategoryResult, CategoryServiceResultCode>(code);
-            }
-            newCategory.Children = parameters.ChildrenIds;
-        }
-        Guid? limitId = null;
-        if (parameters.LimitAmount is not null)
-        {
-            var newLimit = new CategoryLimit
-            {
-                CategoryId = newCategory.Id,
-                Amount = parameters.LimitAmount.Value,
-                Start = parameters.LimitStartDate is not null
-                    ? parameters.LimitStartDate.Value
-                    : DateTime.UtcNow,
-                Period = parameters.LimitTimePeriod is not null
-                    ? parameters.LimitTimePeriod.Value
-                    : TimePeriod.ONE_MONTH,
-            };
-            _categoryLimitCollection.Insert(newLimit);
-            limitId = newLimit.Id;
-        }
-        _categoryCollection.Insert(newCategory);
-        var result = GetCreateCategoryResult(newCategory.Id, limitId);
-
-        await _categoryCollection.SaveAsync(cancellationToken);
+        var result = await UpdateDatabaseAsync(parameters, categories, limits, cancellationToken);
         LogCreateCategorySuccess(parameters.UserId, parameters.Name);
         return new Result<CreateCategoryResult, CategoryServiceResultCode>(result);
     }
 
-    private async Task<CategoryServiceResultCode> UpdateChildCategoriesAsync(
-        List<Guid> childrenIds,
-        Guid userId,
-        decimal? parentLimitAmount,
+    private async Task<CreateCategoryResult> UpdateDatabaseAsync(
+        CreateCategoryParams param,
+        List<Category> categories,
+        List<CategoryLimit> limits,
         CancellationToken cancellationToken
     )
     {
-        if (!await _categoryCollection.ExistsEntriesAsync(childrenIds, userId, cancellationToken))
-            return CategoryServiceResultCode.CHILD_CATEGORY_DOES_NOT_EXIST;
-        var oldParents = await _categoryCollection.SelectByChildIdsAsync(
-            childrenIds,
+        var category = CreateCategory(param.Name, param.Color, param.UserId, param.ChildrenIds);
+        CategoryLimit? limit = null;
+        if (param.LimitAmount != null)
+        {
+            limit = CreateCategoryLimit(
+                category.Id,
+                param.LimitAmount.Value,
+                param.LimitStartDate,
+                param.LimitTimePeriod
+            );
+            _categoryLimitCollection.Insert(limit);
+        }
+        _categoryCollection.Insert(category);
+        var parentLimit = AdjustParentLimit(param.ParentId, param.LimitAmount, limits);
+        var oldParents = RemoveChildId(categories, param.ChildrenIds);
+        var parent = AddChildId(category.Id, param.ParentId, categories);
+        await _categoryCollection.SaveAsync(cancellationToken);
+        return new CreateCategoryResult
+        {
+            CreatedCategory = category,
+            CreatedLimit = limit,
+            ModifiedCategories = parent == null ? oldParents : [.. oldParents, parent],
+            ModifiedCategoryLimits = parentLimit == null ? [] : [parentLimit],
+        };
+    }
+
+    private static Category CreateCategory(
+        string name,
+        string color,
+        Guid userId,
+        List<Guid>? children
+    )
+    {
+        var childrenIds = children ?? [];
+        return new Category
+        {
+            Name = name,
+            Color = color,
+            UserId = userId,
+            Children = childrenIds,
+        };
+    }
+
+    private static CategoryLimit CreateCategoryLimit(
+        Guid categoryId,
+        decimal amount,
+        DateTime? startDate,
+        TimePeriod? monthlyPeriod
+    )
+    {
+        var start = startDate ?? DateTime.UtcNow;
+        var period = monthlyPeriod ?? TimePeriod.ONE_MONTH;
+        return new CategoryLimit
+        {
+            CategoryId = categoryId,
+            Amount = amount,
+            Start = start,
+            Period = period,
+        };
+    }
+
+    private static List<Category> RemoveChildId(List<Category> parents, List<Guid>? childrenIds)
+    {
+        var result = new List<Category>();
+        foreach (var id in childrenIds ?? [])
+        {
+            var parent = parents.FirstOrDefault(item => item.Children.Contains(id));
+            if (parent is null)
+                continue;
+            parent.Children = parent.Children.Where(childId => childId != id);
+            result.Add(parent);
+        }
+        return result;
+    }
+
+    private static Category? AddChildId(Guid childId, Guid? parentId, List<Category> categories)
+    {
+        if (parentId == null)
+            return null;
+        var parent = categories.FirstOrDefault(category => category.Id == parentId.Value);
+        if (parent == null)
+            return null;
+        parent.Children = [.. parent.Children, childId];
+        return parent;
+    }
+
+    private CategoryLimit? AdjustParentLimit(
+        Guid? parentId,
+        decimal? childLimit,
+        List<CategoryLimit> limits
+    )
+    {
+        if (parentId == null || childLimit == null)
+            return null;
+        var parentLimit = limits.FirstOrDefault(limit => limit.CategoryId == parentId.Value);
+        if (parentLimit == null)
+            return null;
+        if (NeedsNewLimitEntry(parentLimit))
+        {
+            var newLimit = CreateCategoryLimit(
+                parentId.Value,
+                parentLimit.Amount + childLimit.Value,
+                DateTime.UtcNow,
+                parentLimit.Period
+            );
+            _categoryLimitCollection.Insert(newLimit);
+            return newLimit;
+        }
+        parentLimit.Amount += childLimit.Value;
+        return parentLimit;
+    }
+
+    private static bool NeedsNewLimitEntry(CategoryLimit limit)
+    {
+        var now = DateTime.UtcNow;
+        var period = GetLimitPeriodValue(limit.Period);
+        return limit.Start.AddMonths(period) < now;
+    }
+
+    private static int GetLimitPeriodValue(TimePeriod period)
+    {
+        return period switch
+        {
+            TimePeriod.ONE_MONTH => 1,
+            TimePeriod.TWO_MONTHS => 2,
+            TimePeriod.THREE_MONTHS => 3,
+            TimePeriod.FOUR_MONTHS => 4,
+            TimePeriod.FIVE_MONTHS => 5,
+            TimePeriod.SIX_MONTHS => 6,
+            TimePeriod.SEVEN_MONTHS => 7,
+            TimePeriod.EIGHT_MONTHS => 8,
+            TimePeriod.NINE_MONTHS => 9,
+            TimePeriod.TEN_MONTHS => 10,
+            TimePeriod.ELEVEN_MONTHS => 11,
+            TimePeriod.TWELVE_MONTHS => 12,
+            _ => 0,
+        };
+    }
+
+    private async Task<(List<Category>, List<CategoryLimit>)> LoadDataAsync(
+        CreateCategoryParams param,
+        CancellationToken cancellationToken
+    )
+    {
+        var categories = new List<Category>();
+        var limits = new List<CategoryLimit>();
+        await LoadCategoryAsync(param.Name, param.UserId, categories, cancellationToken);
+        await LoadCategoryAsync(param.ParentId, param.UserId, categories, cancellationToken);
+        await LoadCategoryLimitAsync(param.ParentId, limits, cancellationToken);
+        if (param.ChildrenIds == null)
+            return (categories, limits);
+        foreach (var childId in param.ChildrenIds)
+        {
+            await LoadCategoryAsync(childId, param.UserId, categories, cancellationToken);
+            await LoadParentCategoryAsync(childId, param.UserId, categories, cancellationToken);
+            await LoadCategoryLimitAsync(childId, limits, cancellationToken);
+        }
+        return (categories, limits);
+    }
+
+    private async Task LoadCategoryAsync(
+        Guid? id,
+        Guid userId,
+        List<Category> categories,
+        CancellationToken cancellationToken
+    )
+    {
+        if (id == null)
+            return;
+        var category = await _categoryCollection.SelectAsync(id.Value, userId, cancellationToken);
+        if (category != null)
+            categories.Add(category);
+    }
+
+    private async Task LoadCategoryAsync(
+        string name,
+        Guid userId,
+        List<Category> categories,
+        CancellationToken cancellationToken
+    )
+    {
+        var category = await _categoryCollection.SelectAsync(name, userId, cancellationToken);
+        if (category != null)
+            categories.Add(category);
+    }
+
+    private async Task LoadParentCategoryAsync(
+        Guid? id,
+        Guid userId,
+        List<Category> categories,
+        CancellationToken cancellationToken
+    )
+    {
+        if (id == null)
+            return;
+        var category = await _categoryCollection.SelectParentAsync(
+            id.Value,
             userId,
             cancellationToken
         );
-        RemoveChildIdFromParent([.. oldParents], childrenIds);
-        if (parentLimitAmount is null)
-            return CategoryServiceResultCode.OK;
-        var childLimits = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(
-            childrenIds,
+        if (category != null)
+            categories.Add(category);
+    }
+
+    private async Task LoadCategoryLimitAsync(
+        Guid? categoryId,
+        List<CategoryLimit> limits,
+        CancellationToken cancellationToken
+    )
+    {
+        if (categoryId == null)
+            return;
+        var limit = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(
+            categoryId.Value,
             cancellationToken
         );
-        if (IsLimitAmountValid(parentLimitAmount.Value, [.. childLimits]))
+        if (limit != null)
+            limits.Add(limit);
+    }
+
+    private async Task<CategoryServiceResultCode> ValidateCreateCategoryAsync(
+        CreateCategoryParams param,
+        List<Category> categories,
+        List<CategoryLimit> limits,
+        CancellationToken cancellationToken
+    )
+    {
+        if (DoesCategoryExist(param.Name, categories))
+            return CategoryServiceResultCode.CATEGORY_ALREADY_EXIST;
+        var result = IsParentValid(param.ParentId, categories);
+        if (result != CategoryServiceResultCode.OK)
+            return result;
+        result = AreChildrenValid(param.ChildrenIds, categories);
+        if (result != CategoryServiceResultCode.OK)
+            return result;
+        result = IsLimitAmountValid(param.LimitAmount, param.ChildrenIds, limits);
+        if (result != CategoryServiceResultCode.OK)
+            return result;
+        return await ExistCycle(param.ParentId, param.ChildrenIds, param.UserId, cancellationToken);
+    }
+
+    private async Task<CategoryServiceResultCode> ExistCycle(
+        Guid? parentId,
+        List<Guid>? childrenIds,
+        Guid userId,
+        CancellationToken cancellationToken
+    )
+    {
+        if (parentId == null || childrenIds == null)
+            return CategoryServiceResultCode.OK;
+        while (true)
+        {
+            if (childrenIds.Contains(parentId.Value))
+                return CategoryServiceResultCode.INVALID_CATEGORY_DEPENDENCY;
+            var category = await _categoryCollection.SelectParentAsync(
+                parentId.Value,
+                userId,
+                cancellationToken
+            );
+            if (category is null)
+                return CategoryServiceResultCode.OK;
+            parentId = category.Id;
+        }
+    }
+
+    private static CategoryServiceResultCode IsParentValid(
+        Guid? parentId,
+        List<Category> categories
+    )
+    {
+        if (parentId == null)
+            return CategoryServiceResultCode.OK;
+        if (DoesCategoryExist(parentId.Value, categories))
+            return CategoryServiceResultCode.OK;
+        return CategoryServiceResultCode.PARENT_CATEGORY_DOES_NOT_EXIST;
+    }
+
+    private static CategoryServiceResultCode AreChildrenValid(
+        List<Guid>? childrenIds,
+        List<Category> categories
+    )
+    {
+        if (childrenIds == null)
+            return CategoryServiceResultCode.OK;
+        if (ExistDuplicateId(childrenIds))
+            return CategoryServiceResultCode.DUPLICATE_CHILD_ID;
+        foreach (var childId in childrenIds)
+        {
+            if (!DoesCategoryExist(childId, categories))
+                return CategoryServiceResultCode.CHILD_CATEGORY_DOES_NOT_EXIST;
+        }
+        return CategoryServiceResultCode.OK;
+    }
+
+    private static CategoryServiceResultCode IsLimitAmountValid(
+        decimal? limitAmount,
+        List<Guid>? childrenIds,
+        List<CategoryLimit> limits
+    )
+    {
+        if (limitAmount == null || childrenIds == null)
+            return CategoryServiceResultCode.OK;
+        var childrenLimits = limits.Where(limit => childrenIds.Contains(limit.CategoryId)).ToList();
+        if (IsLimitAmountValid(limitAmount.Value, childrenLimits))
             return CategoryServiceResultCode.OK;
         return CategoryServiceResultCode.INVALID_CATEGORY_LIMIT;
     }
 
-    private async Task<CategoryServiceResultCode> UpdateParentCategoryAsync(
-        Guid parentId,
-        Guid newChildId,
-        Guid userId,
-        decimal? childLimitAmount,
-        CancellationToken cancellationToken
-    )
-    {
-        var parent = await _categoryCollection.SelectAsync(parentId, userId, cancellationToken);
-        if (parent is null)
-            return CategoryServiceResultCode.PARENT_CATEGORY_DOES_NOT_EXIST;
-        parent.Children = [.. parent.Children, newChildId];
-        if (childLimitAmount is null)
-            return CategoryServiceResultCode.OK;
-        var parentLimit = await _categoryLimitCollection.SelectCurrentLimitByCategoryIdAsync(
-            parentId,
-            cancellationToken
-        );
-        if (parentLimit is null)
-            return CategoryServiceResultCode.OK;
-        if (!NeedsNewLimitEntry(parentLimit))
-        {
-            parentLimit.Amount += childLimitAmount.Value;
-            return CategoryServiceResultCode.OK;
-        }
-        var newParentLimit = new CategoryLimit
-        {
-            CategoryId = parentId,
-            Amount = parentLimit.Amount + childLimitAmount.Value,
-            Start = DateTime.UtcNow,
-            Period = parentLimit.Period,
-        };
-        _categoryLimitCollection.Insert(newParentLimit);
-        return CategoryServiceResultCode.OK;
-    }
-
-    private async Task<bool> ExistCycle(
-        Guid startNode,
-        Guid userId,
-        List<Guid> nextNodes,
-        CancellationToken cancellationToken
-    )
-    {
-        var visited = new HashSet<Guid> { startNode };
-        var toVisit = new List<Guid>(nextNodes);
-
-        for (var index = 0; index < toVisit.Count; index++)
-        {
-            var id = toVisit[index];
-            if (visited.Contains(id))
-                return true;
-            var category = await _categoryCollection.SelectAsync(id, userId, cancellationToken);
-            if (category is not null)
-                toVisit.AddRange(category.Children);
-            visited.Add(id);
-        }
-        return false;
-    }
-
-    private CreateCategoryResult GetCreateCategoryResult(Guid categoryId, Guid? limitId)
-    {
-        var modifiedCategories = _categoryCollection.GetModifiedItems();
-        var modifiedLimits = _categoryLimitCollection.GetModifiedItems();
-
-        return new CreateCategoryResult
-        {
-            CreatedCategory = modifiedCategories.First(item => item.Id == categoryId),
-            CreatedLimit = limitId is null
-                ? null
-                : modifiedLimits.First(item => item.Id == limitId.Value),
-            ModifiedCategories = [.. modifiedCategories.Where(item => item.Id != categoryId)],
-            ModifiedCategoryLimits = limitId is null
-                ? []
-                : [.. modifiedLimits.Where(item => item.Id != limitId.Value)],
-        };
-    }
-
-    private static bool IsLimitAmountValid(decimal limit, List<CategoryLimit> childrenLimits)
+    private static bool IsLimitAmountValid(decimal parentLimit, List<CategoryLimit> childrenLimits)
     {
         var totalLimit = 0.0m;
         foreach (var childLimit in childrenLimits)
         {
             totalLimit += childLimit.Amount;
         }
-        return totalLimit <= limit;
+        return totalLimit <= parentLimit;
     }
 
-    private static void RemoveChildIdFromParent(List<Category> parents, List<Guid> childrenIds)
+    private static bool DoesCategoryExist(string name, List<Category> categories)
     {
-        foreach (var id in childrenIds)
+        return categories.Any(category => category.Name == name);
+    }
+
+    private static bool DoesCategoryExist(Guid id, List<Category> categories)
+    {
+        return categories.Any(category => category.Id == id);
+    }
+
+    private static bool ExistDuplicateId(List<Guid> ids)
+    {
+        foreach (var id in ids)
         {
-            var parent = parents.FirstOrDefault(item => item.Children.Contains(id));
-            if (parent is null)
-                continue;
-            parent.Children = parent.Children.Where(childId => childId != id);
+            if (ids.Count(elem => elem == id) > 1)
+                return true;
         }
-    }
-
-    private static bool NeedsNewLimitEntry(CategoryLimit limit)
-    {
-        var now = DateTime.UtcNow;
-        var period = (int)limit.Period;
-        return limit.Start.AddMonths(period) < now;
+        return false;
     }
 }

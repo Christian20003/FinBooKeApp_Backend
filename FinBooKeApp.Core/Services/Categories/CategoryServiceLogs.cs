@@ -1,3 +1,4 @@
+using FinBooKeApp.Core.Services.Categories.Models;
 using FinBooKeApp.Core.Shared.Logging;
 using Microsoft.Extensions.Logging;
 

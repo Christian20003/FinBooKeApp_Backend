@@ -1,6 +1,7 @@
 using FinBooKeApp.Api.Controllers.Categories;
 using FinBooKeApp.Api.Controllers.Categories.Models;
 using FinBooKeApp.Core.Services.Categories;
+using FinBooKeApp.Core.Services.Categories.Models;
 using FinBooKeApp.Tests.Mocks.Dependencies;
 using FinBooKeApp.Tests.Mocks.Services;
 using Microsoft.AspNetCore.Http;

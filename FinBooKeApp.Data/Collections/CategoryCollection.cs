@@ -9,40 +9,15 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
 {
     private readonly DataDbContext _context = context;
 
-    public async Task DeleteAsync(Category category, CancellationToken cancellationToken)
-    {
-        await foreach (var limit in _context.CategoryLimits.AsAsyncEnumerable())
-        {
-            if (limit.CategoryId == category.Id)
-            {
-                _context.CategoryLimits.Remove(limit);
-            }
-        }
-        _context.Categories.Remove(category);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
     public void Insert(Category category)
     {
         _context.Categories.Add(category);
     }
 
-    public List<Category> GetModifiedItems()
-    {
-        return
-        [
-            .. _context
-                .ChangeTracker.Entries<Category>()
-                .Where(item =>
-                    item.State != EntityState.Detached && item.State != EntityState.Unchanged
-                )
-                .Select(item => item.Entity),
-        ];
-    }
-
     public async Task SaveAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
+        _context.ChangeTracker.Clear();
     }
 
     public async Task<Category?> SelectAsync(
@@ -57,62 +32,27 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         );
     }
 
-    public async Task<IEnumerable<Category>> SelectByChildIdsAsync(
-        IEnumerable<Guid> childrenIds,
-        Guid userId,
-        CancellationToken cancellationToken
-    )
-    {
-        return await _context
-            .Categories.Where(category =>
-                category.Children.Any(id => childrenIds.Contains(id)) && category.UserId == userId
-            )
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<bool> ExistsEntriesAsync(
-        IEnumerable<Guid> ids,
-        Guid userId,
-        CancellationToken cancellationToken
-    )
-    {
-        var result = true;
-        foreach (var id in ids)
-        {
-            result &= await ExistEntryAsync(id, userId, cancellationToken);
-            if (!result)
-                break;
-        }
-        return result;
-    }
-
-    public async Task<bool> ExistEntryAsync(
-        Guid id,
-        Guid userId,
-        CancellationToken cancellationToken
-    )
-    {
-        return await _context.Categories.AnyAsync(
-            item => item.Id == id && item.UserId == userId,
-            cancellationToken
-        );
-    }
-
-    public async Task<bool> ExistEntryAsync(
+    public async Task<Category?> SelectAsync(
         string name,
         Guid userId,
         CancellationToken cancellationToken
     )
     {
-        return await _context.Categories.AnyAsync(
-            item => item.Name == name && item.UserId == userId,
+        return await _context.Categories.FirstOrDefaultAsync(
+            category => category.Name == name && category.UserId == userId,
             cancellationToken
         );
     }
 
-    public async Task UpdateAsync(Category category, CancellationToken cancellationToken)
+    public async Task<Category?> SelectParentAsync(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken
+    )
     {
-        _context.Categories.Update(category);
-        await _context.SaveChangesAsync(cancellationToken);
+        return await _context.Categories.FirstOrDefaultAsync(
+            category => category.Children.Contains(id) && category.UserId == userId,
+            cancellationToken
+        );
     }
 }

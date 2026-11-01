@@ -99,6 +99,24 @@ public class CategoryServiceUnitTest
     }
 
     [Fact]
+    public async Task CreateCategoryAsync_WhenChildrenContainsDuplicates_ReturnError()
+    {
+        var child = _database.GetChildCategory();
+        var param = new CreateCategoryParams
+        {
+            UserId = _database.UserId,
+            Name = "NewCategory",
+            Color = "#ffdd33",
+            ChildrenIds = [child.Id, child.Id],
+        };
+
+        var result = await _service.CreateCategoryAsync(param, new CancellationToken());
+
+        Assert.False(result.HasValue());
+        Assert.Equal(CategoryServiceResultCode.DUPLICATE_CHILD_ID, result.ErrorCode);
+    }
+
+    [Fact]
     public async Task CreateCategoryAsync_WhenChildCategoryHasLargerLimitAmount_ReturnError()
     {
         var child = _database.GetChildCategory();

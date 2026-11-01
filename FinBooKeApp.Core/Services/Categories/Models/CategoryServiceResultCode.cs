@@ -1,4 +1,4 @@
-namespace FinBooKeApp.Core.Services.Categories;
+namespace FinBooKeApp.Core.Services.Categories.Models;
 
 public enum CategoryServiceResultCode
 {
@@ -9,4 +9,5 @@ public enum CategoryServiceResultCode
     CATEGORY_ALREADY_EXIST = 5,
     INVALID_CATEGORY_LIMIT = 6,
     INVALID_CATEGORY_DEPENDENCY = 7,
+    DUPLICATE_CHILD_ID = 8,
 }
