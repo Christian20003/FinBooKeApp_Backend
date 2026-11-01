@@ -95,6 +95,11 @@ public partial class CategoryController(
                 var text = _localizer.GetString("ParentDoesNotExist");
                 return ErrorMapper.GetErrorDTO([text], ErrorType.NOT_FOUND);
             }
+            case CategoryServiceResultCode.DUPLICATE_CHILD_ID:
+            {
+                var text = _localizer.GetString("DuplicateChildId");
+                return ErrorMapper.GetErrorDTO([text], ErrorType.BAD_REQUEST, "Children");
+            }
             case CategoryServiceResultCode.INVALID_CATEGORY_LIMIT:
             {
                 var text = _localizer.GetString("InvalidLimit");

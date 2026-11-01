@@ -60,6 +60,11 @@ public class CategoryControllerUnitTest
         };
         yield return new object[]
         {
+            CategoryServiceResultCode.DUPLICATE_CHILD_ID,
+            StatusCodes.Status400BadRequest,
+        };
+        yield return new object[]
+        {
             CategoryServiceResultCode.CHILD_CATEGORY_DOES_NOT_EXIST,
             StatusCodes.Status404NotFound,
         };
