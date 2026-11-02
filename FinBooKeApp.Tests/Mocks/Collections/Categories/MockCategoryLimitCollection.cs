@@ -26,6 +26,9 @@ public static class MockCategoryLimitCollection
         mock.Setup(obj => obj.Insert(It.IsAny<CategoryLimit>()))
             .Callback((CategoryLimit limit) => collection.TrackedCategoryLimits.Add(limit));
 
+        mock.Setup(obj => obj.Update(It.IsAny<CategoryLimit>()))
+            .Callback((CategoryLimit limit) => collection.TrackedCategoryLimits.Add(limit));
+
         mock.Setup(obj => obj.SaveAsync(It.IsAny<CancellationToken>()))
             .Callback(
                 (CancellationToken cancellationToken) =>

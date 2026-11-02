@@ -5,6 +5,7 @@ namespace FinBooKeApp.Data.Interfaces;
 public interface ICategoryCollection
 {
     public void Insert(Category category);
+    public void Update(Category category);
     public Task SaveAsync(CancellationToken cancellationToken);
     public Task<List<Category>> SelectAsync(Guid userId, CancellationToken cancellationToken);
     public Task<Category?> SelectAsync(Guid id, Guid userId, CancellationToken cancellationToken);

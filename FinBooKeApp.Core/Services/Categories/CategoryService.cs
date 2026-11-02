@@ -91,9 +91,7 @@ public partial class CategoryService(
                 param.LimitStartDate,
                 param.LimitTimePeriod
             );
-            _categoryLimitCollection.Insert(limit);
         }
-        _categoryCollection.Insert(category);
         var parentLimit = AdjustParentLimit(param.ParentId, param.LimitAmount, limits);
         var oldParents = RemoveChildId(categories, param.ChildrenIds);
         var parent = AddChildId(category.Id, param.ParentId, categories);
@@ -107,24 +105,21 @@ public partial class CategoryService(
         };
     }
 
-    private static Category CreateCategory(
-        string name,
-        string color,
-        Guid userId,
-        List<Guid>? children
-    )
+    private Category CreateCategory(string name, string color, Guid userId, List<Guid>? children)
     {
         var childrenIds = children ?? [];
-        return new Category
+        var category = new Category
         {
             Name = name,
             Color = color,
             UserId = userId,
             Children = childrenIds,
         };
+        _categoryCollection.Insert(category);
+        return category;
     }
 
-    private static CategoryLimit CreateCategoryLimit(
+    private CategoryLimit CreateCategoryLimit(
         Guid categoryId,
         decimal amount,
         DateTime? startDate,
@@ -133,16 +128,18 @@ public partial class CategoryService(
     {
         var start = startDate ?? DateTime.UtcNow;
         var period = monthlyPeriod ?? TimePeriod.ONE_MONTH;
-        return new CategoryLimit
+        var limit = new CategoryLimit
         {
             CategoryId = categoryId,
             Amount = amount,
             Start = start,
             Period = period,
         };
+        _categoryLimitCollection.Insert(limit);
+        return limit;
     }
 
-    private static List<Category> RemoveChildId(List<Category> parents, List<Guid>? childrenIds)
+    private List<Category> RemoveChildId(List<Category> parents, List<Guid>? childrenIds)
     {
         var result = new List<Category>();
         foreach (var id in childrenIds ?? [])
@@ -151,12 +148,13 @@ public partial class CategoryService(
             if (parent is null)
                 continue;
             parent.Children = parent.Children.Where(childId => childId != id);
+            _categoryCollection.Update(parent);
             result.Add(parent);
         }
         return result;
     }
 
-    private static Category? AddChildId(Guid childId, Guid? parentId, List<Category> categories)
+    private Category? AddChildId(Guid childId, Guid? parentId, List<Category> categories)
     {
         if (parentId == null)
             return null;
@@ -164,6 +162,7 @@ public partial class CategoryService(
         if (parent == null)
             return null;
         parent.Children = [.. parent.Children, childId];
+        _categoryCollection.Update(parent);
         return parent;
     }
 
@@ -190,6 +189,7 @@ public partial class CategoryService(
             return newLimit;
         }
         parentLimit.Amount += childLimit.Value;
+        _categoryLimitCollection.Update(parentLimit);
         return parentLimit;
     }
 

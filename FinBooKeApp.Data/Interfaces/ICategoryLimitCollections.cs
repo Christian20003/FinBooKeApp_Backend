@@ -16,6 +16,7 @@ public interface ICategoryLimitCollection
         Guid categoryId,
         CancellationToken cancellationToken
     );
+    public void Update(CategoryLimit limit);
     public void Insert(CategoryLimit limit);
     public Task SaveAsync(CancellationToken cancellationToken);
 }

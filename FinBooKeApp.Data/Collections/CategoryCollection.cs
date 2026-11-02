@@ -14,16 +14,21 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         _context.Categories.Add(category);
     }
 
+    public void Update(Category category)
+    {
+        _context.Categories.Update(category);
+    }
+
     public async Task SaveAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
-        _context.ChangeTracker.Clear();
     }
 
     public async Task<List<Category>> SelectAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await _context
-            .Categories.Where(category => category.UserId == userId)
+            .Categories.AsNoTracking()
+            .Where(category => category.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
@@ -33,10 +38,12 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         CancellationToken cancellationToken
     )
     {
-        return await _context.Categories.FirstOrDefaultAsync(
-            category => category.Id == id && category.UserId == userId,
-            cancellationToken
-        );
+        return await _context
+            .Categories.AsNoTracking()
+            .FirstOrDefaultAsync(
+                category => category.Id == id && category.UserId == userId,
+                cancellationToken
+            );
     }
 
     public async Task<Category?> SelectAsync(
@@ -45,10 +52,12 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         CancellationToken cancellationToken
     )
     {
-        return await _context.Categories.FirstOrDefaultAsync(
-            category => category.Name == name && category.UserId == userId,
-            cancellationToken
-        );
+        return await _context
+            .Categories.AsNoTracking()
+            .FirstOrDefaultAsync(
+                category => category.Name == name && category.UserId == userId,
+                cancellationToken
+            );
     }
 
     public async Task<Category?> SelectParentAsync(
@@ -57,9 +66,11 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         CancellationToken cancellationToken
     )
     {
-        return await _context.Categories.FirstOrDefaultAsync(
-            category => category.Children.Contains(id) && category.UserId == userId,
-            cancellationToken
-        );
+        return await _context
+            .Categories.AsNoTracking()
+            .FirstOrDefaultAsync(
+                category => category.Children.Contains(id) && category.UserId == userId,
+                cancellationToken
+            );
     }
 }

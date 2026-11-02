@@ -53,6 +53,9 @@ public static class MockCategoryCollection
         mock.Setup(obj => obj.Insert(It.IsAny<Category>()))
             .Callback((Category category) => collection.TrackedCategories.Add(category));
 
+        mock.Setup(obj => obj.Update(It.IsAny<Category>()))
+            .Callback((Category category) => collection.TrackedCategories.Add(category));
+
         mock.Setup(obj => obj.SaveAsync(It.IsAny<CancellationToken>()))
             .Callback(
                 (CancellationToken cancellationToken) =>

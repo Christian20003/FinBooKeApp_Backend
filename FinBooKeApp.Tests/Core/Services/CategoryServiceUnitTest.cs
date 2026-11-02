@@ -202,7 +202,6 @@ public class CategoryServiceUnitTest
     public async Task CreateCategoryAsync_WhenParentIdIsSet_ReturnUpdatedParent()
     {
         var parent = _database.GetParentCategory();
-        _database.TrackedCategories.Add(parent);
         var param = new CreateCategoryParams
         {
             UserId = _database.UserId,
@@ -243,7 +242,6 @@ public class CategoryServiceUnitTest
         var parent = _database.GetParentCategory();
         var parentLimit = _database.GetLimit(parent.Id);
         var oldAmount = parentLimit.Amount;
-        _database.TrackedCategoryLimits.Add(parentLimit);
         var param = new CreateCategoryParams
         {
             UserId = _database.UserId,
@@ -350,7 +348,6 @@ public class CategoryServiceUnitTest
     {
         var parent = _database.GetParentCategory();
         var child = _database.GetChildCategory();
-        _database.TrackedCategories.Add(parent);
         var param = new CreateCategoryParams
         {
             UserId = _database.UserId,

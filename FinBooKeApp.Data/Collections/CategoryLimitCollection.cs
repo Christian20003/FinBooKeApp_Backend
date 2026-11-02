@@ -15,7 +15,8 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
     )
     {
         return await _context
-            .CategoryLimits.Where(limit => limit.CategoryId == categoryId)
+            .CategoryLimits.AsNoTracking()
+            .Where(limit => limit.CategoryId == categoryId)
             .ToListAsync(cancellationToken);
     }
 
@@ -25,7 +26,8 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
     )
     {
         return await _context
-            .CategoryLimits.Where(limit => categoryIds.Contains(limit.CategoryId))
+            .CategoryLimits.AsNoTracking()
+            .Where(limit => categoryIds.Contains(limit.CategoryId))
             .ToListAsync(cancellationToken);
     }
 
@@ -35,9 +37,15 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
     )
     {
         return await _context
-            .CategoryLimits.OrderByDescending(limit => limit.CreatedAt)
+            .CategoryLimits.AsNoTracking()
+            .OrderByDescending(limit => limit.CreatedAt)
             .Where(limit => limit.CategoryId == categoryId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public void Update(CategoryLimit limit)
+    {
+        _context.CategoryLimits.Update(limit);
     }
 
     public void Insert(CategoryLimit limit)
@@ -48,6 +56,5 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
     public async Task SaveAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
-        _context.ChangeTracker.Clear();
     }
 }
