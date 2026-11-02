@@ -9,4 +9,13 @@ public interface ICategoryService
         CreateCategoryParams parameters,
         CancellationToken cancellationToken
     );
+    public Task<Result<GetCategoryResult, CategoryServiceResultCode>> GetCategoryAsync(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken
+    );
+    public Task<Result<GetCategoriesResult, CategoryServiceResultCode>> GetCategoriesAsync(
+        Guid userId,
+        CancellationToken cancellationToken
+    );
 }

@@ -25,6 +25,8 @@ public static class LogEvents
     public const int ProfileGetProfileImage = 1029;
 
     public const int CategoryCreateCategory = 1040;
+    public const int CategoryGetCategory = 1041;
+    public const int CategoryGetCategories = 1042;
 
     // 2000 - 2999
 
@@ -48,6 +50,8 @@ public static class LogEvents
     public const int ProfileVerifyEmailSuccess = 2028;
 
     public const int CategoryCreateCategorySuccess = 2040;
+    public const int CategoryGetCategorySuccess = 2041;
+    public const int CategoryGetCategoriesSucess = 2042;
 
     // 4000 - 4999
 
@@ -71,4 +75,5 @@ public static class LogEvents
     public const int ProfileInvalidToken = 4024;
 
     public const int CategoryCreateCategoryFailure = 4040;
+    public const int CategoryGetCategoryFailure = 4041;
 }

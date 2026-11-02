@@ -9,6 +9,26 @@ public class CategoryLimitCollection(DataDbContext context) : ICategoryLimitColl
 {
     private readonly DataDbContext _context = context;
 
+    public async Task<List<CategoryLimit>> SelectByCategoryId(
+        Guid categoryId,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _context
+            .CategoryLimits.Where(limit => limit.CategoryId == categoryId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<CategoryLimit>> SelectByCategoryId(
+        List<Guid> categoryIds,
+        CancellationToken cancellationToken
+    )
+    {
+        return await _context
+            .CategoryLimits.Where(limit => categoryIds.Contains(limit.CategoryId))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<CategoryLimit?> SelectCurrentLimitByCategoryIdAsync(
         Guid categoryId,
         CancellationToken cancellationToken

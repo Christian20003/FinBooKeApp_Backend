@@ -39,6 +39,41 @@ public partial class CategoryService(
         return new Result<CreateCategoryResult, CategoryServiceResultCode>(result);
     }
 
+    public async Task<Result<GetCategoryResult, CategoryServiceResultCode>> GetCategoryAsync(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken
+    )
+    {
+        LogGetCategory(userId, id);
+        var category = await _categoryCollection.SelectAsync(id, userId, cancellationToken);
+        if (category == null)
+        {
+            LogGetCategoryFailure(userId, id, CategoryServiceResultCode.CATEGORY_DOES_NOT_EXIST);
+            return new Result<GetCategoryResult, CategoryServiceResultCode>(
+                CategoryServiceResultCode.CATEGORY_DOES_NOT_EXIST
+            );
+        }
+        var limits = await _categoryLimitCollection.SelectByCategoryId(id, cancellationToken);
+        var result = new GetCategoryResult { Category = category, CategoryLimit = limits };
+        LogGetCategorySuccess(userId, id);
+        return new Result<GetCategoryResult, CategoryServiceResultCode>(result);
+    }
+
+    public async Task<Result<GetCategoriesResult, CategoryServiceResultCode>> GetCategoriesAsync(
+        Guid userId,
+        CancellationToken cancellationToken
+    )
+    {
+        LogGetCategories(userId);
+        var categories = await _categoryCollection.SelectAsync(userId, cancellationToken);
+        var ids = categories.Select(category => category.Id).ToList();
+        var limits = await _categoryLimitCollection.SelectByCategoryId(ids, cancellationToken);
+        var result = new GetCategoriesResult { Categories = categories, CategoryLimits = limits };
+        LogGetCategoriesSuccess(userId);
+        return new Result<GetCategoriesResult, CategoryServiceResultCode>(result);
+    }
+
     private async Task<CreateCategoryResult> UpdateDatabaseAsync(
         CreateCategoryParams param,
         List<Category> categories,

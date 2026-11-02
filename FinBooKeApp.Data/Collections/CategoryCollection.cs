@@ -20,6 +20,13 @@ public class CategoryCollection(DataDbContext context) : ICategoryCollection
         _context.ChangeTracker.Clear();
     }
 
+    public async Task<List<Category>> SelectAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _context
+            .Categories.Where(category => category.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Category?> SelectAsync(
         Guid id,
         Guid userId,
